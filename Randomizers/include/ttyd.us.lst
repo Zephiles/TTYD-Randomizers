@@ -1,0 +1,879 @@
+// __mem.c
+800050B4:memset
+// 800050E4:__fill_mem
+// 8000519C:memcpy
+
+// system.o
+// unused:memcmp_as4
+// unused:memset_as4
+80005634:memcpy_as4
+// unused:LZ77Decode
+// unused:mtxGetScaleElement
+80005654:mtxGetRotationElement
+// unused:mtx_set_col_vec
+// unused:mtx_set_row_vec
+// unused:mtx_col_vec
+// unused:mtx_row_vec
+// unused:sysOSReport
+// unused:sysFrame2MsecFloat
+// unused:sysFrame2Msec
+8000598C:sysMsec2FrameFloat
+800059CC:sysMsec2Frame
+800059F4:sysFrame2SecFloat
+// unused:sysFrame2Sec
+// unused:sysSec2FrameFloat
+// unused:sysSec2Frame
+80005A00:getV60FPS
+80005AD8:sysDummyDraw
+80005CE4:sysWaitDrawSync
+80005D90:sysGetToken
+80005DA0:irand
+// unused:movePos3
+// unused:movePos2
+80005DE4:movePos
+80005E8C:sincosf
+80005F04:padGetRumbleStatus
+80005F14:padRumbleHardOff
+80005F28:padRumbleOff
+80005F3C:padRumbleOn
+// unused:keyGetTriggerR
+// unused:keyGetTriggerL
+80005F50:keyGetSubStickY
+// unused:keyGetSubStickX
+80005F60:keyGetStickY
+80005F70:keyGetStickX
+80005F80:keyGetButtonTrg
+80005F94:keyGetDirTrg
+80005FA8:keyGetButtonRep
+80005FBC:keyGetDirRep
+80005FD0:keyGetButton
+80005FE4:keyGetDir
+80005FF8:makeKey
+800064FC:qqsort
+// 80006680:fsort
+// unused:intplStringToEnum
+80006C8C:intplGetValue
+8000703C:angleABf
+800071F0:compAngle
+8000722C:distABf
+80007328:reviseAngle
+// unused:roundi
+// unused:__assert2
+// unused:__assert
+80007388:getMarioStDvdRoot
+
+// camdrv.o
+// 8000E388:camLetterBox
+// 8000E564:camLetterBoxDraw
+// 8000E7E8:getScreenPoint
+// 8000E8A4:camSetTypeOrtho
+// 8000E8C0:camSetTypePersp
+// 8000E8DC:camCtrlOff
+// 8000E8FC:camCtrlOn
+// 8000E91C:camDispOff
+8000E93C:camDispOn
+// 8000E95C:camSetMode
+// 8000E974:camEffMain
+// 8000EA30:cam3dImgMain
+// 8000EA68:cam3dMain
+// 8000F2D4:camSetCurNo
+// 8000F2DC:camGetCurNo
+// 8000F2E4:camGetCurPtr
+// 8000F2FC:camGetPtr
+// 8000F310:camUnLoadRoad
+// 8000F36C:camLoadRoad
+// 8000F454:camDraw
+// 8000F548:camEvalNearFar
+// 8000F704:camMain
+// 8000FAC8:camEntryPersp
+// 8000FD9C:camInit
+
+// dispdrv.o
+// unused:dispGetEntNum
+80010864:dispGetCurWork
+8001086C:dispCalcZ
+80010900:dispDraw
+80010B5C:dispSort
+// 80010B90:_sort
+80010BC4:dispEntry
+80010C64:dispReInit
+80010C70:dispInit
+
+// seqdrv.o
+8002E1E4:seqCheckSeq
+8002E200:seqGetNextSeq
+8002E208:seqGetPrevSeq
+8002E210:seqGetSeq
+8002E218:seqSetSeq
+8002E228:seqMain
+8002E304:seqInit_MARIOSTORY
+
+// memory.o
+// unused:smartGetWorkPtr
+8002F33C:smartTexObj
+8002F378:smartGarbage
+8002F540:smartAlloc
+8002F878:smartFree
+8002F9CC:smartAutoFree
+8002FA70:smartReInit
+8002FBE0:smartInit
+// unused:_mapAllocDump
+8002FDC4:_mapFree
+8002FE60:_mapAllocTail
+8002FF58:_mapAlloc
+// 80030048:unk_US_PAL_01
+// 80030078:unk_US_PAL_02
+800300C4:__memFree
+800300F0:__memAlloc
+80030154:memClear
+80030218:memInit
+
+// evtmgr.o
+// 80035A28:evtGetPtrID
+// 80035A88:evtGetPtr
+// 80035AC4:evtStartOther
+// 80035B4C:evtStopOther
+// 80035BD4:evtStartAll
+// 80035C68:evtStopAll
+// 80035CFC:evtStartID
+// 80035D9C:evtStopID
+// 80035E3C:evtStart
+// 80036210:evtStop
+// 800365E4:evtSetType
+// 800365EC:evtSetSpeed
+// 800365FC:evtSetPri
+80036604:evtCheckID
+// 80036664:evtDeleteID
+// 80036700:evtDelete
+// 800368D0:evtmgrMain
+// 80036ABC:evtRestart
+// 80036C04:evtBrotherEntry
+// 80036EEC:evtChildEntry
+80037220:evtEntryType
+// 800374AC:evtEntry
+// 80037738:evtEntryRunCheck
+// 800377B0:evtmgrReInit
+// 8003781C:evtmgrInit
+// 80037934:make_pri_table
+// 80037A60:evtGetWork
+
+// mario.o
+800561B8:toFrontPose
+800566CC:toRearPose
+80056BE0:marioDisp
+8005710C:marioDispBlur
+80057290:marioDispBlurSub
+80057878:marioPreDisp
+80057CFC:marioRearAnime
+800583A8:marioMakeDispDir
+80058908:marioGetScale
+80058928:marioChkInScreen
+80058960:marioGetScreenPos
+800589E4:marioPaperLightOff
+// unused:marioPaperLightOn
+80058A10:marioPaperOff
+80058A90:marioPaperOn
+80058BA8:marioSetPaperAnimeLocalTime
+80058C68:marioChgPaper
+80058CF0:marioChgPoseTime
+80058D84:marioChgPose
+80058F9C:toDotMarioPose
+80059124:marioChgEvtPose
+// 800591B4:unk_JP_US_PAL_005
+800593FC:marioAnimeId
+8005942C:marioChkPushAnime
+800594A8:marioMoveMain
+80059A78:marioMove
+8005A634:marioCtrlOff2Main
+8005A7E0:marioMain
+8005B1D8:marioReInit
+8005B5C8:marioInit
+8005BA50:marioPoseInit
+8005BAE8:marioSoundInit
+8005BB08:marioOfsRotReset
+8005BB78:marioReset
+8005BDA0:marioResetHitObj
+8005BF3C:marioChkSts
+8005BFDC:marioBgmodeOff
+8005C0A0:marioBgmodeOn
+8005C164:marioBgmodeChk
+8005C174:marioSetMutekiTime
+8005C1C0:marioKeyOn
+8005C1F4:marioKeyOff
+8005C21C:marioCtrlOn2
+8005C25C:marioCtrlOff2
+8005C290:marioCtrlOn
+8005C2C4:marioCtrlOff
+8005C2EC:marioKeyOffChk
+8005C2FC:marioCtrlOffChk
+8005C30C:marioFBattlePost
+8005C3CC:marioFBattlePrepare
+// 8005C438:unk_JP_US_PAL_006
+8005C464:marioChkCtrl
+8005C47C:marioChkKey
+8005C5B8:marioCheckMenuDisable
+// 8005CA2C:unk_JP_US_PAL_007
+8005CA58:marioCaseEventValidChk
+8005CA98:marioItemGetOk
+8005CAAC:marioItemGetChk
+8005CAE8:marioItemGetDisable
+8005CB04:marioEntry
+8005CDA8:marioSetSpec
+8005CE40:marioSetFamicomMode
+8005D740:marioSetCharMode
+8005E0B0:marioGetColor
+8005E0C0:marioGetPtr
+
+// mariost.o
+// unused:gcResetDone
+// unused:gcResetCheck
+8006EED8:gcRumbleCheck
+// unused:gcDvdCheckCancel
+// unused:gcDvdCheckInit
+8006F1E0:gcDvdCheckThread
+8006F404:viPostCallback
+8006F7BC:marioStGetSystemLevel
+8006F7C8:marioStSystemLevel
+8006F8DC:marioStDisp
+8006F904:marioStMain
+8006FB3C:marioStInit
+
+// fontmgr.o
+// unused:JUTFont_Draw
+// unused:JUTFont_DrawPos
+80074720:_JUTFont_DrawPos
+80074BFC:JUTFont_DrawStart
+// unused:JUTFont_GetWidth
+// unused:JUTFont_GetWidthEntry
+80074E90:JUTFont_CodeToGlyph
+// unused:JUTFont_Free
+80075004:JUTFontSetup
+// unused:JUTFont_SetWidth
+800752FC:HSV2RGB
+80075528:FontGetMessageWidth
+8007554C:FontGetMessageWidthLine
+8007586C:kanjiGetWidth
+800758E4:kanjiSearch
+80075904:hankakuSearch
+80075928:FontDrawMessageMtx
+80075FCC:FontDrawMessage
+800766E0:FontDrawStringShake
+80076A10:FontDrawStringCenterMtx
+// unused:FontDrawStringCenter
+80076CDC:FontDrawStringMtx
+80077034:FontDrawStringVecPitch
+80077368:FontDrawStringPitch
+// unused:FontDrawStringVec
+800773D0:FontDrawString
+80077438:FontDrawCodeMtx
+80077594:FontDrawCode
+8007773C:FontDrawScaleVec
+80077758:FontDrawScale
+8007776C:FontGetDrawColor
+80077774:FontDrawColor_
+800777E0:FontDrawColor
+80077844:FontDrawColorIDX
+800778B4:FontDrawNoiseOff
+800778E0:FontDrawNoise
+800779E4:FontDrawRainbowColorOff
+80077A08:FontDrawRainbowColor
+80077AA8:FontDrawEdgeOff
+80077AB4:FontDrawEdge
+80077AC0:FontDrawStart_alpha
+80077B4C:FontDrawStart
+80077BDC:fontmgrTexSetup
+80077C08:fontmgrInit
+
+// swdrv.o
+// 80085744:_swByteGet
+// 80085754:_swByteSet
+// 80085764:_swClear
+// 800857A4:_swGet
+// 800857EC:_swSet
+8008582C:swByteGet
+80085850:swByteSet
+// 80085874:swClear
+// 800858B4:swGet
+// 800858FC:swSet
+// 8008593C:swReInit
+// 80085980:swInit
+
+// seq_logo.o
+// 800859F8:progDisp
+// unused:arcLoad
+// unused:arcPreLoad
+// 80085F28:dummy_draw
+// 80085FE0:logoDisp
+80086D6C:seq_logoMain
+8008746C:seq_logoExit
+800874B0:seq_logoInit
+
+// itemdrv.o
+// 800AA4FC:itemPickUp
+// 800AA530:itemStatus
+// 800AA53C:itemStatusOn
+// 800AA54C:itemFlag
+// 800AA55C:itemFlagOff
+// 800AA56C:itemFlagOn
+// 800AA57C:itemNokoForceGet
+// 800AA62C:itemForceGet
+// 800AA660:itemHitCheckSide
+// 800AAB24:itemSetPosition
+// 800AAB34:itemseq_Bound
+// 800AB930:itemseq_GetItem
+// 800ACC54:winFullDisp
+// 800ACD5C:winHelpDisp
+// 800ACDC8:winHelpMain
+// 800ACDE8:winNameDisp2
+// 800ACF34:winNameDisp
+// 800AD0E8:itemNearDistCheck
+// 800AD2AC:itemHitCheck
+// 800AD658:itemNameToPtr
+// 800AD6F4:itemDelete
+800AD7F0:itemEntry
+// 800ADFD0:itemModeChange
+// 800ADFE0:itemMain
+// 800AE67C:unk_JP_US_PAL_023
+// 800AE6DC:itemGetNokoCheck
+// 800AE870:itemGetCheck
+// 800AEAAC:itemCoinDrop
+// 800AEB20:itemReInit
+// 800AEC18:itemInit
+
+// party.o
+// 800B713C:partySetFamicomMode
+// 800B7530:partyShadowOff
+// 800B7548:partyUpdateKeyData
+// 800B7650:partyClearCont
+// 800B7688:partyKeyOff
+// 800B768C:partyKeyOn
+// 800B7690:partyDisp
+// 800B7A98:partyPreDisp
+// 800B7DB0:partyMakeDispDir
+// 800B80F0:partySetCamId
+// 800B80F8:partyInitCamId
+// 800B8128:party_damage_return
+// 800B865C:partyRideYoshiMain
+// 800B8B18:party_ride_yoshi_force_move
+// 800B8BA0:party_force_ride_yoshi
+// 800B8D38:partyRideMain
+// 800B98EC:partyRideChk
+// 800B9928:allPartyRideOff2
+// 800B99EC:allPartyRideOff
+// 800B9AB0:unk_JP_US_PAL_029
+// 800B9B2C:allPartyForceRideOn
+// 800B9C00:getRidePos
+// 800B9E80:allPartyRideShip
+// 800B9F0C:allPartyRidePlane
+// 800B9F98:partyDokanEnd
+// 800BA05C:partyDokanMain
+// 800BA56C:partyDokanInit
+// 800BAF5C:partyGoodbyeMain
+// 800BB478:partyGoodbyeInit
+// 800BB544:partyHelloMain
+// 800BBC48:partyHello
+// 800BBDDC:partyDoWork
+// 800BBE84:driveParty
+// 800BC574:partyMain
+// 800BC660:unk_JP_US_PAL_030
+// 800BCAB0:unk_JP_US_PAL_031
+// 800BCB2C:unk_JP_US_PAL_032
+// 800BCB98:partyChgRunMode
+// 800BCF34:partyUsePost
+// 800BCF90:partyReInit
+// 800BD6AC:partyInit
+// 800BD6D8:partyEntry2Pos
+// 800BDAA8:partyEntry2Hello
+// 800BDDD0:partyEntry2
+// 800BE144:partyEntryMain
+// 800BE4C4:partyGetHeight
+// 800BE4F4:yoshiSetColor
+// 800BE594:partyKill2
+// 800BE69C:partyKill
+// 800BE7FC:partyGoodbye
+// 800BE84C:partyEntryPos
+// 800BEA68:partyEntry
+// 800BEC20:partyEntryHello
+// 800BEC70:partySetForceMove
+// 800BECB8:partyStop
+// 800BECDC:partyRun
+// 800BED0C:partyCtrlOn
+// 800BED44:partyCtrlOff
+// 800BED7C:partyChgPaper
+// 800BEDEC:partyChgPose
+// 800BEE68:partyChgPoseId
+// 800BEFCC:partyPaperLightOff
+// 800BEFF4:partyPaperOff
+// 800BF070:partyPaperOn
+800BF190:anotherPartyGetPtr
+800BF1B4:partyGetPtr
+
+// mario_pouch.o
+// 800D2DB4:pouchGetYoshiName
+// 800D2DFC:pouchSetYoshiName
+800D2E28:pouchSetPartyColor
+// 800D2E44:pouchGetPartyColor
+// 800D2E58:pouchCheckMail
+// 800D2EB4:pouchOpenMail
+// 800D2EF4:pouchReceiveMail
+// 800D300C:pouchReceiveMailCount
+// 800D30E0:pouchGetStarStone
+// 800D3154:pouchAddKpaScore
+// 800D3184:pouchGetKpaScore
+// 800D3190:pouchAddKpaCoin
+// 800D31C8:pouchGetKpaCoin
+// 800D31D4:pouchMajinaiInit
+// 800D3204:pouchArriveBadge
+// 800D3234:unk_JP_US_PAL_049
+// 800D328C:pouchEquipBadgeID
+// 800D32E0:pouchEquipCheckBadgeIndex
+// 800D3300:pouchEquipCheckBadge
+// 800D33C8:pouchUnEquipBadgeIndex
+// 800D33F8:pouchEquipBadgeIndex
+// 800D3424:pouchGetStarPoint
+// 800D3430:pouchRevisePartyParam
+800D35A8:pouchReviseMarioParam
+// 800D3830:pouchRemoveKeepItem
+// 800D3964:pouchAddKeepItem
+// 800D3A8C:pouchGetPartyAttackLv
+// 800D3AA0:pouchGetHammerLv
+// 800D3B20:pouchGetJumpLv
+// 800D3BA0:pouchSetAudienceNum
+// 800D3BAC:pouchGetAudienceNum
+// 800D3BB8:pouchGetMaxAP
+// 800D3BC4:pouchSetAP
+// 800D3C00:pouchAddAP
+// 800D3C44:pouchGetAP
+// 800D3C50:pouchSetMaxFP
+// 800D3C68:pouchSetFP
+// 800D3C8C:pouchGetMaxFP
+// 800D3C98:pouchGetFP
+// 800D3CA4:pouchSetPartyHP
+// 800D3CD4:pouchGetPartyHP
+// 800D3CE8:pouchSetMaxHP
+// 800D3D00:pouchSetHP
+// 800D3D24:pouchGetMaxHP
+// 800D3D30:pouchGetHP
+// 800D3D3C:pouchAddHP
+// 800D3D8C:pouchAddStarPiece
+// 800D3DA8:pouchGetStarPiece
+// 800D3DB4:pouchSetSuperCoin
+// 800D3DC8:pouchGetSuperCoin
+// 800D3DD4:pouchSetCoin
+// 800D3E18:pouchAddCoin
+// 800D3E64:pouchGetCoin
+// 800D3E70:pouchSortItem
+// 800D44F8:comp_kind_r
+// 800D4540:comp_aiueo_r
+// 800D46D4:comp_kind
+// 800D471C:comp_aiueo
+// 800D48B0:unk_JP_US_PAL_050
+// 800D4974:pouchRemoveItemIndex
+// 800D4C38:pouchRemoveItem
+800D4ED4:pouchCheckItem
+// 800D50CC:pouchGetItem
+// 800D5570:pouchGetEmptyKeepItemCnt
+// 800D5614:pouchGetEmptyHaveItemCnt
+// 800D5674:pouchGetEquipBadgeCnt
+800D5738:pouchGetHaveBadgeCnt
+// 800D57FC:pouchGetKeepItemCnt
+// 800D58A0:pouchGetHaveItemCnt
+// 800D5964:pouchEquipBadge
+// 800D5978:pouchHaveBadge
+// 800D598C:pouchKeepItem
+// 800D59A0:pouchHaveItem
+// 800D59B4:pouchKeyItem
+// 800D59C8:pouchInit
+800D5EB0:pouchGetPtr
+
+// pmario_sound.o
+// 800D7428:psndENV_LPF
+// 800D7470:psndENVOff_f_d
+// 800D76B8:psndENVOff
+// 800D76E0:psndENVOn_f_d
+// 800D7B3C:psndENVOn
+// 800D7B64:psndENVMain
+// 800D91E8:psndENV_stop
+// 800D9558:psndSFX_get_vol
+// 800D95A0:psndSFXChk
+// 800D95F8:psndSFXOff
+// 800D96C0:psndSFX_dist
+// 800D96F8:psndSFX_pos
+// 800D9744:psndSFX_pit
+// 800D97D0:psndSFX_vol
+// 800D9808:psndSFXOnEx_3D
+// 800D9848:psndSFXOn_3D
+// 800D9884:psndSFXOnVol
+// 800D98BC:psndSFXOn
+// 800D98F8:psndSFXOn_
+// 800D9934:__psndSFXOn
+// 800D9E74:psndSFXMain
+// 800DAA08:psndBGMPlayTime
+// 800DAA98:psndBGMStartCheck
+// 800DAAEC:psndBGMScope
+// 800DAB44:psndBGMChkSilent
+// 800DAB84:psndBGMChk
+// 800DABAC:psndBGMOff_f_d
+// 800DAEFC:psndBGMOff
+// 800DAF24:psndBGMOn_f_d
+// 800DB778:unk_JP_US_PAL_051
+// 800DB7A0:psndBGMOn
+// 800DB7CC:psndBGMMain
+// 800DBC60:psndBGM_rate
+// 800DBCC4:unk_JP_US_PAL_052
+// 800DBDF0:psndSFXAllOff
+// 800DBF38:psndMapChange
+// 800DC0E8:psndGetFlag
+800DC0F8:psndClearFlag
+// 800DC110:psndSetFlag
+// 800DC19C:psndSetReverb
+// 800DC214:psndStopAllFadeOut
+// 800DC380:psndSetPosDirListener
+// 800DC3A8:psndPushGroup
+// 800DC430:psndExit
+// 800DC460:psndMainInt
+// 800DC48C:psndMain
+// 800DC4E0:psndInit
+// 800DC650:searchPSSFXList
+// 800DC6D4:calc3D
+// 800DCBC8:angleABf
+
+// battle.o
+// 800F74B4:BattleConsumeReserveItem
+// 800F7514:BattleStatusWindowCheck
+// 800F75CC:BattleStatusWindowSystemOff
+// 800F75F8:BattleStatusWindowEventOff
+// 800F7624:BattleStatusWindowSystemOn
+// 800F7650:BattleStatusWindowEventOn
+// 800F767C:BattleStatusWindowAPRecoveryOff
+// 800F76A8:BattleStatusWindowAPRecoveryOn
+// 800F76D4:BattleMajinaiEndCheck
+// 800F7718:BattleMajinaiDone
+// 800F7774:BattleMajinaiCheck
+// 800F78C4:battleDisableHResetCheck
+// 800F78FC:BattleAfterReactionMain
+// 800F79E4:BattleAfterReactionRelease
+// 800F7A78:BattleAfterReactionEntry
+// 800F7AF0:BattleAfterReactionQueueInit
+// 800F7B28:BattleCheckUnitBroken
+// 800F7B84:BattleGetFloorHeight
+// 800F7BD4:BattleGetStockExp
+// 800F7BFC:BattleStoreExp
+// 800F7C0C:BattleStoreCoin
+// 800F7C20:BattlePartyInfoWorkInit
+// 800F7CA4:_EquipItem
+// 800F831C:BtlUnit_EquipItem
+// 800F83E4:BattleTransPartyIdToUnitKind
+// 800F8444:BattleTransPartyId
+// 800F8538:BattleChangeParty
+// 800F86B4:BattlePartyAnimeLoad
+// 800F86F4:BattleGetPartnerPtr
+// 800F8728:BattleGetPartyPtr
+800F87A8:BattleGetMarioPtr
+// 800F8814:BattleGetSystemPtr
+// 800F8874:BattleGetUnitPartsPtr
+// 800F88B4:BattleSetUnitPtr
+800F88CC:BattleGetUnitPtr
+// 800F8908:BattleFree
+// 800F8934:BattleAlloc
+// 800F895C:BattleIncSeq
+// 800F89A0:BattleGetSeq
+// 800F8A08:BattleSetSeq
+// 800F8A68:BattleSetMarioParamToFieldBattle
+// 800F8AAC:Btl_UnitSetup
+// 800F8DA4:BattleEnd
+// 800F8E28:BattleMain
+// 800F8F04:BattleInit
+// 800F903C:battleSeqEndCheck
+// 800F904C:battleMain
+
+// battle_disp.o
+// 80100258:_btlStockExpDisp
+// 8010045C:BattleStockExpDisp
+// 801004D8:_btlDispTex4
+// 80100644:btlDispTex4
+801009B4:btlGetScreenPoint
+// 80100A4C:btlDispAnimeSpeed
+// 80100A80:_pose_two_pattern
+// 80100D28:_pose_one_pattern
+// 80100E00:_pose_def
+// 80100E6C:statusPoseControl
+// 80100ED0:getFloatDispOffset
+// 80100F34:floatOffsetControl
+// 80100FFC:getGravityDispOffset
+// 80101060:gravityOffsetControl
+// 801010F4:btlDispPoseAnime
+// 8010112C:btlDispChangePeraAnime
+// 80101168:btlDispChangeAnime
+// 801011FC:btlDispEntAnime
+// 8010128C:btlUnitPartsBlurDisp
+// 80101428:_partsBlurControl
+// 801014F4:btlUnitPartsBlurControl
+// 80101548:btlUnitStolenItemDisp
+// 801015EC:btlUnitItemDisp2
+// 80101678:btlUnitItemDisp
+// 80101774:btlUnitPartsDisp
+// 801024F0:btlDispMain
+// 80103084:_GetStatusPoseType
+// 801030F8:btlDispInit
+// 80103134:btlDispGetTexSize
+// 80103198:btlDispTexPlane3
+// 8010323C:btlDispTexPlane2
+// 801032C8:btlDispTexPlane
+// 801033E4:btlDispTexPlainGX
+// 801036E4:btlDispTexPlaneInit
+// 801037C4:btlDispGXQuads2D
+// 801038E8:btlDispGXPoint2D
+// 80103918:btlDispGXQuads2DRasta
+// 801039EC:btlDispGXPoint2DRasta
+// 80103A14:btlDispGXInit2D
+// 80103B48:btlDispGXInit2DRasta
+// 80103C3C:btlDispGXInit2DSub
+// 80103CD0:searchPoseTbl
+
+// battle_unit.o
+// 80125D08:BtlUnit_CheckShadowGuard
+// 80125D44:BtlUnit_EnemyItemCanUseCheck
+// 80125D88:BtlUnit_HpGaugeMain
+// 80125FD8:BtlUnit_HpGaugeInit
+// 80126088:BtlUnit_snd_se_pos
+// 8012619C:BtlUnit_snd_se
+// 801261F8:BtlUnit_ControlPoseSoundMain
+// 801264B4:BtlUnit_PoseSoundInit
+// 801264CC:BtlUnit_SetCommandAnimPose
+// 80126558:BtlUnit_SetSeMode
+// 80126588:BtlUnit_LoadSeMode
+// 801266D4:BtlUnit_ResetMoveStatus
+// 801267CC:BtlUnit_GetGuardKouraPtr
+// 80126840:BtlUnit_PayWeaponCost
+// 801268FC:BtlUnit_CheckWeaponCost
+// 80126968:BtlUnit_GetWeaponCost
+// 80126AC0:BtlUnit_SetMaxFp
+// 80126B14:BtlUnit_GetMaxFp
+// 80126B58:BtlUnit_RecoverFp
+// 80126BEC:BtlUnit_RecoverHp
+// 80126C10:BtlUnit_SetFp
+// 80126C64:BtlUnit_GetFp
+// 80126CA8:BtlUnit_GetCoin
+// 80126D20:BtlUnit_GetExp
+// 80126E00:BtlUnit_CheckPinchStatus
+// 80126F00:BtlUnit_SetParamToPouch
+// 80126FE8:BtlUnit_ReviseHpFp
+// 80127134:BtlUnit_SetParamFromPouch
+// 8012724C:BtlUnit_CanActStatus
+// 801272DC:BtlUnit_CanGuardStatus
+// 801272FC:BtlUnit_CheckData
+// 8012733C:BtlUnit_GetData
+// 8012737C:BtlUnit_GetACPossibility
+// 80127434:BtlUnit_SetTotalHitDamage
+// 80127440:BtlUnit_GetTotalHitDamage
+// 80127448:BtlUnit_GetHitDamage
+// 80127454:BtlUnit_GetEnemyBelong
+// 80127480:BtlUnit_GetTalkTogePos
+// 80127564:BtlUnit_ChangeStayAnim
+// 801275AC:BtlUnit_ChangeTalkAnim
+// 801275F4:BtlUnit_SetBodyAnim
+// 80127640:BtlUnit_SetBodyAnimType
+// 80127688:BtlUnit_SetAnim
+// 801276AC:BtlUnit_SetAnimType
+// 8012772C:BtlUnit_GetPoseNameFromType
+// 801277AC:BtlUnit_OffUnitFlag
+// 801277BC:BtlUnit_OnUnitFlag
+// 801277CC:BtlUnit_CheckUnitFlag
+// 801277D8:BtlUnit_OffStatusFlag
+// 801277E8:BtlUnit_OnStatusFlag
+// 801277F8:BtlUnit_CheckStatusFlag
+80127814:BtlUnit_CheckStatus
+// 80127890:BtlUnit_CheckRecoveryStatus
+// 80127B58:BtlUnit_ClearStatus
+// 80127BAC:BtlUnit_SetStatus
+// 80127F34:BtlUnit_GetStatus
+// 801280F8:_CheckMoveCount
+80128144:BtlUnit_GetBelong
+// 8012814C:BtlUnit_SetJumpSpeed
+// 80128154:BtlUnit_SetPartsMoveSpeed
+// 8012815C:BtlUnit_SetMoveSpeed
+// 80128164:BtlUnit_SetPartsFallAccel
+// 8012816C:BtlUnit_SetFallAccel
+// 80128174:BtlUnit_SetPartsMoveTargetPos
+// 801281A8:BtlUnit_SetMoveTargetPos
+// 801281DC:BtlUnit_SetPartsMoveCurrentPos
+// 80128210:BtlUnit_SetMoveCurrentPos
+// 80128244:BtlUnit_SetPartsMoveStartPos
+// 80128278:BtlUnit_SetMoveStartPos
+// 801282AC:BtlUnit_AddPartsDispOffset
+// 801282F8:BtlUnit_SetPartsDispOffset
+// 8012832C:BtlUnit_SetDispOffset
+// 80128360:BtlUnit_AddPartsOffsetPos
+// 80128388:BtlUnit_SetPartsOffsetPos
+// 801283BC:BtlUnit_GetPartsOffsetPos
+// 801283D8:BtlUnit_SetOffsetPos
+// 8012840C:BtlUnit_SetHeight
+// 80128414:BtlUnit_GetHeight
+// 8012841C:BtlUnit_GetWidth
+// 80128424:BtlUnit_AddPartsScale
+// 80128470:BtlUnit_SetPartsScale
+// 801284A4:BtlUnit_SetPartsBaseScale
+// 801284D8:BtlUnit_AddScale
+// 80128524:BtlUnit_SetScale
+// 80128558:BtlUnit_GetScale
+// 80128574:BtlUnit_SetBaseScale
+// 801285A8:BtlUnit_AddPartsRotateOffset
+// 801285D0:BtlUnit_SetPartsRotateOffset
+// 80128604:BtlUnit_SetRotateOffset
+// 80128638:BtlUnit_GetPartsBaseRotate
+// 80128654:BtlUnit_SetPartsBaseRotate
+// 80128664:BtlUnit_GetBaseRotate
+// 80128680:BtlUnit_SetBaseRotate
+// 801286E0:BtlUnit_AddPartsRotate
+// 80128798:BtlUnit_GetPartsRotate
+// 801287B4:BtlUnit_SetPartsRotate
+// 801287C4:BtlUnit_AddRotate
+// 80128898:BtlUnit_GetRotate
+// 801288B4:BtlUnit_SetRotate
+// 80128968:BtlUnit_SetPartsHomePos
+// 80128978:BtlUnit_AddHomePos
+// 801289A0:BtlUnit_SetHomePos
+// 801289B0:BtlUnit_GetHomePos
+// 801289CC:BtlUnit_SetHitCursorOffset
+// 801289DC:BtlUnit_SetHitOffset
+// 801289EC:BtlUnit_GetHitPos
+// 80128B10:BtlUnit_GetPartsWorldPos
+// 80128BF0:BtlUnit_AddPartsPos
+// 80128C18:BtlUnit_SetPartsPos
+// 80128C28:BtlUnit_GetPartsPos
+// 80128C44:BtlUnit_AddPos
+// 80128C6C:BtlUnit_SetPos
+80128C7C:BtlUnit_GetPos
+80128C98:BtlUnit_GetBodyPartsId
+80128CD8:BtlUnit_GetPartsPtr
+// 80128D18:BtlUnit_GetUnitId
+// 80128D20:BtlUnit_Spawn
+// 80128E08:BtlUnit_Delete
+// 80128FE0:BtlUnit_Entry
+// 80129694:BtlUnit_Init
+
+// mario_party.o
+// 80140E60:partyGetTechLv
+// 80140EA4:partyGetHp
+// 80140EE8:partyChkJoin
+// 80140F30:partyLeft
+80140F74:partyJoin
+// 80140FB8:marioGetExtraPartyId
+80141050:marioGetPartyId
+// 801410E8:marioGetParty
+// 80141198:marioPartyKill
+// 80141204:marioPartyGoodbye
+8014124C:marioPartyHello
+// 801412FC:marioPartyEntry
+// 8014140C:unk_JP_US_PAL_062
+// 801414A0:marioUseParty
+
+// win_party.o
+// 80165B70:winPartyDisp
+// 8016722C:winPartyMain2
+// 80167248:winPartyMain
+80167734:winPartyExit
+// 8016779C:winPartyInit2
+80167848:winPartyInit
+
+// mario_cam.o
+// 801A86F0:marioCamZoomUpLevelMain
+// 801A89A0:marioCamZoomUp
+// 801A8D38:marioCamZoomOff
+// 801A8E04:marioCamZoomOffReq2
+// 801A8E68:marioCamZoomOffReq
+// 801A8EB4:camFollowYOff
+// 801A8EF4:camFollowYOn
+// 801A8F34:marioNoUpdateCamPos
+// 801A8F60:marioUpdateCamPos
+// 801A8F8C:marioUpdateCam
+// 801A91FC:marioUpdateCamCollision
+// 801A924C:marioCamMain
+// 801A938C:marioPreCamera
+// 801A9434:marioGetCamFollowRate
+// 801A9458:marioSetCamFollowRate
+// 801A9488:marioResetCamFollowRate
+801A94C0:marioSetCamId
+// 801A94F0:marioGetCamId
+// 801A9514:marioInitCamId
+// 801A9544:marioResetCamShiftRate
+// 801A95A8:marioResetCamShift
+
+// printf.c
+8026A0B8:sprintf
+// unused:snprintf
+8026A198:vsprintf
+// unused:vsnprintf
+// unused:vfprintf
+8026A210:vprintf
+// unused:fprintf
+8026A2A8:printf
+8026A390:__StringWrite
+8026A3FC:__FileWrite
+// 8026A454:__pformatter
+// 8026ABC8:float2str
+// 8026B2E4:round_decimal
+// 8026B410:double2hex
+// 8026B748:longlong2str
+// 8026BA5C:long2str
+// 8026BCB4:parse_format
+
+// string.c
+// 8026D38C:strstr
+// 8026D3F4:strchr
+8026D424:strncmp
+8026D464:strcmp
+8026D58C:strcat
+8026D5B8:strncpy
+8026D5FC:strcpy
+// 8026D6B4:strlen
+
+// w_atan2.c
+802725A0:atan2
+
+// OSCache.c
+// 80296A14:DCEnable
+// 80296A28:DCInvalidateRange
+80296A54:DCFlushRange
+// 80296A84:DCStoreRange
+// 80296AB4:DCFlushRangeNoSync
+// 80296AE0:DCStoreRangeNoSync
+// unused:DCZeroRange
+80296B0C:ICInvalidateRange
+// 80296B40:ICFlashInvalidate
+// 80296B50:ICEnable
+// unused:__LCEnable
+// unused:LCEnable
+// 80296B64:LCDisable
+// unused:LCStoreBlocks
+// unused:LCStoreData
+// unused:LCQueueWait
+// 80296B8C:L2GlobalInvalidate
+// 80296C24:DMAErrorHandler
+// 80296D84:__OSCacheInit
+
+// GXGeometry.c
+// 802B59EC:__GXSetDirtyState
+802B5A6C:GXBegin
+// 802B5B3C:__GXSendFlushPrim
+// 802B5BC4:GXSetLineWidth
+// 802B5C04:GXSetPointSize
+// 802B5C44:GXEnableTexOffsets
+// 802B5C8C:GXSetCullMode
+// 802B5CB4:GXGetCullMode
+// 802B5CD0:GXSetCoPlanar
+// 802B5D04:__GXSetGenMode
+
+// GXLight.c
+// 802B6A3C:GXInitLightAttn
+// 802B6A58:GXInitLightSpot
+// 802B6BE8:GXInitLightDistAttn
+// 802B6CB8:GXInitLightPos
+// 802B6CC8:GXInitLightDir
+// 802B6CE4:GXInitLightColor
+// 802B6CF0:GXLoadLightObjImm
+// 802B6D6C:GXSetChanAmbColor
+802B6E54:GXSetChanMatColor
+// 802B6F3C:GXSetNumChans
+// 802B6F78:GXSetChanCtrl
