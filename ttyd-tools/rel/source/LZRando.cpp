@@ -489,7 +489,7 @@ void Mod::writeAdditionalLZRandoAssemblyPatches()
     ttyd::OSCache::DCFlushRange(reinterpret_cast<uint32_t *>(aaa_00_Address), 16);
     ttyd::OSCache::ICInvalidateRange(reinterpret_cast<uint32_t *>(aaa_00_Address), 16);
   }
-  else if (ClearCacheFlag && (NextSeq == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGame)))
+  else if (ClearCacheFlag && ((NextSeq == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGame)) || (NextSeq == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kTitle))))
   {
     ClearCacheFlag = false;
   }

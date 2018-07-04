@@ -127,7 +127,7 @@ void Mod::LZRandoChallengeStuff()
       InCredits = true;
       CreditsCount++;
     }
-    else if ((CreditsCheck != 0))
+    else if (CreditsCheck != 0)
     {
       InCredits = false;
     }
