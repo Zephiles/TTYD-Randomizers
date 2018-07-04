@@ -196,13 +196,6 @@ uint16_t randomizeItemWithChecks(uint16_t currentItemId)
     return currentItemId;
   }
   
-  // Don't randomize enemy item drop
-  if (EnemyHeldItemArrayInUse && (currentItemId >= GoldBar))
-  {
-    EnemyHeldItemArrayInUse = false;
-    return currentItemId;
-  }
-  
   // Don't randomize Coconuts during the time that they are needed in Chapter 5
   uint16_t SequencePosition = ttyd::swdrv::swByteGet(0);
   if ((currentItemId == Coconut) && (SequencePosition >= 232) && (SequencePosition <= 236))
@@ -210,13 +203,25 @@ uint16_t randomizeItemWithChecks(uint16_t currentItemId)
     return currentItemId;
   }
   
-  // Prevent changing the item if currently using an item (counts as being in the Pause Menu) or if in a battle
-  if ((ttyd::mariost::marioStGetSystemLevel() != 15) && (ttyd::seqdrv::seqGetNextSeq() != static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kBattle)))
+  // Prevent changing the item if currently in a battle
+  if (ttyd::seqdrv::seqGetNextSeq() != static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kBattle))
   {
-    bool ItemRandoV2Coin = ItemRandoV2 && (currentItemId == Coin);
-    if (ItemRandoV2Coin || ((currentItemId >= StarPiece) && (currentItemId <= SuperChargeP)))
+    // Don't randomize enemy item drop
+    // Must also not run while in a battle
+    if (EnemyHeldItemArrayInUse && (currentItemId >= GoldBar))
     {
-      return randomizeItem();
+      EnemyHeldItemArrayInUse = false;
+      return currentItemId;
+    }
+    
+    // Prevent changing the item if currently using an item (counts as being in the Pause Menu)
+    if (ttyd::mariost::marioStGetSystemLevel() != 15)
+    {
+      bool ItemRandoV2Coin = ItemRandoV2 && (currentItemId == Coin);
+      if (ItemRandoV2Coin || ((currentItemId >= StarPiece) && (currentItemId <= SuperChargeP)))
+      {
+        return randomizeItem();
+      }
     }
   }
   
