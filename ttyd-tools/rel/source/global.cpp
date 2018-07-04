@@ -29,10 +29,6 @@ uint32_t GSWAddressesStart = r13 - 0x6F50;
 bool TimerActive = false;
 uint32_t TimerCount = 0;
 bool DenyInput = false;
-const char *TitleScreenStrings[3] = { "Item Randomizer V1 - v1.2", "Item Randomizer V2 - v1.2", "Loading Zone Randomizer Beta - v0.5" };
-const char *ToggleModeStrings[4] = { "Hold L and press the following to toggle modes:", "Y = Item Randomizer v1/v2", "X = Loading Zone Randomizer Beta", "Z = Loading Zone Randomizer - 1 Hour Challenge" };
-const char *CurrentModeStrings[3] = { "Item Randomizer: v", "Loading Zone Randomizer: ", "Loading Zone Randomizer - 1 Hour Challenge: " };
-
 
 // Item Rando
 bool ItemRandoV2 = false;
@@ -54,8 +50,8 @@ bool NewFile = false;
 bool ClearCacheNewFileStrings = false;
 char *NewBero = new char[32]; // 31 bytes for NextBero, 1 byte for NULL
 char *NewMap = new char[9]; // 8 bytes for NextMap, 1 byte for NULL
-char *LZRandoText = new char[4];
-char *LZRandoChallengeText = new char[4];
+char *LZRandoText = new char[4]; // 3 bytes for LZRandoText, 1 byte for NULL
+char *LZRandoChallengeText = new char[4]; // 3 bytes for LZRandoChallengeText, 1 byte for NULL
 
 // LZ Rando Challenge
 uint16_t CreditsCount = 0;
