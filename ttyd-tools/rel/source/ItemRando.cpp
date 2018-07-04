@@ -9,6 +9,7 @@
 #include <ttyd/mariost.h>
 #include <ttyd/seqdrv.h>
 #include <ttyd/__mem.h>
+#include <ttyd/OSCache.h>
 
 #include <cstdio>
 
@@ -584,6 +585,10 @@ void Mod::writeItemRandoAssemblyPatches()
   patch::writeBranch(reinterpret_cast<void *>(FixNewItemToInventory), reinterpret_cast<void *>(StartItemFixNewItemsToInventory));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackItemFixNewItemsToInventory), reinterpret_cast<void *>(FixNewItemToInventory + 0x4));
   
+  // Clear Cache of modified address
+  ttyd::OSCache::DCFlushRange(reinterpret_cast<uint32_t *>(FixNewItemToInventory), 4);
+  ttyd::OSCache::ICInvalidateRange(reinterpret_cast<uint32_t *>(FixNewItemToInventory), 4);
+  
   // Write enemy held items
   patch::writeBranch(reinterpret_cast<void *>(EnemyHeldItems), reinterpret_cast<void *>(StartWriteEnemyHeldItems));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackWriteEnemyHeldItems), reinterpret_cast<void *>(EnemyHeldItems + 0x4));
@@ -611,6 +616,10 @@ void Mod::writeItemRandoAssemblyPatches()
   // Adjust SP when getting a new crystal star
   patch::writeBranch(reinterpret_cast<void *>(PouchStoreImportantItemAddress), reinterpret_cast<void *>(StartAdjustSPForNewCrystalStar));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackAdjustSPForNewCrystalStar), reinterpret_cast<void *>(PouchStoreImportantItemAddress + 0x4));
+  
+  // Clear Cache of modified address
+  ttyd::OSCache::DCFlushRange(reinterpret_cast<uint32_t *>(PouchStoreImportantItemAddress), 4);
+  ttyd::OSCache::ICInvalidateRange(reinterpret_cast<uint32_t *>(PouchStoreImportantItemAddress), 4);
   
   // Allow enemies to hold items that they can't use
   *reinterpret_cast<uint32_t *>(EnemyItemCanUseCheck1) = 0x60000000; // nop

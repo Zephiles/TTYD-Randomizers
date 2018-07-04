@@ -3,14 +3,14 @@
 
 StartAdjustSPForNewCrystalStar:
 cmpwi %r31,96 #MagicalMapBigger
-beq- GetRandomItem
+beq- AdjustSP
 cmpwi %r31,120 #CrystalStar
 bgt+ Exit
 cmpwi %r31,114 #DiamondStar
 blt+ Exit
 
 # Only run if the current item is a crystal star or the magical map
-GetRandomItem:
+AdjustSP:
 mr %r3,%r31 # Item
 bl adjustSPForNewCrystalStar
 
