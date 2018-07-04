@@ -29,6 +29,10 @@ uint32_t GSWAddressesStart = r13 - 0x6F50;
 bool TimerActive = false;
 uint32_t TimerCount = 0;
 bool DenyInput = false;
+const char *TitleScreenStrings[3] = { "Item Randomizer V1 - v1.2", "Item Randomizer V2 - v1.2", "Loading Zone Randomizer Beta - v0.5" };
+const char *ToggleModeStrings[4] = { "Hold L and press the following to toggle modes:", "Y = Item Randomizer v1/v2", "X = Loading Zone Randomizer Beta", "Z = Loading Zone Randomizer - 1 Hour Challenge" };
+const char *CurrentModeStrings[3] = { "Item Randomizer: v", "Loading Zone Randomizer: ", "Loading Zone Randomizer - 1 Hour Challenge: " };
+
 
 // Item Rando
 bool ItemRandoV2 = false;

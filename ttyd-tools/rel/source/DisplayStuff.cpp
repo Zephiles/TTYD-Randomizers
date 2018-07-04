@@ -28,8 +28,11 @@ extern bool DenyInput;
 extern bool ItemRandoV2;
 extern bool LZRando;
 extern bool LZRandoChallenge;
+extern const char *TitleScreenStrings[3];
+extern const char *ToggleModeStrings[4];
 extern char *LZRandoText;
 extern char *LZRandoChallengeText;
+extern const char *CurrentModeStrings[3];
 
 namespace mod {
 
@@ -386,37 +389,20 @@ void Mod::titleScreenStuff()
       PosY += 30;
     #endif
     
-    sprintf(mDisplayBuffer,
+    for (int i = 0; i < 3; i++)
+    {
+      sprintf(mDisplayBuffer,
       "%s",
-      "Item Randomizer V1 - v1.2");
-    
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-    
-    sprintf(mDisplayBuffer,
-      "%s",
-      "Item Randomizer V2 - v1.2");
-    
-    PosY -= 20;
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-    
-    sprintf(mDisplayBuffer,
-      "%s",
-      "Loading Zone Randomizer Beta - v0.5");
-    
-    PosY -= 20;
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
+      TitleScreenStrings[i]);
+      
+      ttyd::fontmgr::FontDrawStart();
+      ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+      ttyd::fontmgr::FontDrawEdge();
+      ttyd::fontmgr::FontDrawScale(Scale);
+      ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
+      
+      PosY -= 20;
+    }
   }
 }
 
@@ -432,64 +418,22 @@ void Mod::gameModes()
     int32_t PosY = 0;
     float Scale = 0.75;
     
-    // Toggle Mode text
-    sprintf(mDisplayBuffer,
+    for (int i = 0; i < 4; i++)
+    {
+      sprintf(mDisplayBuffer,
       "%s",
-      "Hold L and press the following to toggle modes:");
+      ToggleModeStrings[i]);
+      
+      ttyd::fontmgr::FontDrawStart();
+      ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+      ttyd::fontmgr::FontDrawEdge();
+      ttyd::fontmgr::FontDrawScale(Scale);
+      ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
+      
+      PosY -= 20;
+    }
     
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-    
-    sprintf(mDisplayBuffer,
-      "%s",
-      "Y = Item Randomizer v1/v2");
-    
-    PosY -= 20;
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-    
-    sprintf(mDisplayBuffer,
-      "%s",
-      "X = Loading Zone Randomizer Beta");
-    
-    PosY -= 20;
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-    
-    sprintf(mDisplayBuffer,
-      "%s",
-      "Z = Loading Zone Randomizer - 1 Hour Challenge");
-    
-    PosY -= 20;
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-    
-    // Display Item Randomizer mode
-    sprintf(mDisplayBuffer,
-      "%s%ld",
-      "Item Randomizer: v",
-      (static_cast<uint32_t>(ItemRandoV2)) + 1);
-    
-    PosY -= 50;
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-    
-    // Display Loading Zone Randomizer Beta on or off
+    // Set LZRandoText to the appropriate value
     if (LZRando)
     {
       ttyd::string::strcpy(LZRandoText, "On");
@@ -499,25 +443,13 @@ void Mod::gameModes()
       ttyd::string::strcpy(LZRandoText, "Off");
     }
     
-    sprintf(mDisplayBuffer,
-      "%s%s",
-      "Loading Zone Randomizer: ",
-      LZRandoText);
-    
-    PosY -= 20;
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-    
-    // Display Loading Zone Randomizer 1 Hour Challenge on or off
     // If the Loading Zone Randomizer is off, then turn the 1 Hour Challenge off
     if (!LZRando)
     {
       LZRandoChallenge = false;
     }
     
+    // Set LZRandoChallengeText to the appropriate value
     if (LZRandoChallenge)
     {
       ttyd::string::strcpy(LZRandoChallengeText, "On");
@@ -527,17 +459,44 @@ void Mod::gameModes()
       ttyd::string::strcpy(LZRandoChallengeText, "Off");
     }
     
-    sprintf(mDisplayBuffer,
-      "%s%s",
-      "Loading Zone Randomizer - 1 Hour Challenge: ",
-      LZRandoChallengeText);
+    // Move the text down
+    PosY -= 50;
     
-    PosY -= 20;
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
+    for (int i = 0; i < 3; i++)
+    {
+      switch (i)
+      {
+        case 0:
+          // Display Item Randomizer mode
+          sprintf(mDisplayBuffer,
+            "%s%ld",
+            CurrentModeStrings[i],
+            (static_cast<uint32_t>(ItemRandoV2)) + 1);
+          break;
+        case 1:
+          // Display Loading Zone Randomizer Beta on or off
+          sprintf(mDisplayBuffer,
+            "%s%s",
+            CurrentModeStrings[i],
+            LZRandoText);
+          break;
+        case 2:
+          // Display Loading Zone Randomizer 1 Hour Challenge on or off
+          sprintf(mDisplayBuffer,
+            "%s%s",
+            CurrentModeStrings[i],
+            LZRandoChallengeText);
+          break;
+      }
+      
+      ttyd::fontmgr::FontDrawStart();
+      ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+      ttyd::fontmgr::FontDrawEdge();
+      ttyd::fontmgr::FontDrawScale(Scale);
+      ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
+      
+      PosY -= 20;
+    }
   }
 }
 
