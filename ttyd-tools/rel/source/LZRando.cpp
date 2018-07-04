@@ -28,8 +28,9 @@ extern uint16_t MapArraySize;
 extern char *NextArea;
 extern char *NextBero;
 extern char *NewBero;
-extern char *NewMap;
 extern bool LZRando;
+extern bool ClearCacheNewFileStrings;
+extern char *NewMap;
 extern uint32_t seqMainAddress;
 extern bool ClearCacheFlag;
 
@@ -238,15 +239,34 @@ void Mod::overwriteNewFileStrings()
   #endif
   uint32_t prologue_Address = aaa_00_Address + 0x8;
   
-  if (ttyd::swdrv::swByteGet(0) == 0)
+  uint32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  uint32_t seqMainCheck = *reinterpret_cast<uint32_t *>(seqMainAddress + 0x4);
+  
+  if ((NextSeq == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kLoad)) && (seqMainCheck == 2))
   {
-    ttyd::string::strcpy(reinterpret_cast<char *>(aaa_00_Address), "gor_01");
-    ttyd::string::strcpy(reinterpret_cast<char *>(prologue_Address), "s_bero");
+    // Set the cache of the strings to be cleared later
+    ClearCacheNewFileStrings = false;
+    
+    // Set strings on file select screen curtain
+    if (LZRando)
+    {
+      ttyd::string::strcpy(reinterpret_cast<char *>(aaa_00_Address), "gor_01");
+      ttyd::string::strcpy(reinterpret_cast<char *>(prologue_Address), "s_bero");
+    }
   }
-  else
+  else if (!LZRando || ((NextSeq == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGame)) && (ttyd::swdrv::swByteGet(0) > 0)))
   {
+    // Set strings to default when not using the Loading Zone randomizer, or when the file is already loaded and in central Rogueport
     ttyd::string::strcpy(reinterpret_cast<char *>(aaa_00_Address), "aaa_00");
     ttyd::string::strcpy(reinterpret_cast<char *>(prologue_Address), "prologue");
+  }
+  
+  // Clear the cache of the strings upon starting a file
+  if (!ClearCacheNewFileStrings && (NextSeq == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGame)))
+  {
+    ClearCacheNewFileStrings = true;
+    ttyd::OSCache::DCFlushRange(reinterpret_cast<uint32_t *>(aaa_00_Address), 16);
+    ttyd::OSCache::ICInvalidateRange(reinterpret_cast<uint32_t *>(aaa_00_Address), 16);
   }
 }
 

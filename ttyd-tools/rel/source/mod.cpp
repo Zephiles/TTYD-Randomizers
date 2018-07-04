@@ -84,13 +84,13 @@ void Mod::updateEarly()
   {
     // Only run if the Loading Zone Randomizer is being used
     Mod::setUpNewFile();
-    Mod::overwriteNewFileStrings();
     Mod::failsafeCheats();
     Mod::resetValuesOnGameOver();
     Mod::reloadCurrentScreenFlag();
   }
   
-  // Additional assembly patches that need to run no matter what
+  // Additional LZ Rando stuff that needs to run no matter what
+  Mod::overwriteNewFileStrings();
   Mod::writeAdditionalLZRandoAssemblyPatches();
   
   // Call original function
