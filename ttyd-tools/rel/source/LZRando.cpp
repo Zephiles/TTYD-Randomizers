@@ -49,9 +49,17 @@ void getRandomWarp()
 {
   // This function is ran from a place that only runs once during a screen transition
   // Don't run if currently reloading the current screen
-  if (!ReloadCurrentScreen && (GameOverFlag || ((ttyd::string::strcmp(NextMap, "dmo_00") != 0) && (ttyd::string::strcmp(NextMap, "title") != 0))))
+  // Don't run if transitioning to the intro or the title screen, unless the Game Over flag is set
+  if (!ReloadCurrentScreen && (GameOverFlag || ((ttyd::string::strcmp(NextMap, "dmo_00") != 0) && (ttyd::string::strcmp(NextMap, "title") != 0) && (ttyd::string::strcmp(NextBero, "tuzuki") != 0))))
   {
-    // Don't run if transitioning to the intro or the title screen, unless the Game Over flag is set
+    // Don't run if the loading zone is currently evt_aji_14 or tuzuki, as these are used for the Magnus 2.0 cutscenes
+    if ((ttyd::string::strcmp(NextBero, "evt_aji_14") == 0))
+    {
+      // Set Sequence to properly warp back to Magnus 2.0's room
+      ttyd::swdrv::swByteSet(0, 372);
+      return;
+    }
+    
     GameOverFlag = false;
     
     // Prevent random warp upon starting a new file
