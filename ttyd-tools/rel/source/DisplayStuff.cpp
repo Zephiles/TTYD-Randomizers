@@ -121,7 +121,7 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Check for credits warps
-    int32_t CreditsCheck = ttyd::string::strcmp(NextBero, "end_00");
+    int32_t CreditsCheck = ttyd::string::strcmp(NextMap, "end_00");
     if (!InCredits && (CreditsCheck == 0))
     {
       InCredits = true;
