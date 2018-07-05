@@ -9,7 +9,7 @@ extern "C" {
 // partyChkJoin
 // partyLeft
 void partyJoin(uint32_t id);
-// marioGetExtraPartyId
+uint32_t marioGetExtraPartyId();
 uint32_t marioGetPartyId();
 // marioGetParty
 // marioPartyKill

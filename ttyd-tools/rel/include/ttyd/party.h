@@ -68,8 +68,8 @@ extern "C" {
 // partyPaperLightOff
 // partyPaperOff
 // partyPaperOn
-void *anotherPartyGetPtr(uint32_t marioGetPartyIdResult);
-void *partyGetPtr(uint32_t marioGetPartyIdResult);
+// anotherPartyGetPtr
+void *partyGetPtr(uint32_t partyId);
 
 }
 

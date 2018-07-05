@@ -47,10 +47,14 @@ namespace mod {
 extern "C" {
 void getRandomWarp()
 {
+  int32_t dmo_comparison = ttyd::string::strcmp(NextMap, "dmo_00");
+  int32_t title_comparison = ttyd::string::strcmp(NextMap, "title");
+  int32_t tuzuki_comparison = ttyd::string::strcmp(NextBero, "tuzuki");
+  
   // This function is ran from a place that only runs once during a screen transition
   // Don't run if currently reloading the current screen
   // Don't run if transitioning to the intro or the title screen, unless the Game Over flag is set
-  if (!ReloadCurrentScreen && (GameOverFlag || ((ttyd::string::strcmp(NextMap, "dmo_00") != 0) && (ttyd::string::strcmp(NextMap, "title") != 0) && (ttyd::string::strcmp(NextBero, "tuzuki") != 0))))
+  if (!ReloadCurrentScreen && (GameOverFlag || ((dmo_comparison != 0) && (title_comparison != 0) && (tuzuki_comparison != 0))))
   {
     // Don't run if the loading zone is currently evt_aji_14 or tuzuki, as these are used for the Magnus 2.0 cutscenes
     if ((ttyd::string::strcmp(NextBero, "evt_aji_14") == 0))
@@ -191,8 +195,10 @@ void getRandomWarp()
 
 void Mod::setUpNewFile()
 {
+  uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
+  
   // Set up stuff for new file
-  if ((ttyd::swdrv::swByteGet(0) == 0) && NewFile)
+  if ((SequencePosition == 0) && NewFile)
   {
     NewFile = false;
     
@@ -247,10 +253,13 @@ void Mod::overwriteNewFileStrings()
   #endif
   uint32_t prologue_Address = aaa_00_Address + 0x8;
   
-  uint32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
+  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
   uint32_t seqMainCheck = *reinterpret_cast<uint32_t *>(seqMainAddress + 0x4);
+  uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   
-  if ((NextSeq == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kLoad)) && (seqMainCheck == 2))
+  if ((NextSeq == Load) && (seqMainCheck == 2))
   {
     // Set the cache of the strings to be cleared later
     ClearCacheNewFileStrings = false;
@@ -262,7 +271,7 @@ void Mod::overwriteNewFileStrings()
       ttyd::string::strcpy(reinterpret_cast<char *>(prologue_Address), "s_bero");
     }
   }
-  else if (!LZRando || ((NextSeq == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGame)) && (ttyd::swdrv::swByteGet(0) > 0)))
+  else if (!LZRando || ((NextSeq == Game) && (SequencePosition > 0)))
   {
     // Set strings to default when not using the Loading Zone randomizer, or when the file is already loaded and in central Rogueport
     ttyd::string::strcpy(reinterpret_cast<char *>(aaa_00_Address), "aaa_00");
@@ -270,7 +279,7 @@ void Mod::overwriteNewFileStrings()
   }
   
   // Clear the cache of the strings upon starting a file
-  if (!ClearCacheNewFileStrings && (NextSeq == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGame)))
+  if (!ClearCacheNewFileStrings && (NextSeq == Game))
   {
     ClearCacheNewFileStrings = true;
     ttyd::OSCache::DCFlushRange(reinterpret_cast<uint32_t *>(aaa_00_Address), 16);
@@ -280,7 +289,10 @@ void Mod::overwriteNewFileStrings()
 
 void marioNeverTransform()
 {
-  if (ttyd::seqdrv::seqGetNextSeq() == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGame))
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+  
+  if (NextSeq == Game)
   {
     ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
   
@@ -294,9 +306,13 @@ void marioNeverTransform()
 
 void dismountYoshi()
 {
-  // This needs to be possible in the event that a cutscene forces Mario off of Yoshi improperly
+  uint32_t ButtonInput = ttyd::system::keyGetButton(0);
   uint16_t DismountYoshiCombo = PAD_L | PAD_Z;
-  if (((ttyd::system::keyGetButton(0) & DismountYoshiCombo) == DismountYoshiCombo) && (ttyd::seqdrv::seqGetNextSeq() == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGame)))
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+  
+  // This needs to be possible in the event that a cutscene forces Mario off of Yoshi improperly
+  if (((ButtonInput & DismountYoshiCombo) == DismountYoshiCombo) && (NextSeq == Game))
   {
     uint16_t CurrentlyUsingYoshi = 26;
     ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
@@ -314,8 +330,11 @@ void dismountYoshi()
 
 void resetMarioThroughLZ()
 {
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
+  
   // Prevent softlocks by resetting Mario back to normal upon entering a loading zone
-  if (ttyd::seqdrv::seqGetNextSeq() == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kMapChange))
+  if (NextSeq == MapChange)
   {
     uint16_t CurrentlyUsingTubeMode = 22;
     uint16_t CurrentlyUsingBoatMode = 25;
@@ -330,12 +349,14 @@ void resetMarioThroughLZ()
 
 void reloadScreen()
 {
+  uint32_t ButtonInput = ttyd::system::keyGetButton(0);
   uint16_t ReloadScreenCombo = PAD_L | PAD_B;
-  if ((ttyd::system::keyGetButton(0) & ReloadScreenCombo) == (ReloadScreenCombo))
+  
+  if ((ButtonInput & ReloadScreenCombo) == (ReloadScreenCombo))
   {
-    uint32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-    uint32_t Game = static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGame);
-    uint32_t MapChange = static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
+    int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+    int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+    int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
     
     if ((NextSeq >= Game) && (NextSeq <= MapChange))
     {
@@ -369,14 +390,16 @@ void reloadScreen()
 void setNextBero()
 {
   // Prevent changing the loading zone if currently in a room where using it would result in a softlock
-  if ((ttyd::string::strcmp(NextMap, "mri_16") != 0) && (ttyd::string::strcmp(NextMap, "eki_03") != 0))
+  int32_t mri_comparison = ttyd::string::strcmp(NextMap, "mri_16");
+  int32_t eki_comparison = ttyd::string::strcmp(NextMap, "eki_03");
+  if ((mri_comparison != 0) && (eki_comparison != 0))
   {
+    uint32_t ButtonInput = ttyd::system::keyGetButton(0);
     uint16_t NBeroCombo = PAD_L | PAD_DPAD_UP;
     uint16_t SBeroCombo = PAD_L | PAD_DPAD_DOWN;
     uint16_t WBeroCombo = PAD_L | PAD_DPAD_LEFT;
     uint16_t EBeroCombo = PAD_L | PAD_DPAD_RIGHT;
     
-    uint32_t ButtonInput = ttyd::system::keyGetButton(0);
     if ((ButtonInput & NBeroCombo) == (NBeroCombo))
     {
       ttyd::string::strcpy(NextBero, "n_bero");
@@ -407,7 +430,10 @@ void Mod::failsafeCheats()
 
 void Mod::resetValuesOnGameOver()
 {
-  if (ttyd::seqdrv::seqGetNextSeq() == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGameOver))
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t GameOver = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGameOver);
+    
+  if (NextSeq == GameOver)
   {
     NewFile = false;
     ReloadCurrentScreen = false;
@@ -417,7 +443,10 @@ void Mod::resetValuesOnGameOver()
 
 void Mod::reloadCurrentScreenFlag()
 {
-  if (ReloadCurrentScreen && (ttyd::seqdrv::seqGetNextSeq() == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGame)))
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+  
+  if (ReloadCurrentScreen && (NextSeq == Game))
   {
     ReloadCurrentScreen = false;
   }
@@ -497,9 +526,13 @@ void Mod::writeAdditionalLZRandoAssemblyPatches()
   }
   
   // Clear Cache
-  uint32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
+  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+  int32_t Title = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kTitle);
   uint32_t seqMainCheck = *reinterpret_cast<uint32_t *>(seqMainAddress + 0x4);
-  if (!ClearCacheFlag && (NextSeq == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kLoad)) && (seqMainCheck == 4))
+  
+  if (!ClearCacheFlag && (NextSeq == Load) && (seqMainCheck == 4))
   {
     ClearCacheFlag = true;
     
@@ -517,7 +550,7 @@ void Mod::writeAdditionalLZRandoAssemblyPatches()
     ttyd::OSCache::DCFlushRange(reinterpret_cast<uint32_t *>(aaa_00_Address), 16);
     ttyd::OSCache::ICInvalidateRange(reinterpret_cast<uint32_t *>(aaa_00_Address), 16);
   }
-  else if (ClearCacheFlag && ((NextSeq == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGame)) || (NextSeq == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kTitle))))
+  else if (ClearCacheFlag && ((NextSeq == Game) || (NextSeq == Title)))
   {
     ClearCacheFlag = false;
   }

@@ -405,7 +405,7 @@
 // 800BFD00:partyPaperLightOff
 // 800BFD28:partyPaperOff
 // 800BFDA4:partyPaperOn
-800BFEC4:anotherPartyGetPtr
+// 800BFEC4:anotherPartyGetPtr
 800BFEE8:partyGetPtr
 
 // mario_pouch.o
@@ -759,7 +759,7 @@
 // 801429D0:partyChkJoin
 // 80142A18:partyLeft
 80142A5C:partyJoin
-// 80142AA0:marioGetExtraPartyId
+80142AA0:marioGetExtraPartyId
 80142B38:marioGetPartyId
 // 80142BD0:marioGetParty
 // 80142C80:marioPartyKill

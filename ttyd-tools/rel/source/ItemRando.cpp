@@ -197,14 +197,17 @@ uint16_t randomizeItemWithChecks(uint16_t currentItemId)
   }
   
   // Don't randomize Coconuts during the time that they are needed in Chapter 5
-  uint16_t SequencePosition = ttyd::swdrv::swByteGet(0);
+  uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   if ((currentItemId == Coconut) && (SequencePosition >= 232) && (SequencePosition <= 236))
   {
     return currentItemId;
   }
   
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
+  
   // Prevent changing the item if currently in a battle
-  if (ttyd::seqdrv::seqGetNextSeq() != static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kBattle))
+  if (NextSeq != Battle)
   {
     // Don't randomize enemy item drop
     // Must also not run while in a battle
@@ -215,7 +218,8 @@ uint16_t randomizeItemWithChecks(uint16_t currentItemId)
     }
     
     // Prevent changing the item if currently using an item (counts as being in the Pause Menu)
-    if (ttyd::mariost::marioStGetSystemLevel() != 15)
+    uint32_t SystemLevel = ttyd::mariost::marioStGetSystemLevel();
+    if (SystemLevel != 15)
     {
       bool ItemRandoV2Coin = ItemRandoV2 && (currentItemId == Coin);
       if (ItemRandoV2Coin || ((currentItemId >= StarPiece) && (currentItemId <= SuperChargeP)))
@@ -238,8 +242,11 @@ void *Mod::getRandomItem(const char *itemName, uint32_t itemId, uint32_t itemMod
 
 void Mod::clearEnemyHeldItemArray()
 {
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
+  
   // Clear array if not in use
-  if (!EnemyHeldItemArrayInUse && (ttyd::seqdrv::seqGetNextSeq() != static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kBattle)))
+  if (!EnemyHeldItemArrayInUse && (NextSeq != Battle))
   {
     ttyd::__mem::memset(EnemyHeldItemArray, 0, sizeof(EnemyHeldItemArray));
   }
@@ -247,8 +254,11 @@ void Mod::clearEnemyHeldItemArray()
 
 void Mod::randomizeShopRewardsSetDoorFlag()
 {
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
+  
   // Only set on map change
-  if (ttyd::seqdrv::seqGetNextSeq() == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kMapChange))
+  if (NextSeq == MapChange)
   {
     // Set GSWF(1230), which is the flag that opens the shop door leading to Don Pianta
     uint32_t GSWFAddress = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
@@ -455,6 +465,8 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t PouchStoreImportantItemAddress = 0x800D552C;
     
+    uint32_t CoinBlockAddress = 0x800668E4;
+    
     uint32_t EnemyItemCanUseCheck1 = 0x80125D54;
     uint32_t EnemyItemCanUseCheck2 = 0x801A5414;
     uint32_t EnemyItemCanUseCheck3 = 0x801A5484;
@@ -479,8 +491,6 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars9 = 0x80170FE4;
     uint32_t DisplaySPBars10 = 0x80171004;
     uint32_t DisplaySPBars11 = 0x8013D5B8;
-    
-    uint32_t CoinBlockAddress = 0x800668E4;
   #elif defined TTYD_JP
     uint32_t CrystalStarPointer = 0x800AC284;
     
@@ -503,6 +513,8 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t RandomizeAudienceItemsBadgeFix = 0x8019F478;
     
     uint32_t PouchStoreImportantItemAddress = 0x800D130C;
+    
+    uint32_t CoinBlockAddress = 0x800659E0;
     
     uint32_t EnemyItemCanUseCheck1 = 0x80120894;
     uint32_t EnemyItemCanUseCheck2 = 0x8019F468;
@@ -528,8 +540,6 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars9 = 0x8016BD30;
     uint32_t DisplaySPBars10 = 0x8016BD50;
     uint32_t DisplaySPBars11 = 0x80137FEC;
-    
-    uint32_t CoinBlockAddress = 0x800659E0;
   #elif defined TTYD_EU
     uint32_t CrystalStarPointer = 0x800AF38C;
     
@@ -552,6 +562,8 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t RandomizeAudienceItemsBadgeFix = 0x801A7100;
     
     uint32_t PouchStoreImportantItemAddress = 0x800D6334;
+    
+    uint32_t CoinBlockAddress = 0x8006717C;
     
     uint32_t EnemyItemCanUseCheck1 = 0x8012783C;
     uint32_t EnemyItemCanUseCheck2 = 0x801A70F0;
@@ -577,8 +589,6 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars9 = 0x80172A84;
     uint32_t DisplaySPBars10 = 0x80172AA4;
     uint32_t DisplaySPBars11 = 0x8013F0A0;
-    
-    uint32_t CoinBlockAddress = 0x8006717C;
   #endif
   
   // Write Crystal Star pointer
@@ -625,6 +635,10 @@ void Mod::writeItemRandoAssemblyPatches()
   patch::writeBranch(reinterpret_cast<void *>(PouchStoreImportantItemAddress), reinterpret_cast<void *>(StartAdjustSPForNewCrystalStar));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackAdjustSPForNewCrystalStar), reinterpret_cast<void *>(PouchStoreImportantItemAddress + 0x4));
   
+  // Randomize single coins from coin blocks
+  patch::writeBranch(reinterpret_cast<void *>(CoinBlockAddress), reinterpret_cast<void *>(StartRandomizeCoinBlocks));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackRandomizeCoinBlocks), reinterpret_cast<void *>(CoinBlockAddress + 0x4));
+  
   // Allow enemies to hold items that they can't use
   *reinterpret_cast<uint32_t *>(EnemyItemCanUseCheck1) = 0x60000000; // nop
   *reinterpret_cast<uint32_t *>(EnemyItemCanUseCheck2) = 0x60000000; // nop
@@ -654,10 +668,6 @@ void Mod::writeItemRandoAssemblyPatches()
   *reinterpret_cast<uint32_t *>(DisplaySPBars9) = 0x60000000; // nop
   *reinterpret_cast<uint32_t *>(DisplaySPBars10) = 0x60000000; // nop
   *reinterpret_cast<uint32_t *>(DisplaySPBars11) = 0x2C030000; // cmpwi r3,0
-  
-  // Randomize single coins from coin blocks
-  patch::writeBranch(reinterpret_cast<void *>(CoinBlockAddress), reinterpret_cast<void *>(StartRandomizeCoinBlocks));
-  patch::writeBranch(reinterpret_cast<void *>(BranchBackRandomizeCoinBlocks), reinterpret_cast<void *>(CoinBlockAddress + 0x4));
 }
 
 }

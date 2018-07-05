@@ -38,9 +38,9 @@ namespace mod {
 
 void Mod::LZRandoStuff()
 {
-  uint32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  uint32_t Game = static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGame);
-  uint32_t MapChange = static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+  int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
   
   if ((NextSeq >= Game) && (NextSeq <= MapChange))
   {
@@ -63,11 +63,11 @@ void Mod::LZRandoStuff()
 
 void Mod::LZRandoChallengeStuff()
 {
-  uint32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  uint32_t Game = static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kGame);
-  uint32_t MapChange = static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
-  uint32_t Battle = static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kBattle);
-  uint32_t Load = static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kLoad);
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+  int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
+  int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
+  int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
   uint32_t color = 0xFFFFFFFF;
   
   // Get and display Score
@@ -108,7 +108,7 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Check for a follower
-    uint32_t FollowerPointer = reinterpret_cast<uint32_t>(ttyd::party::anotherPartyGetPtr(ttyd::mario_party::marioGetPartyId()));
+    uint32_t FollowerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetExtraPartyId()));
     if (FollowerPointer)
     {
       // Add 2 points if the player has a follower
@@ -116,7 +116,7 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Check for level ups
-    uint16_t MarioLevel = *reinterpret_cast<uint16_t *>(PouchPointer + 0x8A);
+    int16_t MarioLevel = *reinterpret_cast<int16_t *>(PouchPointer + 0x8A);
     if (MarioLevel > 1)
     {
       // Add 3 points for each level up
@@ -213,7 +213,7 @@ void Mod::LZRandoChallengeStuff()
     Score += BossCount * 10;
     
     // Add 1 point for Mario's coin count divided by 100
-    uint16_t CoinCount = *reinterpret_cast<uint16_t *>(PouchPointer + 0x78);
+    int16_t CoinCount = *reinterpret_cast<int16_t *>(PouchPointer + 0x78);
     Score += CoinCount / 100;
     
     // Check badge log
@@ -223,9 +223,9 @@ void Mod::LZRandoChallengeStuff()
     // Check each bit in the bitfield
     for (int i = 0; i < 3; i++)
     {
+      uint32_t CurrentAddress = *reinterpret_cast<uint32_t *>(BadgeLogAddressesStart + (i * 0x4));
       for (int x = 0; x < 32; x++)
       {
-        uint32_t CurrentAddress = *reinterpret_cast<uint32_t *>(BadgeLogAddressesStart + (i * 0x4));
         if (CurrentAddress & (1 << x))
         {
           // Add 1 to the count if the bit is on
@@ -332,10 +332,12 @@ void Mod::LZRandoChallengeStuff()
 
 void Mod::changeGameModes()
 {
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
   uint32_t seqMainCheck = *reinterpret_cast<uint32_t *>(seqMainAddress + 0x4);
   
   // Only run on the file select screen whule the curtain is up
-  if ((ttyd::seqdrv::seqGetNextSeq() == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kLoad)) && (seqMainCheck == 2))
+  if ((NextSeq == Load) && (seqMainCheck == 2))
   {
     uint32_t ButtonInput = ttyd::system::keyGetButton(0);
     uint16_t ItemRandoButtonCombo = PAD_L | PAD_Y;
@@ -376,8 +378,11 @@ void Mod::changeGameModes()
 
 void Mod::titleScreenStuff()
 {
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Title = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kTitle);
+  
   // Only run on the title screen
-  if (ttyd::seqdrv::seqGetNextSeq() == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kTitle))
+  if (NextSeq == Title)
   {
     uint32_t color = 0xFFFFFFFF;
     int32_t PosX = -235;
@@ -408,10 +413,12 @@ void Mod::titleScreenStuff()
 
 void Mod::gameModes()
 {
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
   uint32_t seqMainCheck = *reinterpret_cast<uint32_t *>(seqMainAddress + 0x4);
   
   // Only run on the file select screen whule the curtain is up
-  if ((ttyd::seqdrv::seqGetNextSeq() == static_cast<uint32_t>(ttyd::seqdrv::SeqIndex::kLoad)) && (seqMainCheck == 2))
+  if ((NextSeq == Load) && (seqMainCheck == 2))
   {
     uint32_t color = 0xFFFFFFFF;
     int32_t PosX = -255;
@@ -441,11 +448,8 @@ void Mod::gameModes()
     else
     {
       ttyd::string::strcpy(LZRandoText, "Off");
-    }
-    
-    // If the Loading Zone Randomizer is off, then turn the 1 Hour Challenge off
-    if (!LZRando)
-    {
+      
+      // If the Loading Zone Randomizer is off, then turn the 1 Hour Challenge off
       LZRandoChallenge = false;
     }
     
