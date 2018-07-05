@@ -24,6 +24,8 @@ extern bool EnemyHeldItemArrayInUse;
 extern bool ItemRandoV2;
 extern uint32_t EnemyHeldItemArray[8];
 extern uint32_t GSWAddressesStart;
+extern uint32_t CrystalStarPointerAddress;
+extern bool RandomizeGivenItem;
 
 extern "C" {
   void StartCrystalStarPointerWrite();
@@ -407,35 +409,129 @@ void randomizeStandardShopItems(uint16_t CurrentShopItemIndex, void *ShopItemsAr
 extern "C" {
 void adjustSPForNewCrystalStar(uint16_t CurrentItem)
 {
-  uint32_t PouchPointer = reinterpret_cast<uint32_t>(ttyd::mario_pouch::pouchGetPtr());
-  uint32_t SPBarAddress = PouchPointer + 0x8C;
-  uint16_t Multiplier = 0;
-  
-  if (CurrentItem != MagicalMapBigger)
+  // Only run if the current item is the magical map or a crystal star
+  if ((CurrentItem == MagicalMapBigger) || ((CurrentItem >= DiamondStar) && (CurrentItem <= CrystalStar)))
   {
-    // Item is a crystal star
-    Multiplier = CurrentItem - DiamondStar + 1;
-    *reinterpret_cast<uint16_t *>(SPBarAddress) |= (1 << Multiplier);
+    uint32_t PouchPointer = reinterpret_cast<uint32_t>(ttyd::mario_pouch::pouchGetPtr());
+    uint32_t SPBarAddress = PouchPointer + 0x8C;
+    uint16_t Multiplier = 0;
+    
+    if (CurrentItem != MagicalMapBigger)
+    {
+      // Item is a crystal star
+      Multiplier = CurrentItem - DiamondStar + 1;
+      *reinterpret_cast<uint16_t *>(SPBarAddress) |= (1 << Multiplier);
+    }
+    else
+    {
+      // Item is the Magical Map
+      *reinterpret_cast<uint16_t *>(SPBarAddress) |= (1 << 0); // Turn on the 0 bit
+    }
+    
+    // Get new Max SP
+    uint16_t NewMaxSP = (Multiplier + 1) * 100;
+    uint16_t CurrentMaxSP = *reinterpret_cast<uint16_t *>(PouchPointer + 0x7C);
+    
+    // Check if new Max SP is higher than current Max SP
+    if (NewMaxSP > CurrentMaxSP)
+    {
+      *reinterpret_cast<uint16_t *>(PouchPointer + 0x7C) = NewMaxSP;
+      *reinterpret_cast<uint16_t *>(PouchPointer + 0x7A) = NewMaxSP; // Current SP
+    }
+    else
+    {
+      *reinterpret_cast<uint16_t *>(PouchPointer + 0x7A) = CurrentMaxSP; // Current SP
+    }
+  }
+}
+}
+
+extern "C" {
+uint32_t audienceFixMarioReceivingBadges(uint32_t pouchGetEmptyHaveItemCnt, uint32_t currentCrowdItem)
+{
+  // Only run if currentCrowdItem is a badge
+  if (currentCrowdItem < PowerJump)
+  {
+    return pouchGetEmptyHaveItemCnt;
+  }
+  
+  // Get the total number of badges the player currently has
+  uint32_t BadgeCount = ttyd::mario_pouch::pouchGetHaveBadgeCnt();
+  
+  if (BadgeCount < 200)
+  {
+    // There is currently free space for badges, so return a number higher than 0 free spaces
+    return 1;
   }
   else
   {
-    // Item is the Magical Map
-    *reinterpret_cast<uint16_t *>(SPBarAddress) |= (1 << 0); // Turn on the 0 bit
+    // There is currently no free space for badges, so return 0 free spaces
+    return 0;
+  }
+}
+}
+
+extern "C" {
+void *writeCrystalStarPointer(void *CurrentItemLocation)
+{
+  if (CrystalStarIsInField)
+  {
+    CrystalStarIsInField = false;
+    
+    // Get pointer
+    uint32_t CrystalStarPointer = *reinterpret_cast<uint32_t *>(CrystalStarPointerAddress);
+    CrystalStarPointer = *reinterpret_cast<uint32_t *>(CrystalStarPointer + 0x4);
+    
+    // Write pointer
+    *reinterpret_cast<uint32_t *>(reinterpret_cast<uint32_t>(CurrentItemLocation) + 0x1C) = CrystalStarPointer;
   }
   
-  // Get new Max SP
-  uint16_t NewMaxSP = (Multiplier + 1) * 100;
-  uint16_t CurrentMaxSP = *reinterpret_cast<uint16_t *>(PouchPointer + 0x7C);
-  
-  // Check if new Max SP is higher than current Max SP
-  if (NewMaxSP > CurrentMaxSP)
+  return CurrentItemLocation;
+}
+}
+
+extern "C" {
+uint32_t newItemToInventory(uint32_t currentItem)
+{
+  // Return CrystalStarNewItem if the current item is a crystal star
+  if ((currentItem >= DiamondStar) && (currentItem <= CrystalStar))
   {
-    *reinterpret_cast<uint16_t *>(PouchPointer + 0x7C) = NewMaxSP;
-    *reinterpret_cast<uint16_t *>(PouchPointer + 0x7A) = NewMaxSP; // Current SP
+    return CrystalStarNewItem;
+  }
+  else if (currentItem == HotDog)
+  {
+    // Set flag to prevent swSet from being ran during the pouchGetItem function
+    RandomizeGivenItem = true;
+    
+    // Randomize the hotdog from the Glitzville hotdog seller
+    uint16_t NewItem = 0;
+    while (NewItem < GoldBar)
+    {
+      // Make sure the new item is a standard item/badge
+      NewItem = randomizeItem();
+    }
+    
+    return NewItem;
+  }
+  
+  return currentItem;
+}
+}
+
+extern "C" {
+uint32_t newItemsPrevent_swSet(uint32_t currentItem)
+{
+  if (RandomizeGivenItem)
+  {
+    RandomizeGivenItem = false;
+    
+    // Return arbitrary value less than 240 (PowerJump)
+    return 1;
   }
   else
   {
-    *reinterpret_cast<uint16_t *>(PouchPointer + 0x7A) = CurrentMaxSP; // Current SP
+    // Return original value
+    return currentItem;
   }
 }
 }

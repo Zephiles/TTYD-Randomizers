@@ -18,6 +18,7 @@
 
 #include <cstdio>
 
+extern bool LZRando;
 extern bool ReloadCurrentScreen;
 extern bool GameOverFlag;
 extern char *NextMap;
@@ -28,7 +29,6 @@ extern uint16_t MapArraySize;
 extern char *NextArea;
 extern char *NextBero;
 extern char *NewBero;
-extern bool LZRando;
 extern bool ClearCacheNewFileStrings;
 extern char *NewMap;
 extern uint32_t seqMainAddress;
@@ -47,11 +47,17 @@ namespace mod {
 extern "C" {
 void getRandomWarp()
 {
+  // This function is ran from a place that only runs once during a screen transition
+  // Don't run if the Loading Zone randomizer is currently not in use
+  if (!LZRando)
+  {
+    return;
+  }
+  
   int32_t dmo_comparison = ttyd::string::strcmp(NextMap, "dmo_00");
   int32_t title_comparison = ttyd::string::strcmp(NextMap, "title");
   int32_t tuzuki_comparison = ttyd::string::strcmp(NextBero, "tuzuki");
   
-  // This function is ran from a place that only runs once during a screen transition
   // Don't run if currently reloading the current screen
   // Don't run if transitioning to the intro or the title screen, unless the Game Over flag is set
   if (!ReloadCurrentScreen && (GameOverFlag || ((dmo_comparison != 0) && (title_comparison != 0) && (tuzuki_comparison != 0))))
@@ -450,6 +456,36 @@ void Mod::reloadCurrentScreenFlag()
   {
     ReloadCurrentScreen = false;
   }
+}
+
+uint32_t getCurseReturnValue(uint32_t pouchCheckItem, const char *CheckMap)
+{
+  // Only run if the player doesn't already have the Boat Mode curse, and if the Loading Zone randomizer is in use
+  if (!pouchCheckItem && LZRando)
+  {
+    // Only run if the player is currently in the room in Rogueport Sewers with the 3 shine sprites
+    if (ttyd::string::strcmp(NextMap, CheckMap) == 0)
+    {
+      // Return arbitrary value greater than 0
+      return 1;
+    }
+  }
+  
+  return pouchCheckItem;
+}
+
+extern "C" {
+uint32_t enablePaperTubeModes(uint32_t pouchCheckItem)
+{
+  return getCurseReturnValue(pouchCheckItem, "jin_05");
+}
+}
+
+extern "C" {
+uint32_t enableBoatMode(uint32_t pouchCheckItem)
+{
+  return getCurseReturnValue(pouchCheckItem, "tik_20");
+}
 }
 
 void Mod::writeLZRandoAssemblyPatches()

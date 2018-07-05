@@ -422,7 +422,7 @@ void Mod::gameModes()
   {
     uint32_t color = 0xFFFFFFFF;
     int32_t PosX = -255;
-    int32_t PosY = 0;
+    int32_t PosY = 40;
     float Scale = 0.75;
     
     for (int i = 0; i < 4; i++)

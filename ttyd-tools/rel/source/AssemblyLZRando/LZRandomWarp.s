@@ -2,12 +2,6 @@
 .global BranchBackGetRandomWarp
 
 StartGetRandomWarp:
-# Check if the Loading Zone Randomizer is in use
-lis %r3,LZRando@ha
-lbz %r3,LZRando@l(%r3)
-cmpwi %r3,1 # True
-bne+ Exit
-
 bl getRandomWarp
 
 Exit:

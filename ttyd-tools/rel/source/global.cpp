@@ -24,6 +24,7 @@ extern "C" {
 #endif
 
 uint32_t GSWAddressesStart = r13 - 0x6F50;
+uint32_t CrystalStarPointerAddress = r13 - 0x7040;
 
 // Display Stuff
 bool TimerActive = false;
