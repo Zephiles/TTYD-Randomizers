@@ -51,7 +51,7 @@ INCLUDES	:=	include
 
 MACHDEP		= -mno-sdata -mgcn -DGEKKO -mcpu=750 -meabi -mhard-float
 
-CFLAGS		= -nostdlib -ffreestanding -ffunction-sections -fdata-sections -g -O3 -Wall -Werror $(MACHDEP) $(INCLUDE)
+CFLAGS		= -nostdlib -ffreestanding -ffunction-sections -fdata-sections -fno-inline -g -O3 -Wall -Werror $(MACHDEP) $(INCLUDE)
 CXXFLAGS	= -fno-exceptions -fno-rtti -std=gnu++17 $(CFLAGS)
 
 LDFLAGS		= -r -e _prolog -u _prolog -u _epilog -u _unresolved -Wl,--gc-sections -nostdlib -g $(MACHDEP) -Wl,-Map,$(notdir $@).map
