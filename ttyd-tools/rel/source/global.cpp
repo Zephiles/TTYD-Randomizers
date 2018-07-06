@@ -39,7 +39,9 @@ bool EmeraldStarAlreadyChanged = false;
 uint16_t CrystalStarNewItem = 1; // Have the Strange Sack used by default as a failsafe
 bool MarioRunAwayCoinDrop = false;
 bool EnemyHeldItemArrayInUse = false;
-uint32_t EnemyHeldItemArray[8] = { 0 };
+uint8_t EnemyHeldItemArrayCounter = 0;
+bool RanAwayFromBattle = false;
+uint16_t EnemyHeldItemArray[8][8] = { 0 };
 bool RandomizeGivenItem = false;
 
 // LZ Rando

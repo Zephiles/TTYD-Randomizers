@@ -23,7 +23,7 @@ private:
   
   // Item Rando
   void *getRandomItem(const char *itemName, uint32_t itemId, uint32_t itemMode, int32_t wasCollectedExpr, void *itemPickupScript, float itemCoordinateX, float itemCoordinateY, float itemCoordinateZ);
-  void clearEnemyHeldItemArray();
+  void manageEnemyHeldItemArray();
   void randomizeShopRewardsSetDoorFlag();
   void writeItemRandoAssemblyPatches();
   void *(*mPFN_itemEntry_trampoline)(const char *name, uint32_t id, uint32_t mode, int32_t wasCollectedExpr, void *pickupScript, float coordinateX, float coordinateY, float coordinateZ) = nullptr;

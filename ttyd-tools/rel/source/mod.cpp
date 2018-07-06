@@ -76,7 +76,7 @@ void Mod::updateEarly()
   }, this);
   
   // Item Rando
-  Mod::clearEnemyHeldItemArray();
+  Mod::manageEnemyHeldItemArray();
   Mod::randomizeShopRewardsSetDoorFlag();
   
   // LZ Rando

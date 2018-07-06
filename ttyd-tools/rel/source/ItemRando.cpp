@@ -22,7 +22,9 @@ extern uint16_t CrystalStarNewItem;
 extern bool MarioRunAwayCoinDrop;
 extern bool EnemyHeldItemArrayInUse;
 extern bool ItemRandoV2;
-extern uint32_t EnemyHeldItemArray[8];
+extern uint8_t EnemyHeldItemArrayCounter;
+extern bool RanAwayFromBattle;
+extern uint16_t EnemyHeldItemArray[8][8];
 extern uint32_t GSWAddressesStart;
 extern uint32_t CrystalStarPointerAddress;
 extern bool RandomizeGivenItem;
@@ -40,8 +42,8 @@ extern "C" {
   void BranchBackWriteEnemyHeldItems();
   void StartWriteEnemyHeldItemDrop();
   void BranchBackWriteEnemyHeldItemDrop();
-  void StartWriteEnemyHeldItemArrayInUseFlag();
-  void BranchBackWriteEnemyHeldItemArrayInUseFlag();
+  void StartWriteRunAwayFlag();
+  void BranchBackWriteRunAwayFlag();
   void StartRandomizeStandardShops();
   void BranchBackRandomizeStandardShops();
   void StartAudienceItem();
@@ -242,18 +244,103 @@ void *Mod::getRandomItem(const char *itemName, uint32_t itemId, uint32_t itemMod
   return mPFN_itemEntry_trampoline(const_cast<char *>(itemName), itemId, itemMode, wasCollectedExpr, reinterpret_cast<uint32_t *>(itemPickupScript), itemCoordinateX, itemCoordinateY, itemCoordinateZ);
 }
 
-void Mod::clearEnemyHeldItemArray()
+void Mod::manageEnemyHeldItemArray()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
   int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
   
-  // Only clear array if not in use, and if not in a battle
-  if (EnemyHeldItemArrayInUse || (NextSeq == Battle))
+  if (NextSeq == Battle)
   {
-    return;
+    // Increment EnemyHeldItemArrayCounter upon entering a battle
+    if (!EnemyHeldItemArrayInUse)
+    {
+      EnemyHeldItemArrayInUse = true;
+      EnemyHeldItemArrayCounter++;
+    }
+  }
+  else
+  {
+    EnemyHeldItemArrayInUse = false;
+    
+    if (RanAwayFromBattle)
+    {
+      RanAwayFromBattle = false;
+      
+      // Clear current part of array upon running from a battle
+      EnemyHeldItemArrayCounter--;
+      ttyd::__mem::memset(&EnemyHeldItemArray[EnemyHeldItemArrayCounter][0], 0, sizeof(uint16_t) * 8);
+    }
+  }
+}
+
+extern "C" {
+uint32_t assignEnemyHeldItem(void *OriginalEnemyHeldItemArray, uint32_t ArrayIndex)
+{
+  uint32_t NewItem;
+  bool GetNewItem = true;
+  
+  while (GetNewItem)
+  {
+    NewItem = randomizeItem();
+    
+    // Make sure the item isn't an important item
+    if (NewItem < GoldBar)
+    {
+      // Get a new item
+      continue;
+    }
+    else
+    {
+      GetNewItem = false;
+    }
   }
   
-  ttyd::__mem::memset(EnemyHeldItemArray, 0, sizeof(EnemyHeldItemArray));
+  // Get current slot in the array to use
+  uint32_t NewArrayIndex = (ArrayIndex - 0x1C) / 0x4;
+  
+  // Store NewItem in new array
+  EnemyHeldItemArray[EnemyHeldItemArrayCounter - 1][NewArrayIndex] = NewItem;
+  
+  // Store NewItem in the original array
+  *reinterpret_cast<uint32_t *>(reinterpret_cast<uint32_t>(OriginalEnemyHeldItemArray) + ArrayIndex) = NewItem;
+  
+  return NewItem;
+}
+}
+
+extern "C" {
+uint32_t getEnemyItemDrop()
+{
+  // Decrement EnemyHeldItemArrayCounter
+  EnemyHeldItemArrayCounter--;
+  
+  uint32_t ItemsInArray = 0;
+  
+  // Get total number of current held items
+  for (int i = 0; i < 8; i++)
+  {
+    uint16_t tempitem = EnemyHeldItemArray[EnemyHeldItemArrayCounter][i];
+    if (tempitem != 0)
+    {
+      ItemsInArray++;
+    }
+    else
+    {
+      break;
+    }
+  }
+  
+  // Pick a random item to drop from the array
+  uint32_t DropItem = EnemyHeldItemArray[EnemyHeldItemArrayCounter][ttyd::system::irand(ItemsInArray)];
+  
+  // Clear current part of array
+  ttyd::__mem::memset(&EnemyHeldItemArray[EnemyHeldItemArrayCounter][0], 0, sizeof(uint16_t) * 8);
+  
+  // Prevent dropped item from being randomized
+  EnemyHeldItemArrayInUse = true; // This bool will be used before it is reset by manageEnemyHeldItemArray
+  
+  return DropItem;
+}
 }
 
 void Mod::randomizeShopRewardsSetDoorFlag()
@@ -722,8 +809,8 @@ void Mod::writeItemRandoAssemblyPatches()
   patch::writeBranch(reinterpret_cast<void *>(BranchBackWriteEnemyHeldItemDrop), reinterpret_cast<void *>(EnemyHeldItemDrop + 0x4));
   
   // Disable EnemyHeldItemArrayInUse
-  patch::writeBranch(reinterpret_cast<void *>(DisableEnemyHeldItemArrayInUseFlag), reinterpret_cast<void *>(StartWriteEnemyHeldItemArrayInUseFlag));
-  patch::writeBranch(reinterpret_cast<void *>(BranchBackWriteEnemyHeldItemArrayInUseFlag), reinterpret_cast<void *>(DisableEnemyHeldItemArrayInUseFlag + 0x4));
+  patch::writeBranch(reinterpret_cast<void *>(DisableEnemyHeldItemArrayInUseFlag), reinterpret_cast<void *>(StartWriteRunAwayFlag));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackWriteRunAwayFlag), reinterpret_cast<void *>(DisableEnemyHeldItemArrayInUseFlag + 0x4));
   
   // Randomize standard shop items
   patch::writeBranch(reinterpret_cast<void *>(RandomizeStandardShops), reinterpret_cast<void *>(StartRandomizeStandardShops));
