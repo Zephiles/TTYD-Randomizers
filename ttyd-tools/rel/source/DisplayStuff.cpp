@@ -42,23 +42,26 @@ void Mod::LZRandoStuff()
   int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
   int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
   
-  if ((NextSeq >= Game) && (NextSeq <= MapChange))
+  // Only display while a file is loaded, and while not in battles
+  if ((NextSeq < Game) || (NextSeq > MapChange))
   {
-    uint32_t color = 0xFFFFFFFF;
-    int32_t PosX = -232;
-    int32_t PosY = -93;
-    
-    sprintf(mDisplayBuffer,
-        "Seq: %lu\r\nLZ: %s\r\nMap: %s",
-        ttyd::swdrv::swByteGet(0),
-        NextBero,
-        NextMap);
-      
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawMessage(PosX, PosY, mDisplayBuffer);
+    return;
   }
+  
+  uint32_t color = 0xFFFFFFFF;
+  int32_t PosX = -232;
+  int32_t PosY = -93;
+  
+  sprintf(mDisplayBuffer,
+    "Seq: %lu\r\nLZ: %s\r\nMap: %s",
+    ttyd::swdrv::swByteGet(0),
+    NextBero,
+    NextMap);
+    
+  ttyd::fontmgr::FontDrawStart();
+  ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+  ttyd::fontmgr::FontDrawEdge();
+  ttyd::fontmgr::FontDrawMessage(PosX, PosY, mDisplayBuffer);
 }
 
 void Mod::LZRandoChallengeStuff()
@@ -124,13 +127,13 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Check for credits warps
-    int32_t CreditsCheck = ttyd::string::strcmp(NextMap, "end_00");
-    if (!InCredits && (CreditsCheck == 0))
+    bool CreditsCheck = ttyd::string::strcmp(NextMap, "end_00") == 0;
+    if (!InCredits && CreditsCheck)
     {
       InCredits = true;
       CreditsCount++;
     }
-    else if (CreditsCheck != 0)
+    else if (!CreditsCheck)
     {
       InCredits = false;
     }
@@ -140,9 +143,9 @@ void Mod::LZRandoChallengeStuff()
     
     // Check for bosses
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-    uint32_t PitFlagsAddress = GSWAddresses + 0x3F0;
+    bool BonetailCheck = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x3F0) & (1 << 29); // Check GSWF(5085) - Check the 29 bit
     
-    if (((*reinterpret_cast<uint32_t *>(PitFlagsAddress)) & (1 << 29)) && !BossDefeated[0]) // Check GSWF(5085) - Check the 29 bit
+    if (BonetailCheck && !BossDefeated[0])
     {
       // Bonetail has been defeated
       BossDefeated[0] = true;
@@ -336,43 +339,47 @@ void Mod::changeGameModes()
   int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
   uint32_t seqMainCheck = *reinterpret_cast<uint32_t *>(seqMainAddress + 0x4);
   
-  // Only run on the file select screen whule the curtain is up
-  if ((NextSeq == Load) && (seqMainCheck == 2))
+  bool Comparisons = (NextSeq == Load) && (seqMainCheck == 2);
+  
+  // Only run on the file select screen while the curtain is up
+  if (!Comparisons)
   {
-    uint32_t ButtonInput = ttyd::system::keyGetButton(0);
-    uint16_t ItemRandoButtonCombo = PAD_L | PAD_Y;
-    uint16_t LZRandoButtonCombo = PAD_L | PAD_X;
-    uint16_t LZRandoChallengeButtonCombo = PAD_L | PAD_Z;
-    
-    if ((ButtonInput & ItemRandoButtonCombo) == ItemRandoButtonCombo)
+    return;
+  }
+  
+  uint32_t ButtonInput = ttyd::system::keyGetButton(0);
+  uint16_t ItemRandoButtonCombo = PAD_L | PAD_Y;
+  uint16_t LZRandoButtonCombo = PAD_L | PAD_X;
+  uint16_t LZRandoChallengeButtonCombo = PAD_L | PAD_Z;
+  
+  if ((ButtonInput & ItemRandoButtonCombo) == ItemRandoButtonCombo)
+  {
+    if (!DenyInput)
     {
-      if (!DenyInput)
-      {
-        ItemRandoV2 = !ItemRandoV2;
-      }
-      DenyInput = true;
+      ItemRandoV2 = !ItemRandoV2;
     }
-    else if ((ButtonInput & LZRandoButtonCombo) == LZRandoButtonCombo)
+    DenyInput = true;
+  }
+  else if ((ButtonInput & LZRandoButtonCombo) == LZRandoButtonCombo)
+  {
+    if (!DenyInput)
     {
-      if (!DenyInput)
-      {
-        LZRando = !LZRando;
-      }
-      DenyInput = true;
+      LZRando = !LZRando;
     }
-    else if ((ButtonInput & LZRandoChallengeButtonCombo) == LZRandoChallengeButtonCombo)
+    DenyInput = true;
+  }
+  else if ((ButtonInput & LZRandoChallengeButtonCombo) == LZRandoChallengeButtonCombo)
+  {
+    if (!DenyInput)
     {
-      if (!DenyInput)
-      {
-        LZRandoChallenge = !LZRandoChallenge;
-      }
-      DenyInput = true;
+      LZRandoChallenge = !LZRandoChallenge;
     }
-    else
-    {
-      // Reset flag if no button combo is pressed/held
-      DenyInput = false;
-    }
+    DenyInput = true;
+  }
+  else
+  {
+    // Reset flag if no button combo is pressed/held
+    DenyInput = false;
   }
 }
 
@@ -382,32 +389,34 @@ void Mod::titleScreenStuff()
   int32_t Title = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kTitle);
   
   // Only run on the title screen
-  if (NextSeq == Title)
+  if (NextSeq != Title)
   {
-    uint32_t color = 0xFFFFFFFF;
-    int32_t PosX = -235;
-    int32_t PosY = -25;
-    float Scale = 0.9;
-    
-    #ifdef TTYD_JP
-      PosX += 10;
-      PosY += 30;
-    #endif
-    
-    for (int i = 0; i < 3; i++)
-    {
-      sprintf(mDisplayBuffer,
+    return;
+  }
+  
+  uint32_t color = 0xFFFFFFFF;
+  int32_t PosX = -235;
+  int32_t PosY = -25;
+  float Scale = 0.9;
+  
+  #ifdef TTYD_JP
+    PosX += 10;
+    PosY += 30;
+  #endif
+  
+  for (int i = 0; i < 3; i++)
+  {
+    sprintf(mDisplayBuffer,
       "%s",
       TitleScreenStrings[i]);
-      
-      ttyd::fontmgr::FontDrawStart();
-      ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-      ttyd::fontmgr::FontDrawEdge();
-      ttyd::fontmgr::FontDrawScale(Scale);
-      ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-      
-      PosY -= 20;
-    }
+    
+    ttyd::fontmgr::FontDrawStart();
+    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+    ttyd::fontmgr::FontDrawEdge();
+    ttyd::fontmgr::FontDrawScale(Scale);
+    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
+    
+    PosY -= 20;
   }
 }
 
@@ -417,90 +426,94 @@ void Mod::gameModes()
   int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
   uint32_t seqMainCheck = *reinterpret_cast<uint32_t *>(seqMainAddress + 0x4);
   
-  // Only run on the file select screen whule the curtain is up
-  if ((NextSeq == Load) && (seqMainCheck == 2))
+  bool Comparisons = (NextSeq == Load) && (seqMainCheck == 2);
+  
+  // Only run on the file select screen while the curtain is up
+  if (!Comparisons)
   {
-    uint32_t color = 0xFFFFFFFF;
-    int32_t PosX = -255;
-    int32_t PosY = 40;
-    float Scale = 0.75;
-    
-    for (int i = 0; i < 4; i++)
-    {
-      sprintf(mDisplayBuffer,
+    return;
+  }
+  
+  uint32_t color = 0xFFFFFFFF;
+  int32_t PosX = -255;
+  int32_t PosY = 40;
+  float Scale = 0.75;
+  
+  for (int i = 0; i < 4; i++)
+  {
+    sprintf(mDisplayBuffer,
       "%s",
       ToggleModeStrings[i]);
-      
-      ttyd::fontmgr::FontDrawStart();
-      ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-      ttyd::fontmgr::FontDrawEdge();
-      ttyd::fontmgr::FontDrawScale(Scale);
-      ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-      
-      PosY -= 20;
+    
+    ttyd::fontmgr::FontDrawStart();
+    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+    ttyd::fontmgr::FontDrawEdge();
+    ttyd::fontmgr::FontDrawScale(Scale);
+    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
+    
+    PosY -= 20;
+  }
+  
+  // Set LZRandoText to the appropriate value
+  if (LZRando)
+  {
+    ttyd::string::strcpy(LZRandoText, "On");
+  }
+  else
+  {
+    ttyd::string::strcpy(LZRandoText, "Off");
+    
+    // If the Loading Zone Randomizer is off, then turn the 1 Hour Challenge off
+    LZRandoChallenge = false;
+  }
+  
+  // Set LZRandoChallengeText to the appropriate value
+  if (LZRandoChallenge)
+  {
+    ttyd::string::strcpy(LZRandoChallengeText, "On");
+  }
+  else
+  {
+    ttyd::string::strcpy(LZRandoChallengeText, "Off");
+  }
+  
+  // Move the text down
+  PosY -= 50;
+  
+  for (int i = 0; i < 3; i++)
+  {
+    switch (i)
+    {
+      case 0:
+        // Display Item Randomizer mode
+        sprintf(mDisplayBuffer,
+          "%s%ld",
+          CurrentModeStrings[i],
+          static_cast<uint32_t>(ItemRandoV2) + 1);
+        break;
+      case 1:
+        // Display Loading Zone Randomizer Beta on or off
+        sprintf(mDisplayBuffer,
+          "%s%s",
+          CurrentModeStrings[i],
+          LZRandoText);
+        break;
+      case 2:
+        // Display Loading Zone Randomizer 1 Hour Challenge on or off
+        sprintf(mDisplayBuffer,
+          "%s%s",
+          CurrentModeStrings[i],
+          LZRandoChallengeText);
+        break;
     }
     
-    // Set LZRandoText to the appropriate value
-    if (LZRando)
-    {
-      ttyd::string::strcpy(LZRandoText, "On");
-    }
-    else
-    {
-      ttyd::string::strcpy(LZRandoText, "Off");
-      
-      // If the Loading Zone Randomizer is off, then turn the 1 Hour Challenge off
-      LZRandoChallenge = false;
-    }
+    ttyd::fontmgr::FontDrawStart();
+    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+    ttyd::fontmgr::FontDrawEdge();
+    ttyd::fontmgr::FontDrawScale(Scale);
+    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
     
-    // Set LZRandoChallengeText to the appropriate value
-    if (LZRandoChallenge)
-    {
-      ttyd::string::strcpy(LZRandoChallengeText, "On");
-    }
-    else
-    {
-      ttyd::string::strcpy(LZRandoChallengeText, "Off");
-    }
-    
-    // Move the text down
-    PosY -= 50;
-    
-    for (int i = 0; i < 3; i++)
-    {
-      switch (i)
-      {
-        case 0:
-          // Display Item Randomizer mode
-          sprintf(mDisplayBuffer,
-            "%s%ld",
-            CurrentModeStrings[i],
-            (static_cast<uint32_t>(ItemRandoV2)) + 1);
-          break;
-        case 1:
-          // Display Loading Zone Randomizer Beta on or off
-          sprintf(mDisplayBuffer,
-            "%s%s",
-            CurrentModeStrings[i],
-            LZRandoText);
-          break;
-        case 2:
-          // Display Loading Zone Randomizer 1 Hour Challenge on or off
-          sprintf(mDisplayBuffer,
-            "%s%s",
-            CurrentModeStrings[i],
-            LZRandoChallengeText);
-          break;
-      }
-      
-      ttyd::fontmgr::FontDrawStart();
-      ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-      ttyd::fontmgr::FontDrawEdge();
-      ttyd::fontmgr::FontDrawScale(Scale);
-      ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-      
-      PosY -= 20;
-    }
+    PosY -= 20;
   }
 }
 

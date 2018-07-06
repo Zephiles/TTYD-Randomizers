@@ -57,9 +57,9 @@ extern "C" {
 namespace mod {
 
 extern "C" {
-uint16_t randomizeItem()
+uint32_t randomizeItem()
 {
-  uint16_t NewItem;
+  uint32_t NewItem;
   bool ConfirmNewItem = false;
   
   while (!ConfirmNewItem)
@@ -126,7 +126,7 @@ uint16_t randomizeItem()
 }
 }
 
-uint16_t randomizeItemWithChecks(uint16_t currentItemId)
+uint32_t randomizeItemWithChecks(uint32_t currentItemId)
 {
   // Check if the current item is a Shine Sprite, as it will appear twice in the field, but the first one shouldn't be randomized
   if (currentItemId == ShineSprite)
@@ -169,7 +169,7 @@ uint16_t randomizeItemWithChecks(uint16_t currentItemId)
     // Set necessary pointer for items to properly act like crystal stars
     CrystalStarIsInField = true;
     
-    // Check if current item is the Emerald Star, and player is currently in Magnus 1.0's room
+    // Check if current item is the Emerald Star, and if the player is currently in Magnus 1.0's room
     if ((currentItemId == EmeraldStar) && (ttyd::string::strcmp(NextMap, "mri_01") == 0))
     {
       if (!EmeraldStarAlreadyChanged)
@@ -247,11 +247,13 @@ void Mod::clearEnemyHeldItemArray()
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
   int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
   
-  // Clear array if not in use
-  if (!EnemyHeldItemArrayInUse && (NextSeq != Battle))
+  // Only clear array if not in use, and if not in a battle
+  if (EnemyHeldItemArrayInUse || (NextSeq == Battle))
   {
-    ttyd::__mem::memset(EnemyHeldItemArray, 0, sizeof(EnemyHeldItemArray));
+    return;
   }
+  
+  ttyd::__mem::memset(EnemyHeldItemArray, 0, sizeof(EnemyHeldItemArray));
 }
 
 void Mod::randomizeShopRewardsSetDoorFlag()
@@ -260,188 +262,196 @@ void Mod::randomizeShopRewardsSetDoorFlag()
   int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
   
   // Only set on map change
-  if (NextSeq == MapChange)
+  if (NextSeq != MapChange)
   {
-    // Set GSWF(1230), which is the flag that opens the shop door leading to Don Pianta
-    uint32_t GSWFAddress = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
-    *reinterpret_cast<uint32_t *>(GSWFAddress + 0x210) |= (1 << 14); // Turn on the 14 bit
-    
-    // Randomize shop rewards (leave the number of purchases needed for them alone for now)
-    // Set up array with new items to use (10 items in the array)
-    uint16_t NewItem[10] = { 0 };
-    
-    for (int i = 0; i < 10; i++)
-    {
-      bool GetNewItem = true;
-      while (GetNewItem)
-      {
-        NewItem[i] = randomizeItem();
-        if ((NewItem[i] <= StarPiece) || (NewItem[i] == DebugBadge))
-        {
-          // Get a new item if these occur
-          continue;
-        }
-        
-        // Make sure NewItem isn't already in the array
-        bool FoundItem = false;
-        for (int x = 0; x < 10; x++)
-        {
-          // Prevent index comparing against itself
-          if (i == x)
-          {
-            x++;
-          }
-          
-          if (NewItem[i] == NewItem[x])
-          {
-            FoundItem = true;
-            break;
-          }
-        }
-        
-        if (!FoundItem)
-        {
-          GetNewItem = false;
-        }
-      }
-    }
-    
-    #ifdef TTYD_US
-      uint32_t ShopRewardsArrayStart = 0x8033C950;
-    #elif defined TTYD_JP
-      uint32_t ShopRewardsArrayStart = 0x8033A610;
-    #elif defined TTYD_EU
-      uint32_t ShopRewardsArrayStart = 0x80348708;
-    #endif
-    
-    // Replace items in the array with the items in the new array (10 items in the array)
-    for (int i = 0; i < 10; i++)
-    {
-      *reinterpret_cast<uint32_t *>(ShopRewardsArrayStart + 0x4) = NewItem[i];
-      
-      // Get next item in array
-      ShopRewardsArrayStart += 0x8;
-    }
+    return;
   }
-}
-
-extern "C" {
-void randomizeStandardShopItems(uint16_t CurrentShopItemIndex, void *ShopItemsArray, uint16_t OffsetToCurrentItem)
-{
-  uint32_t ShopArray = reinterpret_cast<uint32_t>(ShopItemsArray);
-  uint16_t CurrentItem = *reinterpret_cast<uint32_t *>(ShopArray + OffsetToCurrentItem);
   
-  // Don't randomize any important items
-  if (CurrentItem >= GoldBar)
+  // Set GSWF(1230), which is the flag that opens the shop door leading to Don Pianta
+  uint32_t GSWFAddress = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
+  *reinterpret_cast<uint32_t *>(GSWFAddress + 0x210) |= (1 << 14); // Turn on the 14 bit
+  
+  // Randomize shop rewards (leave the number of purchases needed for them alone for now)
+  // Set up array with new items to use (10 items in the array)
+  uint16_t NewItem[10] = { 0 };
+  
+  for (int i = 0; i < 10; i++)
   {
     bool GetNewItem = true;
     while (GetNewItem)
     {
-      CurrentItem = randomizeItem();
-      if ((CurrentItem <= StarPiece) || (CurrentItem == DebugBadge))
+      NewItem[i] = randomizeItem();
+      if ((NewItem[i] <= StarPiece) || (NewItem[i] == DebugBadge))
       {
         // Get a new item if these occur
         continue;
       }
       
-      // Check for duplicates
-      if (CurrentShopItemIndex > 0)
+      // Make sure NewItem isn't already in the array
+      bool FoundItem = false;
+      for (int x = 0; x < 10; x++)
       {
-        bool FoundItem = false;
-        for (int i = 0; i < CurrentShopItemIndex; i++)
+        // Prevent index comparing against itself
+        if (i == x)
         {
-          uint32_t tempItem = *reinterpret_cast<uint32_t *>(ShopArray + (i * 0x8));
-          if (tempItem == CurrentItem)
-          {
-            FoundItem = true;
-            break;
-          }
+          x++;
         }
         
-        if (FoundItem)
+        if (NewItem[i] == NewItem[x])
         {
-          // Found duplicate item, so get a new one
-          continue;
+          FoundItem = true;
+          break;
         }
-        else
+      }
+      
+      if (!FoundItem)
+      {
+        GetNewItem = false;
+      }
+    }
+  }
+  
+  #ifdef TTYD_US
+    uint32_t ShopRewardsArrayStart = 0x8033C950;
+  #elif defined TTYD_JP
+    uint32_t ShopRewardsArrayStart = 0x8033A610;
+  #elif defined TTYD_EU
+    uint32_t ShopRewardsArrayStart = 0x80348708;
+  #endif
+  
+  // Replace items in the array with the items in the new array (10 items in the array)
+  for (int i = 0; i < 10; i++)
+  {
+    *reinterpret_cast<uint32_t *>(ShopRewardsArrayStart + 0x4) = NewItem[i];
+    
+    // Get next item in array
+    ShopRewardsArrayStart += 0x8;
+  }
+}
+
+extern "C" {
+void randomizeStandardShopItems(int32_t CurrentShopItemIndex, void *ShopItemsArray, uint32_t OffsetToCurrentItem)
+{
+  uint32_t ShopArray = reinterpret_cast<uint32_t>(ShopItemsArray);
+  uint32_t CurrentItem = *reinterpret_cast<uint32_t *>(ShopArray + OffsetToCurrentItem);
+  
+  // Don't randomize any important items
+  if (CurrentItem < GoldBar)
+  {
+    return;
+  }
+  
+  bool GetNewItem = true;
+  while (GetNewItem)
+  {
+    CurrentItem = randomizeItem();
+    if ((CurrentItem <= StarPiece) || (CurrentItem == DebugBadge))
+    {
+      // Get a new item if these occur
+      continue;
+    }
+    
+    // Check for duplicates
+    if (CurrentShopItemIndex > 0)
+    {
+      bool FoundItem = false;
+      for (int i = 0; i < CurrentShopItemIndex; i++)
+      {
+        uint32_t tempItem = *reinterpret_cast<uint32_t *>(ShopArray + (i * 0x8));
+        if (tempItem == CurrentItem)
         {
-          GetNewItem = false;
+          FoundItem = true;
+          break;
         }
+      }
+      
+      if (FoundItem)
+      {
+        // Found duplicate item, so get a new one
+        continue;
       }
       else
       {
         GetNewItem = false;
       }
-      
-      // Load Item price
-      #ifdef TTYD_US
-        uint32_t itemDataTable = 0x803108A8;
-      #elif defined TTYD_JP
-        uint32_t itemDataTable = 0x8030EE58;
-      #elif defined TTYD_EU
-        uint32_t itemDataTable = 0x8031C638;
-      #endif
-      
-      uint32_t CurrentItemAddress = itemDataTable + (CurrentItem * 0x28);
-      uint16_t ItemBuyPrice = *reinterpret_cast<uint16_t *>(CurrentItemAddress + 0x14);
-      uint16_t ItemSellPrice = *reinterpret_cast<uint16_t *>(CurrentItemAddress + 0x1A);
-      uint16_t ItemNewBuyPrice = ItemSellPrice * 2;
-      
-      // Check if normal price is higher than new price
-      if (ItemBuyPrice > ItemNewBuyPrice)
-      {
-        ItemNewBuyPrice = ItemBuyPrice;
-      }
-      
-      // Make sure the new buy price does not exceed 999 coins
-      if (ItemNewBuyPrice > 999)
-      {
-        ItemNewBuyPrice = 999;
-      }
-      
-      *reinterpret_cast<uint32_t *>(ShopArray + OffsetToCurrentItem) = CurrentItem;
-      *reinterpret_cast<uint32_t *>(ShopArray + OffsetToCurrentItem + 0x4) = ItemNewBuyPrice;
     }
+    else
+    {
+      GetNewItem = false;
+    }
+    
+    // Load Item price
+    #ifdef TTYD_US
+      uint32_t itemDataTable = 0x803108A8;
+    #elif defined TTYD_JP
+      uint32_t itemDataTable = 0x8030EE58;
+    #elif defined TTYD_EU
+      uint32_t itemDataTable = 0x8031C638;
+    #endif
+    
+    uint32_t CurrentItemAddress = itemDataTable + (CurrentItem * 0x28);
+    uint16_t ItemBuyPrice = *reinterpret_cast<uint16_t *>(CurrentItemAddress + 0x14);
+    uint16_t ItemSellPrice = *reinterpret_cast<uint16_t *>(CurrentItemAddress + 0x1A);
+    uint32_t ItemNewBuyPrice = ItemSellPrice * 2;
+    
+    // Check if normal price is higher than new price
+    if (ItemBuyPrice > ItemNewBuyPrice)
+    {
+      ItemNewBuyPrice = ItemBuyPrice;
+    }
+    
+    // Make sure the new buy price does not exceed 999 coins
+    if (ItemNewBuyPrice > 999)
+    {
+      ItemNewBuyPrice = 999;
+    }
+    
+    *reinterpret_cast<uint32_t *>(ShopArray + OffsetToCurrentItem) = CurrentItem;
+    *reinterpret_cast<uint32_t *>(ShopArray + OffsetToCurrentItem + 0x4) = ItemNewBuyPrice;
   }
 }
 }
 
 extern "C" {
-void adjustSPForNewCrystalStar(uint16_t CurrentItem)
+void adjustSPForNewCrystalStar(uint32_t CurrentItem)
 {
+  bool Comparisons = (CurrentItem == MagicalMapBigger) || ((CurrentItem >= DiamondStar) && (CurrentItem <= CrystalStar));
+  
   // Only run if the current item is the magical map or a crystal star
-  if ((CurrentItem == MagicalMapBigger) || ((CurrentItem >= DiamondStar) && (CurrentItem <= CrystalStar)))
+  if (!Comparisons)
   {
-    uint32_t PouchPointer = reinterpret_cast<uint32_t>(ttyd::mario_pouch::pouchGetPtr());
-    uint32_t SPBarAddress = PouchPointer + 0x8C;
-    uint16_t Multiplier = 0;
-    
-    if (CurrentItem != MagicalMapBigger)
-    {
-      // Item is a crystal star
-      Multiplier = CurrentItem - DiamondStar + 1;
-      *reinterpret_cast<uint16_t *>(SPBarAddress) |= (1 << Multiplier);
-    }
-    else
-    {
-      // Item is the Magical Map
-      *reinterpret_cast<uint16_t *>(SPBarAddress) |= (1 << 0); // Turn on the 0 bit
-    }
-    
-    // Get new Max SP
-    uint16_t NewMaxSP = (Multiplier + 1) * 100;
-    uint16_t CurrentMaxSP = *reinterpret_cast<uint16_t *>(PouchPointer + 0x7C);
-    
-    // Check if new Max SP is higher than current Max SP
-    if (NewMaxSP > CurrentMaxSP)
-    {
-      *reinterpret_cast<uint16_t *>(PouchPointer + 0x7C) = NewMaxSP;
-      *reinterpret_cast<uint16_t *>(PouchPointer + 0x7A) = NewMaxSP; // Current SP
-    }
-    else
-    {
-      *reinterpret_cast<uint16_t *>(PouchPointer + 0x7A) = CurrentMaxSP; // Current SP
-    }
+    return;
+  }
+  
+  uint32_t PouchPointer = reinterpret_cast<uint32_t>(ttyd::mario_pouch::pouchGetPtr());
+  uint32_t SPBarAddress = PouchPointer + 0x8C;
+  uint16_t Multiplier = 0;
+  
+  if (CurrentItem != MagicalMapBigger)
+  {
+    // Item is a crystal star
+    Multiplier = CurrentItem - DiamondStar + 1;
+    *reinterpret_cast<uint16_t *>(SPBarAddress) |= (1 << Multiplier);
+  }
+  else
+  {
+    // Item is the Magical Map
+    *reinterpret_cast<uint16_t *>(SPBarAddress) |= (1 << 0); // Turn on the 0 bit
+  }
+  
+  // Get new Max SP
+  uint16_t NewMaxSP = (Multiplier + 1) * 100;
+  uint16_t CurrentMaxSP = *reinterpret_cast<uint16_t *>(PouchPointer + 0x7C);
+  
+  // Check if new Max SP is higher than current Max SP
+  if (NewMaxSP > CurrentMaxSP)
+  {
+    *reinterpret_cast<uint16_t *>(PouchPointer + 0x7C) = NewMaxSP;
+    *reinterpret_cast<uint16_t *>(PouchPointer + 0x7A) = NewMaxSP; // Current SP
+  }
+  else
+  {
+    *reinterpret_cast<uint16_t *>(PouchPointer + 0x7A) = CurrentMaxSP; // Current SP
   }
 }
 }
@@ -504,7 +514,7 @@ uint32_t newItemToInventory(uint32_t currentItem)
     RandomizeGivenItem = true;
     
     // Randomize the hotdog from the Glitzville hotdog seller
-    uint16_t NewItem = 0;
+    uint32_t NewItem = 0;
     while (NewItem < GoldBar)
     {
       // Make sure the new item is a standard item/badge
