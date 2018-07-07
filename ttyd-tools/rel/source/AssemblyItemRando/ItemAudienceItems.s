@@ -8,13 +8,7 @@ mr %r31,%r3
 mr %r30,%r4
 mr %r29,%r6
 
-GetRandomItem:
-bl randomizeItem
-cmpwi %r3,126 # GoldBar
-blt- GetRandomItem
-cmpwi %r3,331 # DebugBadge
-beq- GetRandomItem
-
+bl getAudienceItem
 mr %r0,%r3
 
 mr %r3,%r31

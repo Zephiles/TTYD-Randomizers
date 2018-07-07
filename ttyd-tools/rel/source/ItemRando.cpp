@@ -276,23 +276,12 @@ void Mod::manageEnemyHeldItemArray()
 extern "C" {
 uint32_t assignEnemyHeldItem(void *OriginalEnemyHeldItemArray, uint32_t ArrayIndex)
 {
-  uint32_t NewItem;
-  bool GetNewItem = true;
+  uint32_t NewItem = 0;
   
-  while (GetNewItem)
+  // Make sure the item isn't an important item
+  while (NewItem < GoldBar)
   {
     NewItem = randomizeItem();
-    
-    // Make sure the item isn't an important item
-    if (NewItem < GoldBar)
-    {
-      // Get a new item
-      continue;
-    }
-    else
-    {
-      GetNewItem = false;
-    }
   }
   
   // Get current slot in the array to use
@@ -368,7 +357,7 @@ void Mod::randomizeShopRewardsSetDoorFlag()
     while (GetNewItem)
     {
       NewItem[i] = randomizeItem();
-      if ((NewItem[i] <= StarPiece) || (NewItem[i] == DebugBadge))
+      if ((NewItem[i] < GoldBar) || (NewItem[i] == DebugBadge))
       {
         // Get a new item if these occur
         continue;
@@ -432,7 +421,7 @@ void randomizeStandardShopItems(int32_t CurrentShopItemIndex, void *ShopItemsArr
   while (GetNewItem)
   {
     CurrentItem = randomizeItem();
-    if ((CurrentItem <= StarPiece) || (CurrentItem == DebugBadge))
+    if ((CurrentItem < GoldBar) || (CurrentItem == DebugBadge))
     {
       // Get a new item if these occur
       continue;
@@ -441,23 +430,18 @@ void randomizeStandardShopItems(int32_t CurrentShopItemIndex, void *ShopItemsArr
     // Check for duplicates
     if (CurrentShopItemIndex > 0)
     {
-      bool FoundItem = false;
+      bool FoundDuplicate = false;
       for (int i = 0; i < CurrentShopItemIndex; i++)
       {
         uint32_t tempItem = *reinterpret_cast<uint32_t *>(ShopArray + (i * 0x8));
         if (tempItem == CurrentItem)
         {
-          FoundItem = true;
+          FoundDuplicate = true;
           break;
         }
       }
       
-      if (FoundItem)
-      {
-        // Found duplicate item, so get a new one
-        continue;
-      }
-      else
+      if (!FoundDuplicate)
       {
         GetNewItem = false;
       }
@@ -466,36 +450,36 @@ void randomizeStandardShopItems(int32_t CurrentShopItemIndex, void *ShopItemsArr
     {
       GetNewItem = false;
     }
-    
-    // Load Item price
-    #ifdef TTYD_US
-      uint32_t itemDataTable = 0x803108A8;
-    #elif defined TTYD_JP
-      uint32_t itemDataTable = 0x8030EE58;
-    #elif defined TTYD_EU
-      uint32_t itemDataTable = 0x8031C638;
-    #endif
-    
-    uint32_t CurrentItemAddress = itemDataTable + (CurrentItem * 0x28);
-    uint16_t ItemBuyPrice = *reinterpret_cast<uint16_t *>(CurrentItemAddress + 0x14);
-    uint16_t ItemSellPrice = *reinterpret_cast<uint16_t *>(CurrentItemAddress + 0x1A);
-    uint32_t ItemNewBuyPrice = ItemSellPrice * 2;
-    
-    // Check if normal price is higher than new price
-    if (ItemBuyPrice > ItemNewBuyPrice)
-    {
-      ItemNewBuyPrice = ItemBuyPrice;
-    }
-    
-    // Make sure the new buy price does not exceed 999 coins
-    if (ItemNewBuyPrice > 999)
-    {
-      ItemNewBuyPrice = 999;
-    }
-    
-    *reinterpret_cast<uint32_t *>(ShopArray + OffsetToCurrentItem) = CurrentItem;
-    *reinterpret_cast<uint32_t *>(ShopArray + OffsetToCurrentItem + 0x4) = ItemNewBuyPrice;
   }
+  
+  // Load Item price
+  #ifdef TTYD_US
+    uint32_t itemDataTable = 0x803108A8;
+  #elif defined TTYD_JP
+    uint32_t itemDataTable = 0x8030EE58;
+  #elif defined TTYD_EU
+    uint32_t itemDataTable = 0x8031C638;
+  #endif
+  
+  uint32_t CurrentItemAddress = itemDataTable + (CurrentItem * 0x28);
+  uint16_t ItemBuyPrice = *reinterpret_cast<uint16_t *>(CurrentItemAddress + 0x14);
+  uint16_t ItemSellPrice = *reinterpret_cast<uint16_t *>(CurrentItemAddress + 0x1A);
+  uint32_t ItemNewBuyPrice = ItemSellPrice * 2;
+  
+  // Check if normal price is higher than new price
+  if (ItemBuyPrice > ItemNewBuyPrice)
+  {
+    ItemNewBuyPrice = ItemBuyPrice;
+  }
+  
+  // Make sure the new buy price does not exceed 999 coins
+  if (ItemNewBuyPrice > 999)
+  {
+    ItemNewBuyPrice = 999;
+  }
+  
+  *reinterpret_cast<uint32_t *>(ShopArray + OffsetToCurrentItem) = CurrentItem;
+  *reinterpret_cast<uint32_t *>(ShopArray + OffsetToCurrentItem + 0x4) = ItemNewBuyPrice;
 }
 }
 
@@ -630,6 +614,21 @@ uint32_t newItemsPrevent_swSet(uint32_t currentItem)
     // Return original value
     return currentItem;
   }
+}
+}
+
+extern "C" {
+uint32_t getAudienceItem()
+{
+  uint32_t NewItem = 0;
+  
+  // Make sure the new item is a standard item/badge
+  while ((NewItem < GoldBar) || (NewItem == DebugBadge))
+  {
+    NewItem = randomizeItem();
+  }
+  
+  return NewItem;
 }
 }
 
