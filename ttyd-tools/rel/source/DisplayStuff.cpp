@@ -3,26 +3,29 @@
 #include "buttons.h"
 
 #include <ttyd/seqdrv.h>
+#include <ttyd/string.h>
 #include <ttyd/swdrv.h>
 #include <ttyd/fontmgr.h>
 #include <ttyd/mario_pouch.h>
 #include <ttyd/party.h>
 #include <ttyd/mario_party.h>
-#include <ttyd/string.h>
-#include <ttyd/__mem.h>
 #include <ttyd/system.h>
+#include <ttyd/__mem.h>
 
 #include <cstdio>
 
-extern char *NextBero;
 extern char *NextMap;
+extern char *NextBero;
 extern uint32_t GSWAddressesStart;
 extern bool InCredits;
 extern uint16_t CreditsCount;
 extern bool BossDefeated[11];
 extern uint16_t BossCount;
+extern bool TimerDisabled;
 extern bool TimerActive;
 extern uint32_t TimerCount;
+extern bool DisplayTimer;
+extern const char *TimesUpStrings[2];
 extern uint32_t seqMainAddress;
 extern bool DenyInput;
 extern bool ItemRandoV2;
@@ -42,8 +45,12 @@ void Mod::LZRandoStuff()
   int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
   int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
   
+  bool dmo_comparison = ttyd::string::strcmp(NextMap,"dmo_00") == 0;
+  bool title_comparison = ttyd::string::strcmp(NextMap,"title") == 0;
+  
   // Only display while a file is loaded, and while not in battles
-  if ((NextSeq < Game) || (NextSeq > MapChange))
+  // Don't display while in the intro
+  if ((NextSeq < Game) || (NextSeq > MapChange) || dmo_comparison || title_comparison)
   {
     return;
   }
@@ -67,14 +74,21 @@ void Mod::LZRandoStuff()
 void Mod::LZRandoChallengeStuff()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Seq = ttyd::seqdrv::seqGetSeq();
+  int32_t Title = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kTitle);
   int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
   int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
   int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
+  int32_t GameOver = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGameOver);
   int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
   uint32_t color = 0xFFFFFFFF;
   
+  bool dmo_comparison = ttyd::string::strcmp(NextMap,"dmo_00") != 0;
+  bool title_comparison = ttyd::string::strcmp(NextMap,"title") != 0;
+  
   // Get and display Score
-  if ((NextSeq >= Game) && (NextSeq <= MapChange))
+  // Don't display while in the intro or on the title screen
+  if ((NextSeq >= Game) && (NextSeq <= MapChange) && dmo_comparison && title_comparison)
   {
     uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
     uint32_t PouchPointer = reinterpret_cast<uint32_t>(ttyd::mario_pouch::pouchGetPtr());
@@ -254,79 +268,134 @@ void Mod::LZRandoChallengeStuff()
     ttyd::fontmgr::FontDrawMessage(PosX, PosY, mDisplayBuffer);
   }
   
-  // Display timer
-  if (TimerActive || ((NextSeq >= Game) && (NextSeq <= Battle)))
+  // Don't display timer if disabled
+  if (!TimerDisabled)
   {
-    int32_t PosX = 85;
-    int32_t PosY = -153;
-    
-    #ifdef TTYD_JP
-      PosX += 15;
-    #endif
-    
-    uint32_t modframe = TimerCount % 60;
-    uint32_t second = (TimerCount / 60) % 60;
-    uint32_t minute = (TimerCount / (60 * 60)) % 60;
-    uint32_t hour = TimerCount / (60 * 60 * 60);
-    
-    sprintf(mDisplayBuffer,
-      "%.1ld:%.2ld:%.2ld.%.2ld",
-      hour,
-      minute,
-      second,
-      modframe);
-    
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawMessage(PosX, PosY, mDisplayBuffer);
-    
     // Activate timer
     if (!TimerActive)
     {
       TimerCount = 216000; // 1 hour
       
-      if (NextSeq == Game)
+      // Don't activate timer if in the intro or on the title screen
+      if (dmo_comparison && title_comparison)
       {
-        TimerActive = true;
+        if (NextSeq == MapChange)
+        {
+          // Display timer
+          DisplayTimer = true;
+        }
+        else if (NextSeq == Game)
+        {
+          // Activate timer
+          TimerActive = true;
+        }
       }
     }
-    else
+    
+    // Display timer
+    if (DisplayTimer && (NextSeq >= Title) && (NextSeq <= GameOver))
     {
-      if (TimerCount > 0)
+      bool Comparisons = (NextSeq == Title) && (TimerCount == 0);
+      
+      // Don't show the timer on the title screen while it is at 0
+      if (!Comparisons)
       {
-        // Run timer
-        TimerCount--;
-      }
-      else // TimerCount == 0
-      {
-        // Display text for time being up
-        PosX = -90;
-        PosY = 20;
-        float Scale = 1.5;
+        int32_t PosX = 75;
+        int32_t PosY = -153;
+        
+        #ifdef TTYD_JP
+          PosX += 25;
+        #endif
+        
+        uint32_t modframe = TimerCount % 60;
+        uint32_t second = (TimerCount / 60) % 60;
+        uint32_t minute = (TimerCount / (60 * 60)) % 60;
+        uint32_t hour = TimerCount / (60 * 60 * 60);
         
         sprintf(mDisplayBuffer,
-          "%s",
-          "Time's Up!");
+          "%.2ld:%.2ld:%.2ld.%.2ld",
+          hour,
+          minute,
+          second,
+          modframe);
         
         ttyd::fontmgr::FontDrawStart();
         ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
         ttyd::fontmgr::FontDrawEdge();
-        ttyd::fontmgr::FontDrawScale(Scale);
-        ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
+        ttyd::fontmgr::FontDrawMessage(PosX, PosY, mDisplayBuffer);
+      }
+      
+      if (TimerActive)
+      {
+        if (TimerCount > 0)
+        {
+          // Run timer
+          TimerCount--;
+        }
+        else if ((Seq >= Game) && (NextSeq != Battle))
+        {
+          // Don't display while on the title screen
+          // Don't display in battles, as tyring to warp as the curtain is coming up will crash the game
+          // Display text for time being up
+          int32_t PosX = -90;
+          int32_t PosY = 80;
+          float Scale = 1.5;
+          
+          sprintf(mDisplayBuffer,
+            "%s",
+            "Time's Up!");
+          
+          ttyd::fontmgr::FontDrawStart();
+          ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+          ttyd::fontmgr::FontDrawEdge();
+          ttyd::fontmgr::FontDrawScale(Scale);
+          ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
+          
+          // Display text for how the player wants to continue
+          PosX = -225;
+          PosY = 25;
+          Scale = 0.9;
+          
+          for (int i = 0; i < 2; i++)
+          {
+            sprintf(mDisplayBuffer,
+              "%s",
+              TimesUpStrings[i]);
+            
+            ttyd::fontmgr::FontDrawStart();
+            ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+            ttyd::fontmgr::FontDrawEdge();
+            ttyd::fontmgr::FontDrawScale(Scale);
+            ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
+            
+            PosY -= 20;
+          }
+          
+          // Get input for what to do next
+          uint32_t ButtonInput = ttyd::system::keyGetButton(0);
+          
+          if ((ButtonInput & PAD_Y) == PAD_Y)
+          {
+            // Continue playing without the timer
+            TimerDisabled = true;
+          }
+          else if ((ButtonInput & PAD_X) == PAD_X)
+          {
+            // Return to the title screen
+            TimerDisabled = true;
+            ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "title", nullptr);
+          }
+        }
       }
     }
-  }
-  
-  // Disable timer
-  if (TimerActive && (NextSeq == Load))
-  {
-    TimerActive = false;
   }
   
   // Reset values upon going to the file select screen
   if (NextSeq == Load)
   {
+    DisplayTimer = false;
+    TimerActive = false;
+    TimerDisabled = false;
     CreditsCount = 0;
     BossCount = 0;
     ttyd::__mem::memset(BossDefeated, false, sizeof(BossDefeated));
@@ -478,7 +547,7 @@ void Mod::gameModes()
   }
   
   // Move the text down
-  PosY -= 50;
+  PosY -= 40;
   
   for (int i = 0; i < 3; i++)
   {

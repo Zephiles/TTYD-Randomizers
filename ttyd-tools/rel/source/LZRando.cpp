@@ -9,29 +9,29 @@
 #include <ttyd/mario_party.h>
 #include <ttyd/mario_pouch.h>
 #include <ttyd/seqdrv.h>
+#include <ttyd/OSCache.h>
 #include <ttyd/mario.h>
 #include <ttyd/mariost.h>
 #include <ttyd/camdrv.h>
 #include <ttyd/pmario_sound.h>
 #include <ttyd/mario_cam.h>
-#include <ttyd/OSCache.h>
 
 #include <cstdio>
 
 extern bool LZRando;
 extern bool ReloadCurrentScreen;
-extern bool GameOverFlag;
 extern char *NextMap;
+extern char *NextBero;
+extern bool GameOverFlag;
 extern bool NewFile;
 extern uint32_t GSWAddressesStart;
 extern uint32_t PossibleMaps[];
 extern uint16_t MapArraySize;
 extern char *NextArea;
-extern char *NextBero;
-extern char *NewBero;
-extern bool ClearCacheNewFileStrings;
-extern char *NewMap;
 extern uint32_t seqMainAddress;
+extern bool ClearCacheNewFileStrings;
+extern char *NewBero;
+extern char *NewMap;
 extern bool ClearCacheFlag;
 
 extern "C" {
@@ -60,14 +60,19 @@ void getRandomWarp()
     return;
   }
   
+  // Don't run on the title screen
+  if (ttyd::string::strcmp(NextMap, "title") == 0)
+  {
+    return;
+  }
+  
   bool dmo_comparison = ttyd::string::strcmp(NextMap, "dmo_00") == 0;
-  bool title_comparison = ttyd::string::strcmp(NextMap, "title") == 0;
   bool tuzuki_comparison = ttyd::string::strcmp(NextBero, "tuzuki") == 0;
   
-  // Don't run if transitioning to the intro or the title screen, or if the current loading zone is tuzuki
+  // Don't run if transitioning to the intro
   // Don't run if the loading zone is currently tuzuki, as this is used for the Magnus 2.0 cutscenes
   // However, it should still run under these conditions if the Game Over flag is set
-  if (dmo_comparison || title_comparison || tuzuki_comparison)
+  if (dmo_comparison || tuzuki_comparison)
   {
     if (!GameOverFlag)
     {

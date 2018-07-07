@@ -6,8 +6,8 @@
 #include <ttyd/mario_pouch.h>
 #include <ttyd/string.h>
 #include <ttyd/swdrv.h>
-#include <ttyd/mariost.h>
 #include <ttyd/seqdrv.h>
+#include <ttyd/mariost.h>
 #include <ttyd/__mem.h>
 
 #include <cstdio>

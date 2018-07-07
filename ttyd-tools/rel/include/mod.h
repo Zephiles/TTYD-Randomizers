@@ -13,6 +13,7 @@ public:
 private:
   void updateEarly();
   void backtraceScreen();
+  void writeNextMap();
   
   // Display Stuff
   void LZRandoStuff();

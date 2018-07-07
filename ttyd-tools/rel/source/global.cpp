@@ -27,8 +27,10 @@ uint32_t GSWAddressesStart = r13 - 0x6F50;
 uint32_t CrystalStarPointerAddress = r13 - 0x7040;
 
 // Display Stuff
+bool TimerDisabled = false;
 bool TimerActive = false;
 uint32_t TimerCount = 0;
+bool DisplayTimer = false;
 bool DenyInput = false;
 
 // Item Rando
@@ -53,16 +55,14 @@ bool NewFile = false;
 bool ClearCacheNewFileStrings = false;
 char *NewBero = new char[32]; // 31 bytes for NextBero, 1 byte for NULL
 char *NewMap = new char[9]; // 8 bytes for NextMap, 1 byte for NULL
+bool ClearCacheFlag = false;
 char *LZRandoText = new char[4]; // 3 bytes for LZRandoText, 1 byte for NULL
-char *LZRandoChallengeText = new char[4]; // 3 bytes for LZRandoChallengeText, 1 byte for NULL
 
 // LZ Rando Challenge
 uint16_t CreditsCount = 0;
 bool InCredits = false;
 bool BossDefeated[11] = { false };
 uint16_t BossCount = 0;
-
-// Clear Cache
-bool ClearCacheFlag = false;
+char *LZRandoChallengeText = new char[4]; // 3 bytes for LZRandoChallengeText, 1 byte for NULL
 
 }
