@@ -683,6 +683,8 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars9 = 0x80170FE4;
     uint32_t DisplaySPBars10 = 0x80171004;
     uint32_t DisplaySPBars11 = 0x8013D5B8;
+    
+    uint32_t KoopaCurseAddress = 0x8036ACA0;
   #elif defined TTYD_JP
     uint32_t CrystalStarPointer = 0x800AC284;
     
@@ -732,6 +734,8 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars9 = 0x8016BD30;
     uint32_t DisplaySPBars10 = 0x8016BD50;
     uint32_t DisplaySPBars11 = 0x80137FEC;
+    
+    uint32_t KoopaCurseAddress = 0x80368318;
   #elif defined TTYD_EU
     uint32_t CrystalStarPointer = 0x800AF38C;
     
@@ -781,6 +785,8 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars9 = 0x80172A84;
     uint32_t DisplaySPBars10 = 0x80172AA4;
     uint32_t DisplaySPBars11 = 0x8013F0A0;
+    
+    uint32_t KoopaCurseAddress = 0x80376B68;
   #endif
   
   // Write Crystal Star pointer
@@ -860,6 +866,9 @@ void Mod::writeItemRandoAssemblyPatches()
   *reinterpret_cast<uint32_t *>(DisplaySPBars9) = 0x60000000; // nop
   *reinterpret_cast<uint32_t *>(DisplaySPBars10) = 0x60000000; // nop
   *reinterpret_cast<uint32_t *>(DisplaySPBars11) = 0x2C030000; // cmpwi r3,0
+  
+  // Make Koopa Curse target all enemies rather than just one
+  *reinterpret_cast<uint8_t *>(KoopaCurseAddress) = 0x2;
 }
 
 }
