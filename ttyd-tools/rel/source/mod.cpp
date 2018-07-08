@@ -74,7 +74,6 @@ void Mod::updateEarly()
       }
     }, this);
   }
-  Mod::changeGameModes();
   ttyd::dispdrv::dispEntry(ttyd::dispdrv::DisplayLayer::k2d, 0, [](ttyd::dispdrv::DisplayLayer layerId, void *user)
   {
     reinterpret_cast<Mod *>(user)->titleScreenStuff();
@@ -113,6 +112,7 @@ void Mod::backtraceScreen()
     uint32_t DebugModeInitializeAddress = 0x80009CF0;
   #endif
   
+  // Display the backtrace screen by default
   *reinterpret_cast<uint32_t *>(DebugModeInitializeAddress) = 0x3800FFFF; // li r0,-1
 }
 

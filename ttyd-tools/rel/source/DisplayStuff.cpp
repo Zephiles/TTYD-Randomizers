@@ -31,7 +31,7 @@ extern bool DenyInput;
 extern bool ItemRandoV2;
 extern bool LZRando;
 extern bool LZRandoChallenge;
-extern const char *TitleScreenStrings[3];
+extern const char *TitleScreenStrings[2];
 extern const char *ToggleModeStrings[4];
 extern char *LZRandoText;
 extern char *LZRandoChallengeText;
@@ -356,7 +356,8 @@ void Mod::LZRandoChallengeStuff()
           PosY = 25;
           Scale = 0.9;
           
-          for (int i = 0; i < 2; i++)
+          int32_t ArraySize = static_cast<int32_t>(sizeof(TimesUpStrings) / sizeof(TimesUpStrings[0]));
+          for (int i = 0; i < ArraySize; i++)
           {
             sprintf(mDisplayBuffer,
               "%s",
@@ -402,56 +403,6 @@ void Mod::LZRandoChallengeStuff()
   }
 }
 
-void Mod::changeGameModes()
-{
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
-  uint32_t seqMainCheck = *reinterpret_cast<uint32_t *>(seqMainAddress + 0x4);
-  
-  bool Comparisons = (NextSeq == Load) && (seqMainCheck == 2);
-  
-  // Only run on the file select screen while the curtain is up
-  if (!Comparisons)
-  {
-    return;
-  }
-  
-  uint32_t ButtonInput = ttyd::system::keyGetButton(0);
-  uint16_t ItemRandoButtonCombo = PAD_L | PAD_Y;
-  uint16_t LZRandoButtonCombo = PAD_L | PAD_X;
-  uint16_t LZRandoChallengeButtonCombo = PAD_L | PAD_Z;
-  
-  if ((ButtonInput & ItemRandoButtonCombo) == ItemRandoButtonCombo)
-  {
-    if (!DenyInput)
-    {
-      ItemRandoV2 = !ItemRandoV2;
-    }
-    DenyInput = true;
-  }
-  else if ((ButtonInput & LZRandoButtonCombo) == LZRandoButtonCombo)
-  {
-    if (!DenyInput)
-    {
-      LZRando = !LZRando;
-    }
-    DenyInput = true;
-  }
-  else if ((ButtonInput & LZRandoChallengeButtonCombo) == LZRandoChallengeButtonCombo)
-  {
-    if (!DenyInput)
-    {
-      LZRandoChallenge = !LZRandoChallenge;
-    }
-    DenyInput = true;
-  }
-  else
-  {
-    // Reset flag if no button combo is pressed/held
-    DenyInput = false;
-  }
-}
-
 void Mod::titleScreenStuff()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
@@ -465,7 +416,7 @@ void Mod::titleScreenStuff()
   
   uint32_t color = 0xFFFFFFFF;
   int32_t PosX = -235;
-  int32_t PosY = -25;
+  int32_t PosY = -35;
   float Scale = 0.9;
   
   #ifdef TTYD_JP
@@ -473,7 +424,8 @@ void Mod::titleScreenStuff()
     PosY += 30;
   #endif
   
-  for (int i = 0; i < 3; i++)
+  int32_t ArraySize = static_cast<int32_t>(sizeof(TitleScreenStrings) / sizeof(TitleScreenStrings[0]));
+  for (int i = 0; i < ArraySize; i++)
   {
     sprintf(mDisplayBuffer,
       "%s",
@@ -508,7 +460,8 @@ void Mod::gameModes()
   int32_t PosY = 40;
   float Scale = 0.75;
   
-  for (int i = 0; i < 4; i++)
+  int32_t ArraySize = static_cast<int32_t>(sizeof(ToggleModeStrings) / sizeof(ToggleModeStrings[0]));
+  for (int i = 0; i < ArraySize; i++)
   {
     sprintf(mDisplayBuffer,
       "%s",
@@ -549,7 +502,8 @@ void Mod::gameModes()
   // Move the text down
   PosY -= 40;
   
-  for (int i = 0; i < 3; i++)
+  ArraySize = static_cast<int32_t>(sizeof(CurrentModeStrings) / sizeof(CurrentModeStrings[0]));
+  for (int i = 0; i < ArraySize; i++)
   {
     switch (i)
     {
@@ -583,6 +537,42 @@ void Mod::gameModes()
     ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
     
     PosY -= 20;
+  }
+  
+  // Get input for game modes
+  uint32_t ButtonInput = ttyd::system::keyGetButton(0);
+  uint16_t ItemRandoButtonCombo = PAD_L | PAD_Y;
+  uint16_t LZRandoButtonCombo = PAD_L | PAD_X;
+  uint16_t LZRandoChallengeButtonCombo = PAD_L | PAD_Z;
+  
+  if ((ButtonInput & ItemRandoButtonCombo) == ItemRandoButtonCombo)
+  {
+    if (!DenyInput)
+    {
+      ItemRandoV2 = !ItemRandoV2;
+    }
+    DenyInput = true;
+  }
+  else if ((ButtonInput & LZRandoButtonCombo) == LZRandoButtonCombo)
+  {
+    if (!DenyInput)
+    {
+      LZRando = !LZRando;
+    }
+    DenyInput = true;
+  }
+  else if ((ButtonInput & LZRandoChallengeButtonCombo) == LZRandoChallengeButtonCombo)
+  {
+    if (!DenyInput)
+    {
+      LZRandoChallenge = !LZRandoChallenge;
+    }
+    DenyInput = true;
+  }
+  else
+  {
+    // Reset flag if no button combo is pressed/held
+    DenyInput = false;
   }
 }
 

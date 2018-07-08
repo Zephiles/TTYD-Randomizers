@@ -6,7 +6,7 @@
 extern "C" {
 
 // Display Stuff
-const char *TitleScreenStrings[3] = { "Item Randomizer V1 - v1.2", "Item Randomizer V2 - v1.2", "Loading Zone Randomizer Beta - v0.5" };
+const char *TitleScreenStrings[2] = { "Item Randomizers - v1.2", "Loading Zone Randomizer Beta - v0.5" };
 
 const char *ToggleModeStrings[4] = { "Hold L and press the following to toggle modes:", "Y = Item Randomizer v1/v2", "X = Loading Zone Randomizer Beta", "Z = Loading Zone Randomizer - 1 Hour Challenge" };
 

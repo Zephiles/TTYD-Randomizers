@@ -20,7 +20,6 @@ private:
   void LZRandoChallengeStuff();
   void titleScreenStuff();
   void gameModes();
-  void changeGameModes();
   
   // Item Rando
   void *getRandomItem(const char *itemName, uint32_t itemId, uint32_t itemMode, int32_t wasCollectedExpr, void *itemPickupScript, float itemCoordinateX, float itemCoordinateY, float itemCoordinateZ);
