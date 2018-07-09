@@ -58,7 +58,6 @@ extern "C" {
 
 namespace mod {
 
-extern "C" {
 uint32_t randomizeItem()
 {
   uint32_t NewItem;
@@ -125,7 +124,6 @@ uint32_t randomizeItem()
   }
 
   return NewItem;
-}
 }
 
 uint32_t randomizeItemWithChecks(uint32_t currentItemId)
