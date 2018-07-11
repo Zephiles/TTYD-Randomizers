@@ -827,7 +827,7 @@
 8026D58C:strcat
 8026D5B8:strncpy
 8026D5FC:strcpy
-// 8026D6B4:strlen
+8026D6B4:strlen
 
 // w_atan2.c
 802725A0:atan2

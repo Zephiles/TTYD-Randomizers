@@ -1,4 +1,5 @@
 #include "mod.h"
+#include "drawstring.h"
 #include "items.h"
 #include "buttons.h"
 
@@ -25,17 +26,13 @@ extern bool TimerDisabled;
 extern bool TimerActive;
 extern uint32_t TimerCount;
 extern bool DisplayTimer;
-extern const char *TimesUpStrings[2];
 extern uint32_t seqMainAddress;
 extern bool DenyInput;
 extern bool ItemRandoV2;
 extern bool LZRando;
 extern bool LZRandoChallenge;
-extern const char *TitleScreenStrings[2];
-extern const char *ToggleModeStrings[4];
 extern char *LZRandoText;
 extern char *LZRandoChallengeText;
-extern const char *CurrentModeStrings[3];
 
 namespace mod {
 
@@ -57,10 +54,11 @@ void Mod::LZRandoStuff()
   
   uint32_t color = 0xFFFFFFFF;
   int32_t PosX = -232;
-  int32_t PosY = -93;
+  int32_t PosY = -120;
+  float Scale = 0.75;
   
   sprintf(mDisplayBuffer,
-    "Seq: %lu\r\nLZ: %s\r\nMap: %s",
+    "Seq: %lu\nLZ: %s\nMap: %s",
     ttyd::swdrv::swByteGet(0),
     NextBero,
     NextMap);
@@ -68,7 +66,8 @@ void Mod::LZRandoStuff()
   ttyd::fontmgr::FontDrawStart();
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
   ttyd::fontmgr::FontDrawEdge();
-  ttyd::fontmgr::FontDrawMessage(PosX, PosY, mDisplayBuffer);
+  ttyd::fontmgr::FontDrawScale(Scale);
+  drawstring::drawStringMultiline(PosX, PosY, mDisplayBuffer);
 }
 
 void Mod::LZRandoChallengeStuff()
@@ -256,7 +255,8 @@ void Mod::LZRandoChallengeStuff()
     
     // Display Score
     int32_t PosX = -232;
-    int32_t PosY = -65;
+    int32_t PosY = -100;
+    float Scale = 0.75;
     
     sprintf(mDisplayBuffer,
       "Score: %ld",
@@ -265,7 +265,8 @@ void Mod::LZRandoChallengeStuff()
     ttyd::fontmgr::FontDrawStart();
     ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
     ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawMessage(PosX, PosY, mDisplayBuffer);
+    ttyd::fontmgr::FontDrawScale(Scale);
+    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
   }
   
   // Don't display timer if disabled
@@ -300,11 +301,14 @@ void Mod::LZRandoChallengeStuff()
       // Don't show the timer on the title screen while it is at 0
       if (!Comparisons)
       {
-        int32_t PosX = 75;
-        int32_t PosY = -153;
+        int32_t FontDrawX = 105;
+        int32_t FontDrawY = -160;
+        float Scale = 0.8;
         
         #ifdef TTYD_JP
-          PosX += 25;
+          FontDrawX += 5;
+          FontDrawY += 2;
+          Scale += 0.05;
         #endif
         
         uint32_t modframe = TimerCount % 60;
@@ -320,9 +324,11 @@ void Mod::LZRandoChallengeStuff()
           modframe);
         
         ttyd::fontmgr::FontDrawStart();
+        uint32_t color = 0xFFFFFFFF;
         ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
         ttyd::fontmgr::FontDrawEdge();
-        ttyd::fontmgr::FontDrawMessage(PosX, PosY, mDisplayBuffer);
+        ttyd::fontmgr::FontDrawScale(Scale);
+        ttyd::fontmgr::FontDrawString(FontDrawX, FontDrawY, mDisplayBuffer);
       }
       
       if (TimerActive)
@@ -356,21 +362,16 @@ void Mod::LZRandoChallengeStuff()
           PosY = 25;
           Scale = 0.9;
           
-          int32_t ArraySize = static_cast<int32_t>(sizeof(TimesUpStrings) / sizeof(TimesUpStrings[0]));
-          for (int i = 0; i < ArraySize; i++)
-          {
-            sprintf(mDisplayBuffer,
-              "%s",
-              TimesUpStrings[i]);
-            
-            ttyd::fontmgr::FontDrawStart();
-            ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-            ttyd::fontmgr::FontDrawEdge();
-            ttyd::fontmgr::FontDrawScale(Scale);
-            ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-            
-            PosY -= 20;
-          }
+          sprintf(mDisplayBuffer,
+            "%s\n%s",
+            "Press Y to continue playing",
+            "Press X to return to the title screen");
+          
+          ttyd::fontmgr::FontDrawStart();
+          ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+          ttyd::fontmgr::FontDrawEdge();
+          ttyd::fontmgr::FontDrawScale(Scale);
+          drawstring::drawStringMultiline(PosX, PosY, mDisplayBuffer);
           
           // Get input for what to do next
           uint32_t ButtonInput = ttyd::system::keyGetButton(0);
@@ -424,21 +425,16 @@ void Mod::titleScreenStuff()
     PosY += 30;
   #endif
   
-  int32_t ArraySize = static_cast<int32_t>(sizeof(TitleScreenStrings) / sizeof(TitleScreenStrings[0]));
-  for (int i = 0; i < ArraySize; i++)
-  {
-    sprintf(mDisplayBuffer,
-      "%s",
-      TitleScreenStrings[i]);
-    
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-    
-    PosY -= 20;
-  }
+  sprintf(mDisplayBuffer,
+    "%s\n%s",
+    "Item Randomizers - v1.2.1",
+    "Loading Zone Randomizer Beta - v0.5");
+  
+  ttyd::fontmgr::FontDrawStart();
+  ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+  ttyd::fontmgr::FontDrawEdge();
+  ttyd::fontmgr::FontDrawScale(Scale);
+  drawstring::drawStringMultiline(PosX, PosY, mDisplayBuffer);
 }
 
 void Mod::gameModes()
@@ -460,21 +456,19 @@ void Mod::gameModes()
   int32_t PosY = 40;
   float Scale = 0.75;
   
-  int32_t ArraySize = static_cast<int32_t>(sizeof(ToggleModeStrings) / sizeof(ToggleModeStrings[0]));
-  for (int i = 0; i < ArraySize; i++)
-  {
-    sprintf(mDisplayBuffer,
-      "%s",
-      ToggleModeStrings[i]);
-    
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-    
-    PosY -= 20;
-  }
+  // Display game modes
+  sprintf(mDisplayBuffer,
+    "%s\n%s\n%s\n%s",
+    "Hold L and press the following to toggle modes:",
+    "Y = Item Randomizer v1/v2",
+    "X = Loading Zone Randomizer Beta",
+    "Z = Loading Zone Randomizer - 1 Hour Challenge");
+  
+  ttyd::fontmgr::FontDrawStart();
+  ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+  ttyd::fontmgr::FontDrawEdge();
+  ttyd::fontmgr::FontDrawScale(Scale);
+  drawstring::drawStringMultiline(PosX, PosY, mDisplayBuffer);
   
   // Set LZRandoText to the appropriate value
   if (LZRando)
@@ -500,44 +494,23 @@ void Mod::gameModes()
   }
   
   // Move the text down
-  PosY -= 40;
+  PosY -= 120;
   
-  ArraySize = static_cast<int32_t>(sizeof(CurrentModeStrings) / sizeof(CurrentModeStrings[0]));
-  for (int i = 0; i < ArraySize; i++)
-  {
-    switch (i)
-    {
-      case 0:
-        // Display Item Randomizer mode
-        sprintf(mDisplayBuffer,
-          "%s%ld",
-          CurrentModeStrings[i],
-          static_cast<uint32_t>(ItemRandoV2) + 1);
-        break;
-      case 1:
-        // Display Loading Zone Randomizer Beta on or off
-        sprintf(mDisplayBuffer,
-          "%s%s",
-          CurrentModeStrings[i],
-          LZRandoText);
-        break;
-      case 2:
-        // Display Loading Zone Randomizer 1 Hour Challenge on or off
-        sprintf(mDisplayBuffer,
-          "%s%s",
-          CurrentModeStrings[i],
-          LZRandoChallengeText);
-        break;
-    }
+  // Display current modes
+  sprintf(mDisplayBuffer,
+    "%s%ld\n%s%s\n%s%s",
+    "Item Randomizer: v",
+    static_cast<uint32_t>(ItemRandoV2) + 1,
+    "Loading Zone Randomizer: ",
+    LZRandoText,
+    "Loading Zone Randomizer - 1 Hour Challenge: ",
+    LZRandoChallengeText);
     
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
-    
-    PosY -= 20;
-  }
+  ttyd::fontmgr::FontDrawStart();
+  ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+  ttyd::fontmgr::FontDrawEdge();
+  ttyd::fontmgr::FontDrawScale(Scale);
+  drawstring::drawStringMultiline(PosX, PosY, mDisplayBuffer);
   
   // Get input for game modes
   uint32_t ButtonInput = ttyd::system::keyGetButton(0);
