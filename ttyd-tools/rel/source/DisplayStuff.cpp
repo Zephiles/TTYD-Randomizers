@@ -416,7 +416,7 @@ void Mod::titleScreenStuff()
   }
   
   uint32_t color = 0xFFFFFFFF;
-  int32_t PosX = -235;
+  int32_t PosX = -240;
   int32_t PosY = -35;
   float Scale = 0.9;
   
@@ -428,7 +428,7 @@ void Mod::titleScreenStuff()
   sprintf(mDisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.1",
-    "Loading Zone Randomizer Beta - v0.5");
+    "Loading Zone Randomizer Beta - v0.5.1");
   
   ttyd::fontmgr::FontDrawStart();
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));

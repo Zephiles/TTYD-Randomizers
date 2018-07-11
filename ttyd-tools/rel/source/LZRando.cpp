@@ -22,6 +22,7 @@ extern bool LZRando;
 extern bool ReloadCurrentScreen;
 extern char *NextMap;
 extern char *NextBero;
+extern bool InCredits;
 extern bool GameOverFlag;
 extern bool NewFile;
 extern uint32_t GSWAddressesStart;
@@ -60,8 +61,10 @@ void getRandomWarp()
     return;
   }
   
-  // Don't run on the title screen
-  if (ttyd::string::strcmp(NextMap, "title") == 0)
+  bool title_comparison = ttyd::string::strcmp(NextMap, "title") == 0;
+  
+  // Don't run on the title screen, unless the credits just occured
+  if (title_comparison && !InCredits)
   {
     return;
   }
