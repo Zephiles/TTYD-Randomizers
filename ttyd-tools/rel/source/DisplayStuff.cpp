@@ -101,9 +101,9 @@ void Mod::LZRandoChallengeStuff()
       uint16_t ImportantItem = *reinterpret_cast<uint16_t *>(ImportantItemsAddressesStart + (i * 0x2));
       if ((ImportantItem != Hammer) && (ImportantItem != MagicalMap) && (ImportantItem != Boots) && (ImportantItem != MailboxSP))
       {
-        if ((ImportantItem >= DiamondStar) && (ImportantItem <= CrystalStar))
+        if ((ImportantItem == MagicalMapBigger) || ((ImportantItem >= DiamondStar) && (ImportantItem <= CrystalStar)))
         {
-          // Add 2 points for a crystal star
+          // Add 2 points for the magical map or a crystal star
           Score += 2;
         }
         else if ((ImportantItem >= PaperModeCurse) && (ImportantItem <= BoatModeCurse))
