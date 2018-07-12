@@ -218,7 +218,7 @@ void getRandomWarp()
 }
 }
 
-void Mod::setUpNewFile()
+void setUpNewFile()
 {
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   bool Comparisons = (SequencePosition == 0) && NewFile;
@@ -269,7 +269,7 @@ void Mod::setUpNewFile()
   ttyd::mario_party::marioPartyHello(4);
 }
 
-void Mod::overwriteNewFileStrings()
+void overwriteNewFileStrings()
 {
   // Overwrite aaa_00 and prologue strings, and put back to default when new values are not needed anymore
   #ifdef TTYD_US
@@ -473,7 +473,7 @@ void setNextBero()
   }
 }
 
-void Mod::failsafeCheats()
+void failsafeCheats()
 {
   marioNeverTransform();
   resetMarioThroughLZ();
@@ -482,7 +482,7 @@ void Mod::failsafeCheats()
   setNextBero();
 }
 
-void Mod::resetValuesOnGameOver()
+void resetValuesOnGameOver()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
   int32_t GameOver = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGameOver);
@@ -497,7 +497,7 @@ void Mod::resetValuesOnGameOver()
   GameOverFlag = true;
 }
 
-void Mod::reloadCurrentScreenFlag()
+void reloadCurrentScreenFlag()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
   int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
@@ -574,7 +574,7 @@ void Mod::writeLZRandoAssemblyPatches()
   patch::writeBranch(reinterpret_cast<void *>(BranchBackEnableBoatMode), reinterpret_cast<void *>(BoatModeCheck + 0x4));
 }
 
-void Mod::writeAdditionalLZRandoAssemblyPatches()
+void writeAdditionalLZRandoAssemblyPatches()
 {
   #ifdef TTYD_US
     uint32_t WalkOnWater1 = 0x8008F938;
@@ -640,6 +640,22 @@ void Mod::writeAdditionalLZRandoAssemblyPatches()
   {
     ClearCacheFlag = false;
   }
+}
+
+void Mod::LZRandoStuff()
+{
+  // Only run if the Loading Zone Randomizer is being used
+  if (LZRando)
+  {
+    setUpNewFile();
+    failsafeCheats();
+    resetValuesOnGameOver();
+    reloadCurrentScreenFlag();
+  }
+  
+  // Additional LZ Rando stuff that needs to run no matter what
+  overwriteNewFileStrings();
+  writeAdditionalLZRandoAssemblyPatches();
 }
 
 }

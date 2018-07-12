@@ -242,7 +242,7 @@ void *Mod::getRandomItem(const char *itemName, uint32_t itemId, uint32_t itemMod
   return mPFN_itemEntry_trampoline(const_cast<char *>(itemName), itemId, itemMode, wasCollectedExpr, reinterpret_cast<uint32_t *>(itemPickupScript), itemCoordinateX, itemCoordinateY, itemCoordinateZ);
 }
 
-void Mod::manageEnemyHeldItemArray()
+void manageEnemyHeldItemArray()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
   int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
@@ -330,7 +330,7 @@ uint32_t getEnemyItemDrop()
 }
 }
 
-void Mod::randomizeShopRewardsSetDoorFlag()
+void randomizeShopRewardsSetDoorFlag()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
   int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
@@ -867,6 +867,12 @@ void Mod::writeItemRandoAssemblyPatches()
   
   // Make Koopa Curse target all enemies rather than just one
   *reinterpret_cast<uint8_t *>(KoopaCurseAddress) = 0x2;
+}
+
+void Mod::itemRandoStuff()
+{
+  manageEnemyHeldItemArray();
+  randomizeShopRewardsSetDoorFlag();
 }
 
 }

@@ -27,6 +27,7 @@ uint32_t GSWAddressesStart = r13 - 0x6F50;
 uint32_t CrystalStarPointerAddress = r13 - 0x7040;
 
 // Display Stuff
+char *DisplayBuffer = new char[256];
 bool TimerDisabled = false;
 bool TimerActive = false;
 uint32_t TimerCount = 0;

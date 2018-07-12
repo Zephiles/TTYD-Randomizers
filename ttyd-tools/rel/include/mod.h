@@ -12,34 +12,27 @@ public:
   
 private:
   void updateEarly();
-  void backtraceScreen();
-  void writeNextMap();
+  void writeOnce();
   
   // Display Stuff
-  void LZRandoStuff();
+  void displayStuff();
+  void LZRandoDisplayStuff();
   void LZRandoChallengeStuff();
   void titleScreenStuff();
   void gameModes();
   
   // Item Rando
-  void *getRandomItem(const char *itemName, uint32_t itemId, uint32_t itemMode, int32_t wasCollectedExpr, void *itemPickupScript, float itemCoordinateX, float itemCoordinateY, float itemCoordinateZ);
-  void manageEnemyHeldItemArray();
-  void randomizeShopRewardsSetDoorFlag();
+  void itemRandoStuff();
   void writeItemRandoAssemblyPatches();
+  void *getRandomItem(const char *itemName, uint32_t itemId, uint32_t itemMode, int32_t wasCollectedExpr, void *itemPickupScript, float itemCoordinateX, float itemCoordinateY, float itemCoordinateZ);
   void *(*mPFN_itemEntry_trampoline)(const char *name, uint32_t id, uint32_t mode, int32_t wasCollectedExpr, void *pickupScript, float coordinateX, float coordinateY, float coordinateZ) = nullptr;
   
   // LZ Rando
-  void setUpNewFile();
-  void overwriteNewFileStrings();
-  void failsafeCheats();
-  void resetValuesOnGameOver();
-  void reloadCurrentScreenFlag();
+  void LZRandoStuff();
   void writeLZRandoAssemblyPatches();
-  void writeAdditionalLZRandoAssemblyPatches();
   
 private:
   void (*mPFN_makeKey_trampoline)() = nullptr;
-  char mDisplayBuffer[256];
 };
 
 }

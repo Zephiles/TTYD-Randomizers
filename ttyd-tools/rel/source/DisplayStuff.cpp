@@ -12,11 +12,13 @@
 #include <ttyd/mario_party.h>
 #include <ttyd/system.h>
 #include <ttyd/__mem.h>
+#include <ttyd/dispdrv.h>
 
 #include <cstdio>
 
 extern char *NextMap;
 extern char *NextBero;
+extern char *DisplayBuffer;
 extern uint32_t GSWAddressesStart;
 extern bool InCredits;
 extern uint16_t CreditsCount;
@@ -36,7 +38,7 @@ extern char *LZRandoChallengeText;
 
 namespace mod {
 
-void Mod::LZRandoStuff()
+void Mod::LZRandoDisplayStuff()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
   int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
@@ -57,7 +59,7 @@ void Mod::LZRandoStuff()
   int32_t PosY = -120;
   float Scale = 0.75;
   
-  sprintf(mDisplayBuffer,
+  sprintf(DisplayBuffer,
     "Seq: %lu\nLZ: %s\nMap: %s",
     ttyd::swdrv::swByteGet(0),
     NextBero,
@@ -67,7 +69,7 @@ void Mod::LZRandoStuff()
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
   ttyd::fontmgr::FontDrawEdge();
   ttyd::fontmgr::FontDrawScale(Scale);
-  drawstring::drawStringMultiline(PosX, PosY, mDisplayBuffer);
+  drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
 }
 
 void Mod::LZRandoChallengeStuff()
@@ -258,7 +260,7 @@ void Mod::LZRandoChallengeStuff()
     int32_t PosY = -100;
     float Scale = 0.75;
     
-    sprintf(mDisplayBuffer,
+    sprintf(DisplayBuffer,
       "Score: %ld",
       Score);
       
@@ -266,7 +268,7 @@ void Mod::LZRandoChallengeStuff()
     ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
     ttyd::fontmgr::FontDrawEdge();
     ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
+    ttyd::fontmgr::FontDrawString(PosX, PosY, DisplayBuffer);
   }
   
   // Don't display timer if disabled
@@ -316,7 +318,7 @@ void Mod::LZRandoChallengeStuff()
         uint32_t minute = (TimerCount / (60 * 60)) % 60;
         uint32_t hour = TimerCount / (60 * 60 * 60);
         
-        sprintf(mDisplayBuffer,
+        sprintf(DisplayBuffer,
           "%.2ld:%.2ld:%.2ld.%.2ld",
           hour,
           minute,
@@ -328,7 +330,7 @@ void Mod::LZRandoChallengeStuff()
         ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
         ttyd::fontmgr::FontDrawEdge();
         ttyd::fontmgr::FontDrawScale(Scale);
-        ttyd::fontmgr::FontDrawString(FontDrawX, FontDrawY, mDisplayBuffer);
+        ttyd::fontmgr::FontDrawString(FontDrawX, FontDrawY, DisplayBuffer);
       }
       
       if (TimerActive)
@@ -347,7 +349,7 @@ void Mod::LZRandoChallengeStuff()
           int32_t PosY = 80;
           float Scale = 1.5;
           
-          sprintf(mDisplayBuffer,
+          sprintf(DisplayBuffer,
             "%s",
             "Time's Up!");
           
@@ -355,14 +357,14 @@ void Mod::LZRandoChallengeStuff()
           ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
           ttyd::fontmgr::FontDrawEdge();
           ttyd::fontmgr::FontDrawScale(Scale);
-          ttyd::fontmgr::FontDrawString(PosX, PosY, mDisplayBuffer);
+          ttyd::fontmgr::FontDrawString(PosX, PosY, DisplayBuffer);
           
           // Display text for how the player wants to continue
           PosX = -225;
           PosY = 25;
           Scale = 0.9;
           
-          sprintf(mDisplayBuffer,
+          sprintf(DisplayBuffer,
             "%s\n%s",
             "Press Y to continue playing",
             "Press X to return to the title screen");
@@ -371,7 +373,7 @@ void Mod::LZRandoChallengeStuff()
           ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
           ttyd::fontmgr::FontDrawEdge();
           ttyd::fontmgr::FontDrawScale(Scale);
-          drawstring::drawStringMultiline(PosX, PosY, mDisplayBuffer);
+          drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
           
           // Get input for what to do next
           uint32_t ButtonInput = ttyd::system::keyGetButton(0);
@@ -425,7 +427,7 @@ void Mod::titleScreenStuff()
     PosY += 30;
   #endif
   
-  sprintf(mDisplayBuffer,
+  sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.1",
     "Loading Zone Randomizer Beta - v0.5.1");
@@ -434,7 +436,7 @@ void Mod::titleScreenStuff()
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
   ttyd::fontmgr::FontDrawEdge();
   ttyd::fontmgr::FontDrawScale(Scale);
-  drawstring::drawStringMultiline(PosX, PosY, mDisplayBuffer);
+  drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
 }
 
 void Mod::gameModes()
@@ -457,7 +459,7 @@ void Mod::gameModes()
   float Scale = 0.75;
   
   // Display game modes
-  sprintf(mDisplayBuffer,
+  sprintf(DisplayBuffer,
     "%s\n%s\n%s\n%s",
     "Hold L and press the following to toggle modes:",
     "Y = Item Randomizer v1/v2",
@@ -468,7 +470,7 @@ void Mod::gameModes()
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
   ttyd::fontmgr::FontDrawEdge();
   ttyd::fontmgr::FontDrawScale(Scale);
-  drawstring::drawStringMultiline(PosX, PosY, mDisplayBuffer);
+  drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
   
   // Set LZRandoText to the appropriate value
   if (LZRando)
@@ -497,7 +499,7 @@ void Mod::gameModes()
   PosY -= 120;
   
   // Display current modes
-  sprintf(mDisplayBuffer,
+  sprintf(DisplayBuffer,
     "%s%ld\n%s%s\n%s%s",
     "Item Randomizer: v",
     static_cast<uint32_t>(ItemRandoV2) + 1,
@@ -510,7 +512,7 @@ void Mod::gameModes()
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
   ttyd::fontmgr::FontDrawEdge();
   ttyd::fontmgr::FontDrawScale(Scale);
-  drawstring::drawStringMultiline(PosX, PosY, mDisplayBuffer);
+  drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
   
   // Get input for game modes
   uint32_t ButtonInput = ttyd::system::keyGetButton(0);
@@ -547,6 +549,28 @@ void Mod::gameModes()
     // Reset flag if no button combo is pressed/held
     DenyInput = false;
   }
+}
+
+void Mod::displayStuff()
+{
+  if (LZRando)
+  {
+    ttyd::dispdrv::dispEntry(ttyd::dispdrv::DisplayLayer::kDebug3d, 0, [](ttyd::dispdrv::DisplayLayer layerId, void *user)
+    {
+      reinterpret_cast<Mod *>(user)->LZRandoDisplayStuff();
+      
+      if (LZRandoChallenge)
+      {
+        reinterpret_cast<Mod *>(user)->LZRandoChallengeStuff();
+      }
+    }, this);
+  }
+  
+  ttyd::dispdrv::dispEntry(ttyd::dispdrv::DisplayLayer::k2d, 0, [](ttyd::dispdrv::DisplayLayer layerId, void *user)
+  {
+    reinterpret_cast<Mod *>(user)->titleScreenStuff();
+    reinterpret_cast<Mod *>(user)->gameModes();
+  }, this);
 }
 
 }
