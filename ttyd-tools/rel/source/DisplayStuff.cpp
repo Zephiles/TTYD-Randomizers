@@ -17,24 +17,25 @@
 #include <cstdio>
 
 extern char *NextMap;
-extern char *NextBero;
 extern char *DisplayBuffer;
+extern char *NextBero;
 extern uint32_t GSWAddressesStart;
 extern bool InCredits;
 extern uint16_t CreditsCount;
 extern bool BossDefeated[11];
 extern uint16_t BossCount;
+extern bool ShowScoreSources;
+extern bool DenyInput;
 extern bool TimerDisabled;
 extern bool TimerActive;
 extern uint32_t TimerCount;
 extern bool DisplayTimer;
 extern uint32_t seqMainAddress;
-extern bool DenyInput;
-extern bool ItemRandoV2;
 extern bool LZRando;
-extern bool LZRandoChallenge;
 extern char *LZRandoText;
+extern bool LZRandoChallenge;
 extern char *LZRandoChallengeText;
+extern bool ItemRandoV2;
 
 namespace mod {
 
@@ -95,6 +96,17 @@ void Mod::LZRandoChallengeStuff()
     uint32_t PouchPointer = reinterpret_cast<uint32_t>(ttyd::mario_pouch::pouchGetPtr());
     uint32_t Score = 0;
     
+    // Individual scores
+    uint32_t CrystalStarScore = 0;
+    uint32_t CurseScore = 0;
+    uint32_t ImportantItemsScore = 0;
+    uint32_t FollowerScore = 0;
+    uint32_t MarioLevelScore = 0;
+    uint32_t CreditsScore = 0;
+    uint32_t BossScore = 0;
+    uint32_t CoinCountScore = 0;
+    uint32_t BadgeLogScore = 0;
+    
     // Check Important Items
     uint32_t ImportantItemsAddressesStart = PouchPointer + 0xA0;
     for (int i = 0; i < 121; i++)
@@ -105,12 +117,12 @@ void Mod::LZRandoChallengeStuff()
         if ((ImportantItem == MagicalMapBigger) || ((ImportantItem >= DiamondStar) && (ImportantItem <= CrystalStar)))
         {
           // Add 2 points for the magical map or a crystal star
-          Score += 2;
+          CrystalStarScore += 2;
         }
         else if ((ImportantItem >= PaperModeCurse) && (ImportantItem <= BoatModeCurse))
         {
           // Add 6 points for curses
-          Score += 6;
+          CurseScore += 6;
         }
         else if (ImportantItem == 0)
         {
@@ -120,7 +132,7 @@ void Mod::LZRandoChallengeStuff()
         else
         {
           // Generic Important Item, so add 1 point
-          Score++;
+          ImportantItemsScore++;
         }
       }
     }
@@ -130,7 +142,7 @@ void Mod::LZRandoChallengeStuff()
     if (FollowerPointer)
     {
       // Add 2 points if the player has a follower
-      Score += 2;
+      FollowerScore += 2;
     }
     
     // Check for level ups
@@ -138,7 +150,7 @@ void Mod::LZRandoChallengeStuff()
     if (MarioLevel > 1)
     {
       // Add 3 points for each level up
-      Score += (MarioLevel - 1) * 3;
+      MarioLevelScore += (MarioLevel - 1) * 3;
     }
     
     // Check for credits warps
@@ -154,7 +166,7 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Add 5 points for each credits warp
-    Score += CreditsCount * 5;
+    CreditsScore += CreditsCount * 5;
     
     // Check for bosses
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
@@ -228,11 +240,11 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Add 10 points for each boss defeated
-    Score += BossCount * 10;
+    BossScore += BossCount * 10;
     
     // Add 1 point for Mario's coin count divided by 100
     int16_t CoinCount = *reinterpret_cast<int16_t *>(PouchPointer + 0x78);
-    Score += CoinCount / 100;
+    CoinCountScore += CoinCount / 100;
     
     // Check badge log
     uint32_t BadgeLogAddressesStart = GSWAddresses + 0x188;
@@ -253,7 +265,10 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Add 1 point for the badge log count divided by 10
-    Score += BadgeLogCount / 10;
+    BadgeLogScore += BadgeLogCount / 10;
+    
+    // Get total score
+    Score = CrystalStarScore + CurseScore + ImportantItemsScore + FollowerScore + MarioLevelScore + CreditsScore + BossScore + CoinCountScore + BadgeLogScore;
     
     // Display Score
     int32_t PosX = -232;
@@ -269,6 +284,49 @@ void Mod::LZRandoChallengeStuff()
     ttyd::fontmgr::FontDrawEdge();
     ttyd::fontmgr::FontDrawScale(Scale);
     ttyd::fontmgr::FontDrawString(PosX, PosY, DisplayBuffer);
+    
+    // Display where the points came from
+    if (ShowScoreSources)
+    {
+      PosX = -232;
+      PosY = -80;
+      
+      sprintf(DisplayBuffer,
+        "%ld %ld %ld %ld %ld %ld %ld %ld %ld",
+        CrystalStarScore,
+        CurseScore,
+        ImportantItemsScore,
+        FollowerScore,
+        MarioLevelScore,
+        CreditsScore,
+        BossScore,
+        CoinCountScore,
+        BadgeLogScore);
+      
+      ttyd::fontmgr::FontDrawStart();
+      ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+      ttyd::fontmgr::FontDrawEdge();
+      ttyd::fontmgr::FontDrawScale(Scale);
+      ttyd::fontmgr::FontDrawString(PosX, PosY, DisplayBuffer);
+    }
+    
+    // Get input for whether to display the score sources or not
+    uint32_t ButtonInput = ttyd::system::keyGetButton(0);
+    uint16_t ShowScoreSourceCombo = PAD_L | PAD_R;
+    
+    if ((ButtonInput & ShowScoreSourceCombo) == ShowScoreSourceCombo)
+    {
+      if (!DenyInput)
+      {
+        ShowScoreSources = !ShowScoreSources;
+      }
+      DenyInput = true;
+    }
+    else
+    {
+      // Reset flag if no button combo is pressed/held
+      DenyInput = false;
+    }
   }
   
   // Don't display timer if disabled
@@ -326,7 +384,6 @@ void Mod::LZRandoChallengeStuff()
           modframe);
         
         ttyd::fontmgr::FontDrawStart();
-        uint32_t color = 0xFFFFFFFF;
         ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
         ttyd::fontmgr::FontDrawEdge();
         ttyd::fontmgr::FontDrawScale(Scale);
@@ -397,9 +454,10 @@ void Mod::LZRandoChallengeStuff()
   // Reset values upon going to the file select screen
   if (NextSeq == Load)
   {
-    DisplayTimer = false;
-    TimerActive = false;
+    ShowScoreSources = false;
     TimerDisabled = false;
+    TimerActive = false;
+    DisplayTimer = false;
     CreditsCount = 0;
     BossCount = 0;
     ttyd::__mem::memset(BossDefeated, false, sizeof(BossDefeated));
@@ -430,7 +488,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.1",
-    "Loading Zone Randomizer Beta - v0.5.1");
+    "Loading Zone Randomizer Beta - v0.5.2");
   
   ttyd::fontmgr::FontDrawStart();
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));

@@ -28,11 +28,12 @@ uint32_t CrystalStarPointerAddress = r13 - 0x7040;
 
 // Display Stuff
 char *DisplayBuffer = new char[256];
+bool ShowScoreSources = false;
+bool DenyInput = false;
 bool TimerDisabled = false;
 bool TimerActive = false;
 uint32_t TimerCount = 0;
 bool DisplayTimer = false;
-bool DenyInput = false;
 
 // Item Rando
 bool ItemRandoV2 = false;
