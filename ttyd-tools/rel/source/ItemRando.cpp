@@ -683,6 +683,10 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars11 = 0x8013D5B8;
     
     uint32_t KoopaCurseAddress = 0x8036ACA0;
+    
+    uint32_t itemDataTable = 0x803108A8;
+    uint16_t KoopaCurseIcon = 390;
+    uint16_t DebugBadgeIcon = 108;
   #elif defined TTYD_JP
     uint32_t CrystalStarPointer = 0x800AC284;
     
@@ -734,6 +738,10 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars11 = 0x80137FEC;
     
     uint32_t KoopaCurseAddress = 0x80368318;
+    
+    uint32_t itemDataTable = 0x8030EE58;
+    uint16_t KoopaCurseIcon = 382;
+    uint16_t DebugBadgeIcon = 100;
   #elif defined TTYD_EU
     uint32_t CrystalStarPointer = 0x800AF38C;
     
@@ -785,6 +793,10 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars11 = 0x8013F0A0;
     
     uint32_t KoopaCurseAddress = 0x80376B68;
+    
+    uint32_t itemDataTable = 0x8031C638;
+    uint16_t KoopaCurseIcon = 390;
+    uint16_t DebugBadgeIcon = 108;
   #endif
   
   // Write Crystal Star pointer
@@ -867,6 +879,10 @@ void Mod::writeItemRandoAssemblyPatches()
   
   // Make Koopa Curse target all enemies rather than just one
   *reinterpret_cast<uint8_t *>(KoopaCurseAddress) = 0x2;
+  
+  // Change icons for Koopa Curse and Debug Badge
+  *reinterpret_cast<uint16_t *>(itemDataTable + (KoopaCurse * 0x28) + 0x20) = KoopaCurseIcon;
+  *reinterpret_cast<uint16_t *>(itemDataTable + (DebugBadge * 0x28) + 0x20) = DebugBadgeIcon;
 }
 
 void Mod::itemRandoStuff()
