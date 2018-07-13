@@ -24,8 +24,8 @@ private:
   // Item Rando
   void itemRandoStuff();
   void writeItemRandoAssemblyPatches();
-  void *getRandomItem(const char *itemName, uint32_t itemId, uint32_t itemMode, int32_t wasCollectedExpr, void *itemPickupScript, float itemCoordinateX, float itemCoordinateY, float itemCoordinateZ);
-  void *(*mPFN_itemEntry_trampoline)(const char *name, uint32_t id, uint32_t mode, int32_t wasCollectedExpr, void *pickupScript, float coordinateX, float coordinateY, float coordinateZ) = nullptr;
+  void *getRandomItem(const char *, uint32_t, uint32_t, int32_t, void *, float, float, float);
+  void *(*mPFN_itemEntry_trampoline)(const char *, uint32_t, uint32_t, int32_t, void *, float, float, float) = nullptr;
   
   // LZ Rando
   void LZRandoStuff();

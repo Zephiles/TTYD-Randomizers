@@ -142,7 +142,7 @@ void Mod::LZRandoChallengeStuff()
     if (FollowerPointer)
     {
       // Add 2 points if the player has a follower
-      FollowerScore += 2;
+      FollowerScore = 2;
     }
     
     // Check for level ups
@@ -150,7 +150,7 @@ void Mod::LZRandoChallengeStuff()
     if (MarioLevel > 1)
     {
       // Add 3 points for each level up
-      MarioLevelScore += (MarioLevel - 1) * 3;
+      MarioLevelScore = (MarioLevel - 1) * 3;
     }
     
     // Check for credits warps
@@ -166,7 +166,7 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Add 5 points for each credits warp
-    CreditsScore += CreditsCount * 5;
+    CreditsScore = CreditsCount * 5;
     
     // Check for bosses
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
@@ -240,11 +240,11 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Add 10 points for each boss defeated
-    BossScore += BossCount * 10;
+    BossScore = BossCount * 10;
     
     // Add 1 point for Mario's coin count divided by 100
     int16_t CoinCount = *reinterpret_cast<int16_t *>(PouchPointer + 0x78);
-    CoinCountScore += CoinCount / 100;
+    CoinCountScore = CoinCount / 100;
     
     // Check badge log
     uint32_t BadgeLogAddressesStart = GSWAddresses + 0x188;
@@ -265,7 +265,7 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Add 1 point for the badge log count divided by 10
-    BadgeLogScore += BadgeLogCount / 10;
+    BadgeLogScore = BadgeLogCount / 10;
     
     // Get total score
     Score = CrystalStarScore + CurseScore + ImportantItemsScore + FollowerScore + MarioLevelScore + CreditsScore + BossScore + CoinCountScore + BadgeLogScore;
