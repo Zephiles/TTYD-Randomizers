@@ -276,8 +276,8 @@ uint32_t assignEnemyHeldItem(void *OriginalEnemyHeldItemArray, uint32_t ArrayInd
 {
   uint32_t NewItem = 0;
   
-  // Make sure the item isn't an important item
-  while (NewItem < GoldBar)
+  // Make sure the item isn't an important item or the Debug Badge
+  while ((NewItem < GoldBar) || (NewItem == DebugBadge))
   {
     NewItem = randomizeItem();
   }
@@ -330,21 +330,8 @@ uint32_t getEnemyItemDrop()
 }
 }
 
-void randomizeShopRewardsSetDoorFlag()
+void randomizeShopRewards()
 {
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
-  
-  // Only set on map change
-  if (NextSeq != MapChange)
-  {
-    return;
-  }
-  
-  // Set GSWF(1230), which is the flag that opens the shop door leading to Don Pianta
-  uint32_t GSWFAddress = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
-  *reinterpret_cast<uint32_t *>(GSWFAddress + 0x210) |= (1 << 14); // Turn on the 14 bit
-  
   // Randomize shop rewards (leave the number of purchases needed for them alone for now)
   // Set up array with new items to use (10 items in the array)
   uint16_t NewItem[10] = { 0 };
@@ -401,6 +388,30 @@ void randomizeShopRewardsSetDoorFlag()
     // Get next item in array
     ShopRewardsArrayStart += 0x8;
   }
+}
+
+void setValuesMapChangeItem()
+{
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
+  
+  // Only set on map change
+  if (NextSeq != MapChange)
+  {
+    return;
+  }
+  
+  // Randomize shop rewards
+  randomizeShopRewards();
+  
+  // Set GSWF(1230), which is the flag that opens the shop door leading to Don Pianta
+  uint32_t GSWFAddress = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
+  *reinterpret_cast<uint32_t *>(GSWFAddress + 0x210) |= (1 << 14); // Turn on the 14 bit
+  
+  // Reset EnemyHeldItemArray, in the event that it bugs out for some reason
+  // Need to figure out why it bugs out in the first place
+  ttyd::__mem::memset(EnemyHeldItemArray, 0, sizeof(EnemyHeldItemArray));
+  EnemyHeldItemArrayCounter = 0;
 }
 
 extern "C" {
@@ -888,7 +899,8 @@ void Mod::writeItemRandoAssemblyPatches()
 void Mod::itemRandoStuff()
 {
   manageEnemyHeldItemArray();
-  randomizeShopRewardsSetDoorFlag();
+  randomizeShopRewards();
+  setValuesMapChangeItem();
 }
 
 }

@@ -9,22 +9,26 @@ extern "C" {
   char *NextMap = reinterpret_cast<char *>(r13 + 0x16A8);
   char *NextArea = reinterpret_cast<char *>(r13 + 0x16C8);
   uint32_t seqMainAddress = r13 + 0x1860;
+  uint32_t AreaObjectsAddressesStart = 0x803D98A8;
 #elif defined TTYD_JP
   uint32_t r13 = 0x80417260;
   char *NextBero = reinterpret_cast<char *>(r13 + 0x1128);
   char *NextMap = reinterpret_cast<char *>(r13 + 0x1148);
   char *NextArea = reinterpret_cast<char *>(r13 + 0x1168);
   uint32_t seqMainAddress = r13 + 0x1300;
+  uint32_t AreaObjectsAddressesStart = 0x803CA2D8;
 #elif defined TTYD_EU
   uint32_t r13 = 0x80429760;
   char *NextBero = reinterpret_cast<char *>(r13 + 0x1768);
   char *NextMap = reinterpret_cast<char *>(r13 + 0x1788);
   char *NextArea = reinterpret_cast<char *>(r13 + 0x17A8);
   uint32_t seqMainAddress = r13 + 0x1940;
+  uint32_t AreaObjectsAddressesStart = 0x803DA6F8;
 #endif
 
 uint32_t GSWAddressesStart = r13 - 0x6F50;
 uint32_t CrystalStarPointerAddress = r13 - 0x7040;
+uint32_t AreaLZsAddressesStart = r13 - 0x6F58;
 
 // Display Stuff
 char *DisplayBuffer = new char[256];
@@ -33,7 +37,7 @@ bool DenyInput = false;
 bool TimerDisabled = false;
 bool TimerActive = false;
 uint32_t TimerCount = 0;
-bool DisplayTimer = false;
+bool DisablePlayerControl = false;
 
 // Item Rando
 bool ItemRandoV2 = false;

@@ -12,6 +12,8 @@
 #include <ttyd/mario_party.h>
 #include <ttyd/system.h>
 #include <ttyd/__mem.h>
+#include <ttyd/mariost.h>
+#include <ttyd/mario.h>
 #include <ttyd/dispdrv.h>
 
 #include <cstdio>
@@ -26,10 +28,12 @@ extern bool BossDefeated[11];
 extern uint16_t BossCount;
 extern bool ShowScoreSources;
 extern bool DenyInput;
+extern bool NewFile;
 extern bool TimerDisabled;
 extern bool TimerActive;
 extern uint32_t TimerCount;
-extern bool DisplayTimer;
+extern bool DisablePlayerControl;
+extern bool GameOverFlag;
 extern uint32_t seqMainAddress;
 extern bool LZRando;
 extern char *LZRandoText;
@@ -329,23 +333,29 @@ void Mod::LZRandoChallengeStuff()
     }
   }
   
+  // Reset values if starting a new file
+  if (NewFile)
+  {
+    TimerCount = 216000; // 1 hour
+    ShowScoreSources = false;
+    TimerDisabled = false;
+    TimerActive = false;
+    DisablePlayerControl = false;
+    CreditsCount = 0;
+    BossCount = 0;
+    ttyd::__mem::memset(BossDefeated, false, sizeof(BossDefeated));
+  }
+  
   // Don't display timer if disabled
   if (!TimerDisabled)
   {
     // Activate timer
     if (!TimerActive)
     {
-      TimerCount = 216000; // 1 hour
-      
       // Don't activate timer if in the intro or on the title screen
       if (dmo_comparison && title_comparison)
       {
-        if (NextSeq == MapChange)
-        {
-          // Display timer
-          DisplayTimer = true;
-        }
-        else if (NextSeq == Game)
+        if (NextSeq == Game)
         {
           // Activate timer
           TimerActive = true;
@@ -354,68 +364,84 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Display timer
-    if (DisplayTimer && (NextSeq >= Title) && (NextSeq <= GameOver))
+    bool Comparisons = ((Seq == Title) || (Seq == Load)) && (TimerCount == 0);
+    
+    // Don't show the timer on the title screen or file select screen while it is at 0
+    if (!Comparisons)
     {
-      bool Comparisons = (NextSeq == Title) && (TimerCount == 0);
+      // Display timer
+      int32_t FontDrawX = 105;
+      int32_t FontDrawY = -160;
+      float Scale = 0.8;
       
-      // Don't show the timer on the title screen while it is at 0
-      if (!Comparisons)
+      #ifdef TTYD_JP
+        FontDrawX += 5;
+        FontDrawY += 2;
+        Scale += 0.05;
+      #endif
+      
+      uint32_t modframe = TimerCount % 60;
+      uint32_t second = (TimerCount / 60) % 60;
+      uint32_t minute = (TimerCount / (60 * 60)) % 60;
+      uint32_t hour = TimerCount / (60 * 60 * 60);
+      
+      sprintf(DisplayBuffer,
+        "%.2ld:%.2ld:%.2ld.%.2ld",
+        hour,
+        minute,
+        second,
+        modframe);
+      
+      ttyd::fontmgr::FontDrawStart();
+      ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+      ttyd::fontmgr::FontDrawEdge();
+      ttyd::fontmgr::FontDrawScale(Scale);
+      ttyd::fontmgr::FontDrawString(FontDrawX, FontDrawY, DisplayBuffer);
+    }
+    
+    if (TimerActive)
+    {
+      if (TimerCount > 0)
       {
-        int32_t FontDrawX = 105;
-        int32_t FontDrawY = -160;
-        float Scale = 0.8;
+        // Run timer
+        TimerCount--;
+      }
+      else if ((Seq >= Game) && Seq <= GameOver)
+      {
+        uint32_t SystemLevel = ttyd::mariost::marioStGetSystemLevel();
         
-        #ifdef TTYD_JP
-          FontDrawX += 5;
-          FontDrawY += 2;
-          Scale += 0.05;
-        #endif
+        // Pause everything and disable player control
+        if (!DisablePlayerControl && (NextSeq == Game) && (SystemLevel != 15))
+        {
+          DisablePlayerControl = true;
+          ttyd::mariost::marioStSystemLevel(1);
+          
+          // Only turn the key off if it's not already off
+          if (ttyd::mario::marioKeyOffChk() == 0)
+          {
+            ttyd::mario::marioKeyOff();
+          }
+        }
         
-        uint32_t modframe = TimerCount % 60;
-        uint32_t second = (TimerCount / 60) % 60;
-        uint32_t minute = (TimerCount / (60 * 60)) % 60;
-        uint32_t hour = TimerCount / (60 * 60 * 60);
+        // Don't display while on the title screen or file select screen
+        // Display text for time being up
+        int32_t PosX = -90;
+        int32_t PosY = 80;
+        float Scale = 1.5;
         
         sprintf(DisplayBuffer,
-          "%.2ld:%.2ld:%.2ld.%.2ld",
-          hour,
-          minute,
-          second,
-          modframe);
+          "%s",
+          "Time's Up!");
         
         ttyd::fontmgr::FontDrawStart();
         ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
         ttyd::fontmgr::FontDrawEdge();
         ttyd::fontmgr::FontDrawScale(Scale);
-        ttyd::fontmgr::FontDrawString(FontDrawX, FontDrawY, DisplayBuffer);
-      }
-      
-      if (TimerActive)
-      {
-        if (TimerCount > 0)
+        ttyd::fontmgr::FontDrawString(PosX, PosY, DisplayBuffer);
+        
+        // // Don't display or allow modifying of the options in battles, as trying to warp as the curtain is coming up will crash the game
+        if (NextSeq != Battle)
         {
-          // Run timer
-          TimerCount--;
-        }
-        else if ((Seq >= Game) && (NextSeq != Battle))
-        {
-          // Don't display while on the title screen
-          // Don't display in battles, as tyring to warp as the curtain is coming up will crash the game
-          // Display text for time being up
-          int32_t PosX = -90;
-          int32_t PosY = 80;
-          float Scale = 1.5;
-          
-          sprintf(DisplayBuffer,
-            "%s",
-            "Time's Up!");
-          
-          ttyd::fontmgr::FontDrawStart();
-          ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-          ttyd::fontmgr::FontDrawEdge();
-          ttyd::fontmgr::FontDrawScale(Scale);
-          ttyd::fontmgr::FontDrawString(PosX, PosY, DisplayBuffer);
-          
           // Display text for how the player wants to continue
           PosX = -225;
           PosY = 25;
@@ -433,34 +459,32 @@ void Mod::LZRandoChallengeStuff()
           drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
           
           // Get input for what to do next
-          uint32_t ButtonInput = ttyd::system::keyGetButton(0);
+          uint32_t ButtonInputTrg = ttyd::system::keyGetButtonTrg(0);
           
-          if ((ButtonInput & PAD_Y) == PAD_Y)
+          if ((ButtonInputTrg & PAD_Y) == PAD_Y)
           {
             // Continue playing without the timer
             TimerDisabled = true;
+            DisablePlayerControl = false;
+            ttyd::mariost::marioStSystemLevel(0);
+            
+            // Only turn the key on if it's not already on
+            if (ttyd::mario::marioKeyOffChk() != 0)
+            {
+              ttyd::mario::marioKeyOn();
+            }
           }
-          else if ((ButtonInput & PAD_X) == PAD_X)
+          else if ((ButtonInputTrg & PAD_X) == PAD_X)
           {
             // Return to the title screen
             TimerDisabled = true;
+            GameOverFlag = false;
             ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "title", nullptr);
+            ttyd::mariost::marioStSystemLevel(0);
           }
         }
       }
     }
-  }
-  
-  // Reset values upon going to the file select screen
-  if (NextSeq == Load)
-  {
-    ShowScoreSources = false;
-    TimerDisabled = false;
-    TimerActive = false;
-    DisplayTimer = false;
-    CreditsCount = 0;
-    BossCount = 0;
-    ttyd::__mem::memset(BossDefeated, false, sizeof(BossDefeated));
   }
 }
 
@@ -487,8 +511,8 @@ void Mod::titleScreenStuff()
   
   sprintf(DisplayBuffer,
     "%s\n%s",
-    "Item Randomizers - v1.2.2",
-    "Loading Zone Randomizer Beta - v0.5.2");
+    "Item Randomizers - v1.2.3",
+    "Loading Zone Randomizer Beta - v0.5.3");
   
   ttyd::fontmgr::FontDrawStart();
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));

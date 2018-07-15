@@ -33,6 +33,8 @@ extern uint32_t seqMainAddress;
 extern bool ClearCacheNewFileStrings;
 extern char *NewBero;
 extern char *NewMap;
+extern uint32_t AreaObjectsAddressesStart;
+extern uint32_t AreaLZsAddressesStart;
 extern bool ClearCacheFlag;
 
 extern "C" {
@@ -41,6 +43,8 @@ extern "C" {
   void StartEnablePaperTubeModes();
   void StartEnableBoatMode();
   void BranchBackEnableBoatMode();
+  void StartMarioKeyOnFix();
+  void BranchBackMarioKeyOnFix();
 }
 
 namespace mod {
@@ -492,7 +496,6 @@ void resetValuesOnGameOver()
     return;
   }
   
-  NewFile = false;
   ReloadCurrentScreen = false;
   GameOverFlag = true;
 }
@@ -505,6 +508,58 @@ void reloadCurrentScreenFlag()
   if (ReloadCurrentScreen && (NextSeq == Game))
   {
     ReloadCurrentScreen = false;
+  }
+}
+
+void disableMapObjects()
+{
+  // Disable map objects to prevent crashes
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+    
+  if (NextSeq != Game)
+  {
+    return;
+  }
+  
+  uint32_t AreaObjectAddresses = *reinterpret_cast<uint32_t *>(AreaObjectsAddressesStart + 0x4);
+  
+  uint32_t AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZsAddressesStart);
+  AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x4);
+  
+  if (ttyd::string::strcmp(NextMap, "dou_11") == 0)
+  {
+    // Disable the blue switches in the Grotto room leading to the exit in the wall
+    *reinterpret_cast<uint32_t *>(AreaObjectAddresses) &= (1 << 0); // Only have the first bit enabled
+    *reinterpret_cast<uint32_t *>(AreaObjectAddresses + 0x23C) &= (1 << 0); // Only have the first bit enabled
+  }
+  else if (ttyd::string::strcmp(NextMap, "mri_16") == 0)
+  {
+    // Disable the blue switch in the water room of the Great Tree
+    *reinterpret_cast<uint32_t *>(AreaObjectAddresses) &= (1 << 0); // Only have the first bit enabled
+  }
+  else if (ttyd::string::strcmp(NextMap, "pik_02") == 0)
+  {
+    // Disable the pipe in the fake Garnet Star room
+    *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x280) = 0;
+  }
+}
+
+void setValuesMapChangeLZ()
+{
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
+  
+  // Only set on map change
+  if (NextSeq != MapChange)
+  {
+    return;
+  }
+  
+  // Give all partners, in the event that they are taken away
+  for (int i = 1; i <= 7; i++)
+  {
+    ttyd::mario_party::partyJoin(i);
   }
 }
 
@@ -538,6 +593,21 @@ uint32_t enableBoatMode(uint32_t pouchCheckItem)
 }
 }
 
+extern "C" {
+int32_t fixMarioKeyOn(int32_t currentKeyValue)
+{
+  // Prevent key from becoming negative
+  if (currentKeyValue < 1)
+  {
+    return 0;
+  }
+  else
+  {
+    return currentKeyValue - 1;
+  }
+}
+}
+
 void Mod::writeLZRandoAssemblyPatches()
 {
   #ifdef TTYD_US
@@ -545,16 +615,19 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t TubeModeCheck = 0x80092344;
     uint32_t PaperModeCheck = 0x800A6A3C;
     uint32_t BoatModeCheck = 0x8009268C;
+    uint32_t MarioKeyOn = 0x8005C1C8;
   #elif defined TTYD_JP
     uint32_t RandomWarp = 0x800086F0;
     uint32_t TubeModeCheck = 0x80090D90;
     uint32_t PaperModeCheck = 0x800A4DB4;
     uint32_t BoatModeCheck = 0x800910D8;
+    uint32_t MarioKeyOn = 0x8005B370;
   #elif defined TTYD_EU
     uint32_t RandomWarp = 0x80008994;
     uint32_t TubeModeCheck = 0x800936A0;
     uint32_t PaperModeCheck = 0x800A7E0C;
     uint32_t BoatModeCheck = 0x800939E8;
+    uint32_t MarioKeyOn = 0x8005C300;
   #endif
   
   // Random Warps
@@ -572,6 +645,10 @@ void Mod::writeLZRandoAssemblyPatches()
   // Allow Boat mode to be used in the Rogueport Sewers room with the 3 Shine Sprites
   patch::writeBranch(reinterpret_cast<void *>(BoatModeCheck), reinterpret_cast<void *>(StartEnableBoatMode));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackEnableBoatMode), reinterpret_cast<void *>(BoatModeCheck + 0x4));
+  
+  // Fix the marioKeyOn function to prevent the key from becoming negative
+  patch::writeBranch(reinterpret_cast<void *>(MarioKeyOn), reinterpret_cast<void *>(StartMarioKeyOnFix));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackMarioKeyOnFix), reinterpret_cast<void *>(MarioKeyOn + 0x4));
 }
 
 void writeAdditionalLZRandoAssemblyPatches()
@@ -651,6 +728,8 @@ void Mod::LZRandoStuff()
     failsafeCheats();
     resetValuesOnGameOver();
     reloadCurrentScreenFlag();
+    disableMapObjects();
+    setValuesMapChangeLZ();
   }
   
   // Additional LZ Rando stuff that needs to run no matter what

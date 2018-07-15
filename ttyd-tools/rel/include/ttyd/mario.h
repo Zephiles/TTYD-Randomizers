@@ -158,13 +158,13 @@ extern "C" {
 // marioBgmodeOn
 // marioBgmodeChk
 // marioSetMutekiTime
-void marioKeyOn();
-void marioKeyOff();
+int8_t marioKeyOn();
+int8_t marioKeyOff();
 // marioCtrlOn2
 // marioCtrlOff2
 // marioCtrlOn
 // marioCtrlOff
-// marioKeyOffChk
+int8_t marioKeyOffChk();
 // marioCtrlOffChk
 // marioFBattlePost
 // marioFBattlePrepare
