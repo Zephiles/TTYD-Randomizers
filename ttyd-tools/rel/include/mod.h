@@ -30,6 +30,8 @@ private:
   // LZ Rando
   void LZRandoStuff();
   void writeLZRandoAssemblyPatches();
+  void preventPartyLeft(uint32_t);
+  void (*mPFN_partyLeft_trampoline)(uint32_t) = nullptr;
   
 private:
   void (*mPFN_makeKey_trampoline)() = nullptr;

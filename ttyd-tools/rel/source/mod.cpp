@@ -3,6 +3,7 @@
 #include <ttyd/system.h>
 #include <ttyd/itemdrv.h>
 #include <ttyd/fontmgr.h>
+#include <ttyd/mario_party.h>
 
 #include "patch.h"
 
@@ -36,6 +37,14 @@ void Mod::init()
   mPFN_itemEntry_trampoline = patch::hookFunction(ttyd::itemdrv::itemEntry, [](const char *itemName, uint32_t itemId, uint32_t itemMode, int32_t wasCollectedExpr, void *itemPickupScript, float itemCoordinateX, float itemCoordinateY, float itemCoordinateZ)
   {
     return gMod->getRandomItem(const_cast<char *>(itemName), itemId, itemMode, wasCollectedExpr, reinterpret_cast<uint32_t *>(itemPickupScript), itemCoordinateX, itemCoordinateY, itemCoordinateZ);
+  });
+  
+  // LZ Rando
+  // Prevent the game from removing partners
+  // Prevent partyLeft from running
+  mPFN_partyLeft_trampoline = patch::hookFunction(ttyd::mario_party::partyLeft, [](uint32_t id)
+  {
+    gMod->preventPartyLeft(id);
   });
   
   // Make changes that are only done once

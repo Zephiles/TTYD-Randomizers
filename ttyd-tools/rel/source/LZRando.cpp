@@ -545,24 +545,6 @@ void disableMapObjects()
   }
 }
 
-void setValuesMapChangeLZ()
-{
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
-  
-  // Only set on map change
-  if (NextSeq != MapChange)
-  {
-    return;
-  }
-  
-  // Give all partners, in the event that they are taken away
-  for (int i = 1; i <= 7; i++)
-  {
-    ttyd::mario_party::partyJoin(i);
-  }
-}
-
 uint32_t getCurseReturnValue(uint32_t pouchCheckItem, const char *CheckMap)
 {
   // Only run if the player doesn't already have the Boat Mode curse, and if the Loading Zone randomizer is in use
@@ -596,16 +578,34 @@ uint32_t enableBoatMode(uint32_t pouchCheckItem)
 extern "C" {
 int32_t fixMarioKeyOn(int32_t currentKeyValue)
 {
+  // Properly convert key to int8_t
+  int8_t NewKeyValue = static_cast<int8_t>(currentKeyValue);
+  
   // Prevent key from becoming negative
-  if (currentKeyValue < 1)
+  if (NewKeyValue < 1)
   {
     return 0;
   }
   else
   {
-    return currentKeyValue - 1;
+    return NewKeyValue - 1;
   }
 }
+}
+
+void Mod::preventPartyLeft(uint32_t id)
+{
+  // Prevent the game from removing partners
+  // Only prevent from running if the Loading Zone randomizer is currently in use
+  if (LZRando)
+  {
+    return;
+  }
+  else
+  {
+    // Call original function
+    mPFN_partyLeft_trampoline(id);
+  }
 }
 
 void Mod::writeLZRandoAssemblyPatches()
@@ -729,7 +729,6 @@ void Mod::LZRandoStuff()
     resetValuesOnGameOver();
     reloadCurrentScreenFlag();
     disableMapObjects();
-    setValuesMapChangeLZ();
   }
   
   // Additional LZ Rando stuff that needs to run no matter what

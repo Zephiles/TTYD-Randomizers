@@ -757,7 +757,7 @@
 // 80140E60:partyGetTechLv
 // 80140EA4:partyGetHp
 // 80140EE8:partyChkJoin
-// 80140F30:partyLeft
+80140F30:partyLeft
 80140F74:partyJoin
 80140FB8:marioGetExtraPartyId
 80141050:marioGetPartyId

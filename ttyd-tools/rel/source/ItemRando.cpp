@@ -595,7 +595,7 @@ uint32_t newItemToInventory(uint32_t currentItem)
     
     // Randomize the hotdog from the Glitzville hotdog seller
     uint32_t NewItem = 0;
-    while (NewItem < GoldBar)
+    while ((NewItem < GoldBar) || (NewItem == DebugBadge))
     {
       // Make sure the new item is a standard item/badge
       NewItem = randomizeItem();
@@ -899,7 +899,6 @@ void Mod::writeItemRandoAssemblyPatches()
 void Mod::itemRandoStuff()
 {
   manageEnemyHeldItemArray();
-  randomizeShopRewards();
   setValuesMapChangeItem();
 }
 
