@@ -7,7 +7,7 @@
 #include <ttyd/swdrv.h>
 #include <ttyd/system.h>
 #include <ttyd/mario_party.h>
-#include <ttyd/mario_pouch.h>
+#include <ttyd/party.h>
 #include <ttyd/seqdrv.h>
 #include <ttyd/OSCache.h>
 #include <ttyd/mario.h>
@@ -267,7 +267,7 @@ void setUpNewFile()
   }
   
   // Randomize Yoshi color
-  ttyd::mario_pouch::pouchSetPartyColor(4, ttyd::system::irand(7));
+  ttyd::party::yoshiSetColor();
   
   // Start with Yoshi out
   ttyd::mario_party::marioPartyHello(4);

@@ -387,7 +387,7 @@
 // 800BEB04:partyEntry2
 // 800BEE78:partyEntryMain
 // 800BF1F8:partyGetHeight
-// 800BF228:yoshiSetColor
+800BF228:yoshiSetColor
 // 800BF2C8:partyKill2
 // 800BF3D0:partyKill
 // 800BF530:partyGoodbye
@@ -411,7 +411,7 @@
 // mario_pouch.o
 // 800D3BAC:pouchGetYoshiName
 // 800D3BF4:pouchSetYoshiName
-800D3C20:pouchSetPartyColor
+// 800D3C20:pouchSetPartyColor
 // 800D3C3C:pouchGetPartyColor
 // 800D3C50:pouchCheckMail
 // 800D3CAC:pouchOpenMail

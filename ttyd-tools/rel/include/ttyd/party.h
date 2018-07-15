@@ -50,7 +50,7 @@ extern "C" {
 // partyEntry2
 // partyEntryMain
 // partyGetHeight
-// yoshiSetColor
+uint32_t yoshiSetColor();
 // partyKill2
 // partyKill
 // partyGoodbye

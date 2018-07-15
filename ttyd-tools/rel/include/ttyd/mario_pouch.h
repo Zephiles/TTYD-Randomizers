@@ -6,7 +6,7 @@ extern "C" {
 
 // pouchGetYoshiName
 // pouchSetYoshiName
-void pouchSetPartyColor(uint32_t partnerId, uint32_t colorId);
+// pouchSetPartyColor
 // pouchGetPartyColor
 // pouchCheckMail
 // pouchOpenMail
