@@ -763,7 +763,7 @@
 80142B38:marioGetPartyId
 // 80142BD0:marioGetParty
 // 80142C80:marioPartyKill
-// 80142CEC:marioPartyGoodbye
+80142CEC:marioPartyGoodbye
 80142D34:marioPartyHello
 // 80142DE4:marioPartyEntry
 // 80142EF4:unk_JP_US_PAL_062

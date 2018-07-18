@@ -47,14 +47,14 @@ void Mod::LZRandoDisplayStuff()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
   int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
-  int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
+  int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
   
   bool dmo_comparison = ttyd::string::strcmp(NextMap,"dmo_00") == 0;
   bool title_comparison = ttyd::string::strcmp(NextMap,"title") == 0;
   
   // Only display while a file is loaded, and while not in battles
-  // Don't display while in the intro
-  if ((NextSeq < Game) || (NextSeq > MapChange) || dmo_comparison || title_comparison)
+  // Don't display while in the intro or on the title screen
+  if ((NextSeq < Game) || (NextSeq > Battle) || dmo_comparison || title_comparison)
   {
     return;
   }
@@ -83,18 +83,17 @@ void Mod::LZRandoChallengeStuff()
   int32_t Seq = ttyd::seqdrv::seqGetSeq();
   int32_t Title = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kTitle);
   int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
-  int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
   int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
   int32_t GameOver = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGameOver);
   int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
   uint32_t color = 0xFFFFFFFF;
   
-  bool dmo_comparison = ttyd::string::strcmp(NextMap,"dmo_00") != 0;
-  bool title_comparison = ttyd::string::strcmp(NextMap,"title") != 0;
+  bool dmo_comparison = ttyd::string::strcmp(NextMap,"dmo_00") == 0;
+  bool title_comparison = ttyd::string::strcmp(NextMap,"title") == 0;
   
   // Get and display Score
   // Don't display while in the intro or on the title screen
-  if ((NextSeq >= Game) && (NextSeq <= MapChange) && dmo_comparison && title_comparison)
+  if ((NextSeq >= Game) && (NextSeq <= Battle) && !dmo_comparison && !title_comparison)
   {
     uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
     uint32_t PouchPointer = reinterpret_cast<uint32_t>(ttyd::mario_pouch::pouchGetPtr());
@@ -353,7 +352,7 @@ void Mod::LZRandoChallengeStuff()
     if (!TimerActive)
     {
       // Don't activate timer if in the intro or on the title screen
-      if (dmo_comparison && title_comparison)
+      if (!dmo_comparison && !title_comparison)
       {
         if (NextSeq == Game)
         {
@@ -364,9 +363,10 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Display timer
-    bool Comparisons = ((Seq == Title) || (Seq == Load)) && (TimerCount == 0);
+    bool Comparisons = ((Seq == Title) || (Seq == Load) || dmo_comparison || title_comparison) && (TimerCount == 0);
     
     // Don't show the timer on the title screen or file select screen while it is at 0
+    // Don't show the timer during the intro
     if (!Comparisons)
     {
       // Display timer
@@ -511,8 +511,8 @@ void Mod::titleScreenStuff()
   
   sprintf(DisplayBuffer,
     "%s\n%s",
-    "Item Randomizers - v1.2.4",
-    "Loading Zone Randomizer Beta - v0.5.4");
+    "Item Randomizers - v1.2.5",
+    "Loading Zone Randomizer Beta - v0.5.5");
   
   ttyd::fontmgr::FontDrawStart();
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));

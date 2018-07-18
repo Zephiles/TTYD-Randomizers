@@ -411,6 +411,7 @@ void setValuesMapChangeItem()
   // Reset EnemyHeldItemArray, in the event that it bugs out for some reason
   // Need to figure out why it bugs out in the first place
   ttyd::__mem::memset(EnemyHeldItemArray, 0, sizeof(EnemyHeldItemArray));
+  EnemyHeldItemArrayInUse = false;
   EnemyHeldItemArrayCounter = 0;
 }
 

@@ -31,6 +31,7 @@ extern uint16_t MapArraySize;
 extern char *NextArea;
 extern uint32_t seqMainAddress;
 extern bool ClearCacheNewFileStrings;
+extern uint32_t NPCAddressesStart;
 extern char *NewBero;
 extern char *NewMap;
 extern uint32_t AreaObjectsAddressesStart;
@@ -148,6 +149,16 @@ void getRandomWarp()
       if (CurrentNameChars == StarValue)
       {
         continue;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "gon_12") == 0)
+    {
+      // Change the current partner to prevent the game from crashing
+      if (SequencePosition < 50)
+      {
+        // The cutscene causing the crash only occurs if the sequence is below 50
+        // Remove the current partner
+        ttyd::mario_party::marioPartyGoodbye();
       }
     }
     else if (ttyd::string::strcmp(NextMap, "mri_16") == 0)
@@ -338,6 +349,48 @@ void marioNeverTransform()
   }
 }
 
+void specificMapEdits()
+{
+  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+  
+  if (NextSeq != Game)
+  {
+    return;
+  }
+  
+  uint32_t PartnerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId()));
+  
+  if (ttyd::string::strcmp(NextMap, "gon_12") == 0)
+  {
+    // Bring out a partner for the Mowz cutscene if one isn't out
+    // Check if a partner is out or not
+    if (!PartnerPointer)
+    {
+      // Bring out Koops if no partner is out; Goombella also works
+      ttyd::mario_party::marioPartyHello(2);
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "hei_01") == 0)
+  {
+    // Make sure a partner is out for the Koopie Koo cutscene
+    // Check if a partner is out or not
+    if (!PartnerPointer)
+    {
+      // Bring out Yoshi if no partner is out
+      ttyd::mario_party::marioPartyHello(4);
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "mri_07") == 0)
+  {
+    // Move Jabble under the map to prevent the game from crashing when talking to him under certain conditions
+    uint32_t NPCAddresses = *reinterpret_cast<uint32_t *>(NPCAddressesStart);
+    
+    // Set coordinate Y to -1000
+    *reinterpret_cast<float *>(NPCAddresses + 0x90) = -1000;
+  }
+}
+
 void dismountYoshi()
 {
   // This needs to be possible in the event that a cutscene forces Mario off of Yoshi improperly
@@ -480,6 +533,7 @@ void setNextBero()
 void failsafeCheats()
 {
   marioNeverTransform();
+  specificMapEdits();
   resetMarioThroughLZ();
   dismountYoshi();
   reloadScreen();
