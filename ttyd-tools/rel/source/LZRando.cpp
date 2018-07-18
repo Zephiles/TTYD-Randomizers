@@ -381,6 +381,16 @@ void specificMapEdits()
       ttyd::mario_party::marioPartyHello(4);
     }
   }
+  else if (ttyd::string::strcmp(NextMap, "jon_06") == 0)
+  {
+    // Make sure a partner is out when fighting Bonetail
+    // This can be avoided with the edits to the jon REL, which will probably be implemented at a later date
+    if (!PartnerPointer)
+    {
+      // Bring out Yoshi if no partner is out
+      ttyd::mario_party::marioPartyHello(4);
+    }
+  }
   else if (ttyd::string::strcmp(NextMap, "mri_07") == 0)
   {
     // Move Jabble under the map to prevent the game from crashing when talking to him under certain conditions

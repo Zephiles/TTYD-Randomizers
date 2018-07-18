@@ -173,73 +173,43 @@ void Mod::LZRandoChallengeStuff()
     
     // Check for bosses
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-    bool BonetailCheck = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x3F0) & (1 << 29); // Check GSWF(5085) - Check the 29 bit
+    uint16_t SequenceChecks[] = { 21, 56, 112, 164, 200, 211, 253, 332, 373, 401 };
     
-    if (BonetailCheck && !BossDefeated[0])
+    int32_t ArraySize = sizeof(SequenceChecks) / sizeof(SequenceChecks[0]);
+    for (int i = 0; i < ArraySize; i++)
     {
-      // Bonetail has been defeated
-      BossDefeated[0] = true;
-      BossCount++;
+      if (SequenceChecks[i] == SequencePosition)
+      {
+        if (!BossDefeated[i])
+        {
+          BossDefeated[i] = true;
+          BossCount++;
+        }
+      }
+      else
+      {
+        BossDefeated[i] = false;
+      }
     }
-    else if ((SequencePosition == 21) && !BossDefeated[1])
+    
+    // Check for Bonetail
+    if (ttyd::string::strcmp(NextMap, "jon_06") == 0)
     {
-      // Blooper has been defeated
-      BossDefeated[1] = true;
-      BossCount++;
+      // Check GSWF(5085) - Check the 29 bit
+      bool BonetailCheck = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x3F0) & (1 << 29);
+      
+      if (BonetailCheck && !BossDefeated[10])
+      {
+        BossDefeated[10] = true;
+        BossCount++;
+      }
     }
-    else if ((SequencePosition == 56) && !BossDefeated[2])
+    else
     {
-      // Hooktail has been defeated
-      BossDefeated[2] = true;
-      BossCount++;
-    }
-    else if ((SequencePosition == 112) && !BossDefeated[3])
-    {
-      // Magnus 1.0 has been defeated
-      BossDefeated[3] = true;
-      BossCount++;
-    }
-    else if ((SequencePosition == 164) && !BossDefeated[4])
-    {
-      // Grubba has been defeated
-      BossDefeated[4] = true;
-      BossCount++;
-    }
-    else if ((SequencePosition == 200) && !BossDefeated[5])
-    {
-      // Doopliss 1 has been defeated
-      BossDefeated[5] = true;
-      BossCount++;
-    }
-    else if ((SequencePosition == 211) && !BossDefeated[6])
-    {
-      // Doopliss 2 has been defeated
-      BossDefeated[6] = true;
-      BossCount++;
-    }
-    else if ((SequencePosition == 253) && !BossDefeated[7])
-    {
-      // Cortez has been defeated
-      BossDefeated[7] = true;
-      BossCount++;
-    }
-    else if ((SequencePosition == 332) && !BossDefeated[8])
-    {
-      // Smorg has been defeated
-      BossDefeated[8] = true;
-      BossCount++;
-    }
-    else if ((SequencePosition == 373) && !BossDefeated[9])
-    {
-      // Magnus 2.0 has been defeated
-      BossDefeated[9] = true;
-      BossCount++;
-    }
-    else if ((SequencePosition == 401) && !BossDefeated[10])
-    {
-      // Shadow Queen has been defeated
-      BossDefeated[10] = true;
-      BossCount++;
+      BossDefeated[10] = false;
+      
+      // Turn off GSWF(5084) and GSWF(5085) so that the player can refight Bonetail
+      *reinterpret_cast<uint32_t *>(GSWAddresses + 0x3F0) &= ~((1 << 28) | (1 << 29)); // Turn off the 28 and 29 bits
     }
     
     // Add 10 points for each boss defeated
@@ -512,7 +482,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.5",
-    "Loading Zone Randomizer Beta - v0.5.5");
+    "Loading Zone Randomizer Beta - v0.5.6");
   
   ttyd::fontmgr::FontDrawStart();
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
