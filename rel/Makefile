@@ -7,14 +7,14 @@ ifeq ($(strip $(DEVKITPPC)),)
 $(error "Please set DEVKITPPC in your environment. export DEVKITPPC=<path to>devkitPPC")
 endif
 
-ifeq ($(strip $(TTYDTOOLS)),)
-$(error "Please set TTYDTOOLS in your environment. export TTYDTOOLS=<path to>ttyd-tools")
+ifeq ($(strip $(TTYDRandomizers)),)
+$(error "Please set TTYDRandomizers in your environment. export TTYDRandomizers=<path to>TTYD-Randomizers")
 endif
 
 include $(DEVKITPPC)/gamecube_rules
 
-export ELF2REL	:=	$(TTYDTOOLS)/bin/elf2rel
-export GCIPACK	:=	python $(TTYDTOOLS)/gcipack/gcipack.py
+export ELF2REL	:=	$(TTYDRandomizers)/bin/elf2rel
+export GCIPACK	:=	python $(TTYDRandomizers)/gcipack/gcipack.py
 
 ifeq ($(VERSION),)
 all: us jp eu
