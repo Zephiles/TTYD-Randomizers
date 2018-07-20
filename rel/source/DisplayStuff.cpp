@@ -24,14 +24,14 @@ extern char *NextBero;
 extern uint32_t GSWAddressesStart;
 extern bool InCredits;
 extern uint16_t CreditsCount;
-extern bool BossDefeated[11];
+extern bool BossDefeated[12];
 extern uint16_t BossCount;
 extern bool ShowScoreSources;
 extern bool DenyInput;
 extern bool NewFile;
+extern uint32_t TimerCount;
 extern bool TimerDisabled;
 extern bool TimerActive;
-extern uint32_t TimerCount;
 extern bool DisablePlayerControl;
 extern bool GameOverFlag;
 extern uint32_t seqMainAddress;
@@ -173,8 +173,9 @@ void Mod::LZRandoChallengeStuff()
     
     // Check for bosses
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-    uint16_t SequenceChecks[] = { 21, 56, 112, 164, 200, 211, 253, 332, 373, 401 };
+    uint16_t SequenceChecks[] = { 21, 56, 112, 164, 200, 211, 253, 332, 373 };
     
+    // Check for bosses based on Sequence
     int32_t ArraySize = sizeof(SequenceChecks) / sizeof(SequenceChecks[0]);
     for (int i = 0; i < ArraySize; i++)
     {
@@ -192,13 +193,27 @@ void Mod::LZRandoChallengeStuff()
       }
     }
     
-    // Check for Bonetail
-    if (ttyd::string::strcmp(NextMap, "jon_06") == 0)
+    // Check for the Shadow Queen
+    if (SequencePosition == 401)
     {
-      // Check GSWF(5085) - Check the 29 bit
-      bool BonetailCheck = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x3F0) & (1 << 29);
+      if (!BossDefeated[9])
+      {
+        BossDefeated[9] = true;
+        BossCount += 2;
+      }
+    }
+    else
+    {
+      BossDefeated[9] = false;
+    }
+    
+    // Check for the Atomic Boo
+    if (ttyd::string::strcmp(NextMap, "jin_00") == 0)
+    {
+      // Check GSWF(2226) - Check the 18 bit
+      bool AtomicBooCheck = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x28C) & (1 << 18);
       
-      if (BonetailCheck && !BossDefeated[10])
+      if (AtomicBooCheck && !BossDefeated[10])
       {
         BossDefeated[10] = true;
         BossCount++;
@@ -208,11 +223,31 @@ void Mod::LZRandoChallengeStuff()
     {
       BossDefeated[10] = false;
       
+      // Turn off GSWF(2226) so that the player can refight the Atomic Boo
+      *reinterpret_cast<uint32_t *>(GSWAddresses + 0x28C) &= ~(1 << 18); // Turn off the 18 bit
+    }
+    
+    // Check for Bonetail
+    if (ttyd::string::strcmp(NextMap, "jon_06") == 0)
+    {
+      // Check GSWF(5085) - Check the 29 bit
+      bool BonetailCheck = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x3F0) & (1 << 29);
+      
+      if (BonetailCheck && !BossDefeated[11])
+      {
+        BossDefeated[11] = true;
+        BossCount += 2;
+      }
+    }
+    else
+    {
+      BossDefeated[11] = false;
+      
       // Turn off GSWF(5084) and GSWF(5085) so that the player can refight Bonetail
       *reinterpret_cast<uint32_t *>(GSWAddresses + 0x3F0) &= ~((1 << 28) | (1 << 29)); // Turn off the 28 and 29 bits
     }
     
-    // Add 10 points for each boss defeated
+    // Add 10 points for each boss defeated; 20 points for the Shadow Queen and Bonetail
     BossScore = BossCount * 10;
     
     // Add 1 point for Mario's coin count divided by 100
@@ -482,7 +517,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.5",
-    "Loading Zone Randomizer Beta - v0.5.7");
+    "Loading Zone Randomizer Beta - v0.5.8");
   
   ttyd::fontmgr::FontDrawStart();
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));

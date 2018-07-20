@@ -21,21 +21,22 @@
 extern bool LZRando;
 extern bool ReloadCurrentScreen;
 extern char *NextMap;
-extern char *NextBero;
 extern bool InCredits;
+extern char *NextBero;
 extern bool GameOverFlag;
+extern char *NextArea;
 extern bool NewFile;
 extern uint32_t GSWAddressesStart;
 extern uint32_t PossibleMaps[];
 extern uint16_t MapArraySize;
-extern char *NextArea;
+extern bool LZRandoChallenge;
 extern uint32_t seqMainAddress;
 extern bool ClearCacheNewFileStrings;
-extern uint32_t NPCAddressesStart;
-extern char *NewBero;
-extern char *NewMap;
 // extern uint32_t AreaObjectsAddressesStart;
 extern uint32_t AreaLZsAddressesStart;
+// extern uint32_t NPCAddressesStart;
+extern char *NewBero;
+extern char *NewMap;
 extern bool ClearCacheFlag;
 
 extern "C" {
@@ -96,6 +97,20 @@ void getRandomWarp()
     return;
   }
   
+  // Warp back to the Shadow Queen room if currently in that sequence
+  if (ttyd::string::strcmp(NextBero, "minnnanokoe") == 0)
+  {
+    ttyd::string::strcpy(NextMap, "las_29");
+    ttyd::string::strncpy(NextArea, "las_29", 3);
+    return;
+  }
+  
+  // Don't run on the credits screen
+  if (ttyd::string::strcmp(NextMap, "end_00") == 0)
+  {
+    return;
+  }
+  
   // Prevent random warp upon starting a new file
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   if (SequencePosition == 0)
@@ -134,6 +149,12 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "end_00") == 0)
     {
+      // Prevent warping to the credits if not using the challenge mode
+      if (!LZRandoChallenge)
+      {
+        continue;
+      }
+      
       #ifdef TTYD_US
         uint16_t StarValue = 0xDE00;
       #elif defined TTYD_JP
@@ -220,6 +241,16 @@ void getRandomWarp()
       
       // Change loading zone to the pipe above the room
       ttyd::string::strcpy(NextBero, "dokan_2");
+    }
+    else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
+    {
+      // Allow the Shadow Queen to be fought if the sequence is not past 400
+      if (SequencePosition < 400)
+      {
+        // Set the Sequence to 400 and the loading zone to sekai_yami2 to trigger the first fight
+        ttyd::swdrv::swByteSet(0, 400);
+        ttyd::string::strcpy(NextBero, "sekai_yami2");
+      }
     }
     
     ConfirmNewMap = true;
@@ -378,6 +409,26 @@ void specificMapEdits()
     {
       // Bring out Yoshi if no partner is out
       ttyd::mario_party::marioPartyHello(4);
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
+  {
+    // Warp out of the Shadow Queen room if she is defeated, so that the cutscene is skipped
+    uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
+    if (SequencePosition == 401)
+    {
+      if (LZRandoChallenge)
+      {
+        // Warp to a random room if the challenge mode is being used
+        ttyd::swdrv::swByteSet(0, 405);
+        ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "las_29", "w_bero");
+      }
+      else
+      {
+        // Warp to the credits
+        ttyd::swdrv::swByteSet(0, 404);
+        ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "end_00", nullptr);
+      }
     }
   }
   else if (ttyd::string::strcmp(NextMap, "pik_02") == 0)
