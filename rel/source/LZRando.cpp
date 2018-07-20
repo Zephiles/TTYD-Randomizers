@@ -34,7 +34,7 @@ extern bool ClearCacheNewFileStrings;
 extern uint32_t NPCAddressesStart;
 extern char *NewBero;
 extern char *NewMap;
-extern uint32_t AreaObjectsAddressesStart;
+// extern uint32_t AreaObjectsAddressesStart;
 extern uint32_t AreaLZsAddressesStart;
 extern bool ClearCacheFlag;
 
@@ -156,15 +156,9 @@ void getRandomWarp()
       // Change the current partner to prevent the game from crashing
       if (SequencePosition < 50)
       {
-        // The cutscene causing the crash only occurs if the sequence is below 50
-        // Remove the current partner
-        ttyd::mario_party::marioPartyGoodbye();
+        // Set the Sequence to 50 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 50);
       }
-    }
-    else if (ttyd::string::strcmp(NextMap, "mri_16") == 0)
-    {
-      // Change loading zone to avoid softlocking
-      ttyd::string::strcpy(NextBero, "dokan1");
     }
     else if (ttyd::string::strcmp(NextMap, "rsh_05_a") == 0)
     {
@@ -249,6 +243,18 @@ void setUpNewFile()
   // Set Sequence to be just past getting Goombella
   ttyd::swdrv::swByteSet(0, 7);
   
+  // Add all partners
+  for (int i = 1; i <= 7; i++)
+  {
+    ttyd::mario_party::partyJoin(i);
+  }
+  
+  // Randomize Yoshi color
+  ttyd::party::yoshiSetColor();
+  
+  // Start with Yoshi out
+  ttyd::mario_party::marioPartyHello(4);
+  
   // Turn off a bit to enable loading zones
   uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
   *reinterpret_cast<uint32_t *>(GSWAddresses) &= ~(1 << 0); // Turn off the 0 bit
@@ -271,17 +277,17 @@ void setUpNewFile()
   // Turn on GSWF(1200) to prevent partners from explaining Save Blocks in central Rogueport
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x20C) |= (1 << 16); // Turn on the 16 bit
   
-  // Add all partners
-  for (int i = 1; i <= 7; i++)
-  {
-    ttyd::mario_party::partyJoin(i);
-  }
+  // Turn on GSWF(1781) and GSWF(1782) to skip the Koopie Koo cutscene in Petal Meadows
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x254) |= ((1 << 21) | (1 << 22)); // Turn on the 21 and 22 bits
   
-  // Randomize Yoshi color
-  ttyd::party::yoshiSetColor();
+  // Turn on GSWF(2867) to drain the water in the Great Tree
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2DC) |= (1 << 19); // Turn on the 19 bit
   
-  // Start with Yoshi out
-  ttyd::mario_party::marioPartyHello(4);
+  // Turn on GSWF(2878) to prevent the player from being able to talk to Jabble
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2DC) |= (1 << 30); // Turn on the 30 bit
+  
+  // Turn on GSWF(2982), GSWF(2983), and GSWF(2984) to activate the blue switches in Pirate's Grotto
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2EC) |= ((1 << 6) | (1 << 7) | (1 << 8)); // Turn on the 6, 7, and 8 bits
 }
 
 void overwriteNewFileStrings()
@@ -360,28 +366,11 @@ void specificMapEdits()
   }
   
   uint32_t PartnerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId()));
+  // uint32_t AreaObjectAddresses = *reinterpret_cast<uint32_t *>(AreaObjectsAddressesStart + 0x4);
+  uint32_t AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZsAddressesStart);
+  AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x4);
   
-  if (ttyd::string::strcmp(NextMap, "gon_12") == 0)
-  {
-    // Bring out a partner for the Mowz cutscene if one isn't out
-    // Check if a partner is out or not
-    if (!PartnerPointer)
-    {
-      // Bring out Koops if no partner is out; Goombella also works
-      ttyd::mario_party::marioPartyHello(2);
-    }
-  }
-  else if (ttyd::string::strcmp(NextMap, "hei_01") == 0)
-  {
-    // Make sure a partner is out for the Koopie Koo cutscene
-    // Check if a partner is out or not
-    if (!PartnerPointer)
-    {
-      // Bring out Yoshi if no partner is out
-      ttyd::mario_party::marioPartyHello(4);
-    }
-  }
-  else if (ttyd::string::strcmp(NextMap, "jon_06") == 0)
+  if (ttyd::string::strcmp(NextMap, "jon_06") == 0)
   {
     // Make sure a partner is out when fighting Bonetail
     // This can be avoided with the edits to the jon REL, which will probably be implemented at a later date
@@ -391,13 +380,10 @@ void specificMapEdits()
       ttyd::mario_party::marioPartyHello(4);
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "mri_07") == 0)
+  else if (ttyd::string::strcmp(NextMap, "pik_02") == 0)
   {
-    // Move Jabble under the map to prevent the game from crashing when talking to him under certain conditions
-    uint32_t NPCAddresses = *reinterpret_cast<uint32_t *>(NPCAddressesStart);
-    
-    // Set coordinate Y to -1000
-    *reinterpret_cast<float *>(NPCAddresses + 0x90) = -1000;
+    // Disable the pipe in the fake Garnet Star room
+    *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x280) = 0;
   }
 }
 
@@ -508,10 +494,7 @@ void reloadScreen()
 void setNextBero()
 {
   // Prevent changing the loading zone if currently in a room where using it would result in a softlock
-  bool mri_comparison = ttyd::string::strcmp(NextMap, "mri_16") == 0;
-  bool eki_comparison = ttyd::string::strcmp(NextMap, "eki_03") == 0;
-  
-  if (mri_comparison || eki_comparison)
+  if (ttyd::string::strcmp(NextMap, "eki_03") == 0)
   {
     return;
   }
@@ -572,40 +555,6 @@ void reloadCurrentScreenFlag()
   if (ReloadCurrentScreen && (NextSeq == Game))
   {
     ReloadCurrentScreen = false;
-  }
-}
-
-void disableMapObjects()
-{
-  // Disable map objects to prevent crashes
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
-    
-  if (NextSeq != Game)
-  {
-    return;
-  }
-  
-  uint32_t AreaObjectAddresses = *reinterpret_cast<uint32_t *>(AreaObjectsAddressesStart + 0x4);
-  
-  uint32_t AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZsAddressesStart);
-  AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x4);
-  
-  if (ttyd::string::strcmp(NextMap, "dou_11") == 0)
-  {
-    // Disable the blue switches in the Grotto room leading to the exit in the wall
-    *reinterpret_cast<uint32_t *>(AreaObjectAddresses) &= (1 << 0); // Only have the first bit enabled
-    *reinterpret_cast<uint32_t *>(AreaObjectAddresses + 0x23C) &= (1 << 0); // Only have the first bit enabled
-  }
-  else if (ttyd::string::strcmp(NextMap, "mri_16") == 0)
-  {
-    // Disable the blue switch in the water room of the Great Tree
-    *reinterpret_cast<uint32_t *>(AreaObjectAddresses) &= (1 << 0); // Only have the first bit enabled
-  }
-  else if (ttyd::string::strcmp(NextMap, "pik_02") == 0)
-  {
-    // Disable the pipe in the fake Garnet Star room
-    *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x280) = 0;
   }
 }
 
@@ -792,7 +741,6 @@ void Mod::LZRandoStuff()
     failsafeCheats();
     resetValuesOnGameOver();
     reloadCurrentScreenFlag();
-    disableMapObjects();
   }
   
   // Additional LZ Rando stuff that needs to run no matter what
