@@ -1,11 +1,13 @@
 #include "mod.h"
 #include "maps.h"
+#include "items.h"
 #include "buttons.h"
 #include "patch.h"
 
 #include <ttyd/string.h>
 #include <ttyd/swdrv.h>
 #include <ttyd/system.h>
+#include <ttyd/mario_pouch.h>
 #include <ttyd/mario_party.h>
 #include <ttyd/party.h>
 #include <ttyd/seqdrv.h>
@@ -201,6 +203,18 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 50);
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "jin_00") == 0)
+    {
+      // Check if the player has either of the Hammer upgrades
+      bool SuperHammerAmount = ttyd::mario_pouch::pouchCheckItem(SuperHammer) > 0;
+      bool UltraHammerAmount = ttyd::mario_pouch::pouchCheckItem(UltraHammer) > 0;
+      
+      // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the player has a Hammer upgrade
+      if ((SuperHammerAmount || UltraHammerAmount) && LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+      {
+        continue;
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "jin_04") == 0)
     {
       // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
@@ -387,7 +401,7 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "rsh_06_a") == 0)
     {
-      // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less 332
+      // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 332
       if ((SequencePosition < 332) && LZRandoChallenge && (TimerCount >= TimerCountCutoff))
       {
         continue;
