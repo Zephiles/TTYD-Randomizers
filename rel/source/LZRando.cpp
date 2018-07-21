@@ -22,14 +22,15 @@ extern bool LZRando;
 extern bool ReloadCurrentScreen;
 extern char *NextMap;
 extern bool InCredits;
-extern char *NextBero;
 extern bool GameOverFlag;
+extern char *NextBero;
 extern char *NextArea;
 extern bool NewFile;
 extern uint32_t GSWAddressesStart;
 extern uint32_t PossibleMaps[];
 extern uint16_t MapArraySize;
 extern bool LZRandoChallenge;
+extern uint32_t TimerCount;
 extern uint32_t seqMainAddress;
 extern bool ClearCacheNewFileStrings;
 // extern uint32_t AreaObjectsAddressesStart;
@@ -75,13 +76,9 @@ void getRandomWarp()
     return;
   }
   
-  bool dmo_comparison = ttyd::string::strcmp(NextMap, "dmo_00") == 0;
-  bool tuzuki_comparison = ttyd::string::strcmp(NextBero, "tuzuki") == 0;
-  
   // Don't run if transitioning to the intro
-  // Don't run if the loading zone is currently tuzuki, as this is used for the Magnus 2.0 cutscenes
   // However, it should still run under these conditions if the Game Over flag is set
-  if (dmo_comparison || tuzuki_comparison)
+  if (ttyd::string::strcmp(NextMap, "dmo_00") == 0)
   {
     if (!GameOverFlag)
     {
@@ -89,15 +86,16 @@ void getRandomWarp()
     }
   }
   
-  // Don't run if the loading zone is currently evt_aji_14, as this is used for the Magnus 2.0 cutscenes
+  // Warp back to Magnus 2.0's room if the player just beat him
   if (ttyd::string::strcmp(NextBero, "evt_aji_14") == 0)
   {
-    // Set Sequence to properly warp back to Magnus 2.0's room
-    ttyd::swdrv::swByteSet(0, 372);
+    ttyd::string::strcpy(NextBero, "tuzuki");
+    ttyd::string::strcpy(NextMap, "aji_14");
+    ttyd::string::strncpy(NextArea, "aji_14", 3);
     return;
   }
   
-  // Warp back to the Shadow Queen room if currently in that sequence
+  // Warp back to the Shadow Queen room if currently in that Sequence
   if (ttyd::string::strcmp(NextBero, "minnnanokoe") == 0)
   {
     ttyd::string::strcpy(NextMap, "las_29");
@@ -122,6 +120,7 @@ void getRandomWarp()
   
   GameOverFlag = false;
   uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
+  uint32_t TimerCountCutoff = 144000; // 40 Minutes
   bool ConfirmNewMap = false;
   
   while (!ConfirmNewMap)
@@ -131,7 +130,15 @@ void getRandomWarp()
     ttyd::string::strcpy(NextMap, NewRandomMap);
     ttyd::string::strncpy(NextArea, NewRandomMap, 3);
     
-    if (ttyd::string::strcmp(NextMap, "eki_03") == 0)
+    if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
+    {
+      // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 373
+      if ((SequencePosition < 373) && LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+      {
+        continue;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "eki_03") == 0)
     {
       // Change loading zone to avoid softlocking
       ttyd::string::strcpy(NextBero, "w_bero_1");
@@ -156,15 +163,20 @@ void getRandomWarp()
       }
       
       #ifdef TTYD_US
-        uint16_t StarValue = 0xDE00;
+        uint8_t StarValue = 0xDE;
       #elif defined TTYD_JP
         uint16_t StarValue = 0x8199;
       #elif defined TTYD_EU
-        uint16_t StarValue = 0xDE00;
+        uint8_t StarValue = 0xDE;
       #endif
       
-      // Get the first 2 bytes of the file name
-      uint16_t CurrentNameChars = *reinterpret_cast<uint16_t *>(GSWAddresses + 0x11BC);
+      #ifdef TTYD_JP
+        // Get the first 2 bytes of the file name
+        uint16_t CurrentNameChars = *reinterpret_cast<uint16_t *>(GSWAddresses + 0x11BC);
+      #else
+        // Get the first byte of the file name
+        uint8_t CurrentNameChars = *reinterpret_cast<uint8_t *>(GSWAddresses + 0x11BC);
+      #endif
       
       // Don't warp to credits if using the Star character as the file name
       if (CurrentNameChars == StarValue)
@@ -172,28 +184,63 @@ void getRandomWarp()
         continue;
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "gon_11") == 0)
+    {
+      // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 55
+      if ((SequencePosition < 55) && LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+      {
+        continue;
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "gon_12") == 0)
     {
-      // Change the current partner to prevent the game from crashing
+      // Skip the Mowz cutscene
       if (SequencePosition < 50)
       {
         // Set the Sequence to 50 to prevent the cutscene from playing
         ttyd::swdrv::swByteSet(0, 50);
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "rsh_05_a") == 0)
+    else if (ttyd::string::strcmp(NextMap, "jin_04") == 0)
     {
-      // The game will crash if the player enters this room with the sequence being greater than 338
-      if (SequencePosition > 338)
+      // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+      if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
       {
-        // Get a new map
         continue;
+      }
+      
+      // Allow Doopliss 1 or 2 to be fought at random
+      int32_t DooplissCheck = ttyd::system::irand(2);
+      
+      if (DooplissCheck == 0)
+      {
+        if (SequencePosition < 199)
+        {
+          // Set up the Sequence to fight Doopliss 1
+          ttyd::swdrv::swByteSet(0, 199);
+        }
+      }
+      else // DooplissCheck == 1
+      {
+        if (SequencePosition < 210)
+        {
+          // Set up the Sequence to fight Doopliss 2
+          ttyd::swdrv::swByteSet(0, 210);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "jon_00") == 0)
     {
       // Adjust Pit floor if a Pit room is selected
-      uint8_t NewPitFloor = ttyd::system::irand(100);
+      uint32_t TotalPitFloors = 100;
+      
+      if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+      {
+        // Prevent Bonetail from being chosen if currently using the challenge mode and 20 minutes have not passed yet
+        TotalPitFloors--;
+      }
+      
+      uint8_t NewPitFloor = ttyd::system::irand(TotalPitFloors);
       uint32_t NewPitMap;
       
       // Get proper room to use for chosen floor
@@ -242,14 +289,142 @@ void getRandomWarp()
       // Change loading zone to the pipe above the room
       ttyd::string::strcpy(NextBero, "dokan_2");
     }
+    else if (ttyd::string::strcmp(NextMap, "las_09") == 0)
+    {
+      if (SequencePosition < 390)
+      {
+        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        {
+          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+          continue;
+        }
+        else
+        {
+          // Allow the Shadow Sirens to be fought if the Sequence is not past 390
+          // Set the Sequence to 390 so that the Shadow Sirens can be fought
+          ttyd::swdrv::swByteSet(0, 390);
+          ttyd::string::strcpy(NextBero, "e_bero");
+        }
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "las_26") == 0)
+    {
+      if (SequencePosition < 387)
+      {
+        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        {
+          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+          continue;
+        }
+        else
+        {
+          // Allow Gloomtail to be fought if the Sequence is not past 387
+          // Set the Sequence to 387 so that Gloomtail can be fought
+          ttyd::swdrv::swByteSet(0, 387);
+        }
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
     {
-      // Allow the Shadow Queen to be fought if the sequence is not past 400
       if (SequencePosition < 400)
       {
-        // Set the Sequence to 400 and the loading zone to sekai_yami2 to trigger the first fight
-        ttyd::swdrv::swByteSet(0, 400);
-        ttyd::string::strcpy(NextBero, "sekai_yami2");
+        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        {
+          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+          continue;
+        }
+        else
+        {
+          // Allow the Shadow Queen to be fought if the Sequence is not past 400
+          // Set the Sequence to 400 so that the Shadow Queen can be fought
+          ttyd::swdrv::swByteSet(0, 400);
+          ttyd::string::strcpy(NextBero, "sekai_yami2");
+        }
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "mri_01") == 0)
+    {
+      if (SequencePosition < 110)
+      {
+        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        {
+          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+          continue;
+        }
+        else
+        {
+          // Allow Magnus 1.0 to be fought if the Sequence is not past 110
+          // Set the Sequence to 110 so that Magnus 1.0 can be fought
+          ttyd::swdrv::swByteSet(0, 110);
+        }
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "muj_12") == 0)
+    {
+      if (SequencePosition < 252)
+      {
+        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        {
+          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+          continue;
+        }
+        else
+        {
+          // Allow Cortez to be fought if the Sequence is not past 252
+          // Set the Sequence to 252 so that Cortez can be fought
+          ttyd::swdrv::swByteSet(0, 252);
+        }
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "rsh_05_a") == 0)
+    {
+      // The game will crash if the player enters this room with the Sequence being greater than 338
+      if (SequencePosition > 338)
+      {
+        // Get a new map
+        continue;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "rsh_06_a") == 0)
+    {
+      // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less 332
+      if ((SequencePosition < 332) && LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+      {
+        continue;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "tik_02") == 0)
+    {
+      if (SequencePosition < 20)
+      {
+        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        {
+          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+          continue;
+        }
+        else
+        {
+          // Allow Blooper to be fought if the Sequence is not past 20
+          // Set the Sequence to 20 so that Blooper can be fought
+          ttyd::swdrv::swByteSet(0, 20);
+        }
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "tou_03") == 0)
+    {
+      if (SequencePosition < 163)
+      {
+        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        {
+          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+          continue;
+        }
+        else
+        {
+          // Allow Grubba to be fought if the Sequence is not past 163
+          // Set the Sequence to 163 so that Grubba can be fought
+          ttyd::swdrv::swByteSet(0, 163);
+        }
       }
     }
     

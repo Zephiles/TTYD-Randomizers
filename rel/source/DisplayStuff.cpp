@@ -24,7 +24,7 @@ extern char *NextBero;
 extern uint32_t GSWAddressesStart;
 extern bool InCredits;
 extern uint16_t CreditsCount;
-extern bool BossDefeated[12];
+extern bool BossDefeated[14];
 extern uint16_t BossCount;
 extern bool ShowScoreSources;
 extern bool DenyInput;
@@ -80,7 +80,6 @@ void Mod::LZRandoDisplayStuff()
 void Mod::LZRandoChallengeStuff()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Seq = ttyd::seqdrv::seqGetSeq();
   int32_t Title = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kTitle);
   int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
   int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
@@ -173,75 +172,80 @@ void Mod::LZRandoChallengeStuff()
     
     // Check for bosses
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-    uint16_t SequenceChecks[] = { 21, 56, 112, 164, 200, 211, 253, 332, 373 };
+    uint16_t SequenceChecks[] = { 21, 56, 112, 164, 200, 211, 253, 332, 373, 388, 391 };
+    int32_t BossDefeatedIndex = 0;
     
     // Check for bosses based on Sequence
     int32_t ArraySize = sizeof(SequenceChecks) / sizeof(SequenceChecks[0]);
-    for (int i = 0; i < ArraySize; i++)
+    while (BossDefeatedIndex < ArraySize)
     {
-      if (SequenceChecks[i] == SequencePosition)
+      if (SequenceChecks[BossDefeatedIndex] == SequencePosition)
       {
-        if (!BossDefeated[i])
+        if (!BossDefeated[BossDefeatedIndex])
         {
-          BossDefeated[i] = true;
+          BossDefeated[BossDefeatedIndex] = true;
           BossCount++;
         }
       }
       else
       {
-        BossDefeated[i] = false;
+        BossDefeated[BossDefeatedIndex] = false;
       }
+      
+      BossDefeatedIndex++;
     }
     
     // Check for the Shadow Queen
     if (SequencePosition == 401)
     {
-      if (!BossDefeated[9])
+      if (!BossDefeated[BossDefeatedIndex])
       {
-        BossDefeated[9] = true;
+        BossDefeated[BossDefeatedIndex] = true;
         BossCount += 2;
       }
     }
     else
     {
-      BossDefeated[9] = false;
+      BossDefeated[BossDefeatedIndex] = false;
     }
     
     // Check for the Atomic Boo
+    BossDefeatedIndex++;
     if (ttyd::string::strcmp(NextMap, "jin_00") == 0)
     {
       // Check GSWF(2226) - Check the 18 bit
       bool AtomicBooCheck = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x28C) & (1 << 18);
       
-      if (AtomicBooCheck && !BossDefeated[10])
+      if (AtomicBooCheck && !BossDefeated[BossDefeatedIndex])
       {
-        BossDefeated[10] = true;
+        BossDefeated[BossDefeatedIndex] = true;
         BossCount++;
       }
     }
     else
     {
-      BossDefeated[10] = false;
+      BossDefeated[BossDefeatedIndex] = false;
       
       // Turn off GSWF(2226) so that the player can refight the Atomic Boo
       *reinterpret_cast<uint32_t *>(GSWAddresses + 0x28C) &= ~(1 << 18); // Turn off the 18 bit
     }
     
     // Check for Bonetail
+    BossDefeatedIndex++;
     if (ttyd::string::strcmp(NextMap, "jon_06") == 0)
     {
       // Check GSWF(5085) - Check the 29 bit
       bool BonetailCheck = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x3F0) & (1 << 29);
       
-      if (BonetailCheck && !BossDefeated[11])
+      if (BonetailCheck && !BossDefeated[BossDefeatedIndex])
       {
-        BossDefeated[11] = true;
+        BossDefeated[BossDefeatedIndex] = true;
         BossCount += 2;
       }
     }
     else
     {
-      BossDefeated[11] = false;
+      BossDefeated[BossDefeatedIndex] = false;
       
       // Turn off GSWF(5084) and GSWF(5085) so that the player can refight Bonetail
       *reinterpret_cast<uint32_t *>(GSWAddresses + 0x3F0) &= ~((1 << 28) | (1 << 29)); // Turn off the 28 and 29 bits
@@ -368,6 +372,7 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Display timer
+    int32_t Seq = ttyd::seqdrv::seqGetSeq();
     bool Comparisons = ((Seq == Title) || (Seq == Load) || dmo_comparison || title_comparison) && (TimerCount == 0);
     
     // Don't show the timer on the title screen or file select screen while it is at 0
@@ -517,7 +522,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.5",
-    "Loading Zone Randomizer Beta - v0.5.8");
+    "Loading Zone Randomizer Beta - v0.5.9");
   
   ttyd::fontmgr::FontDrawStart();
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
