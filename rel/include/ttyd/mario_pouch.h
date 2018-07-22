@@ -66,7 +66,7 @@ void pouchReviseMarioParam();
 // pouchRemoveItemIndex
 // pouchRemoveItem
 uint32_t pouchCheckItem(uint32_t id);
-// pouchGetItem
+bool pouchGetItem(uint32_t id);
 // pouchGetEmptyKeepItemCnt
 // pouchGetEmptyHaveItemCnt
 // pouchGetEquipBadgeCnt
