@@ -474,6 +474,9 @@ void setUpNewFile()
   
   // Start with Yoshi out
   ttyd::mario_party::marioPartyHello(4);
+
+  // Start with the Strange Sack
+  ttyd::mario_pouch::pouchGetItem(StrangeSack);
   
   // Turn off a bit to enable loading zones
   uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);

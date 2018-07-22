@@ -471,7 +471,7 @@
 // 800D577C:pouchRemoveItemIndex
 // 800D5A40:pouchRemoveItem
 800D5CDC:pouchCheckItem
-// 800D5ED4:pouchGetItem
+800D5ED4:pouchGetItem
 // 800D6378:pouchGetEmptyKeepItemCnt
 // 800D641C:pouchGetEmptyHaveItemCnt
 // 800D647C:pouchGetEquipBadgeCnt
