@@ -30,7 +30,7 @@ extern "C" {
 void pouchReviseMarioParam();
 // pouchRemoveKeepItem
 // pouchAddKeepItem
-// pouchGetPartyAttackLv
+int16_t pouchGetPartyAttackLv(uint32_t partnerId);
 // pouchGetHammerLv
 // pouchGetJumpLv
 // pouchSetAudienceNum

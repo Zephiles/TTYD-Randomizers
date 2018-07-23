@@ -3,6 +3,7 @@
 #include "items.h"
 #include "buttons.h"
 #include "patch.h"
+#include "clearcache.h"
 
 #include <ttyd/string.h>
 #include <ttyd/swdrv.h>
@@ -11,7 +12,6 @@
 #include <ttyd/mario_party.h>
 #include <ttyd/party.h>
 #include <ttyd/seqdrv.h>
-#include <ttyd/OSCache.h>
 #include <ttyd/mario.h>
 #include <ttyd/mariost.h>
 #include <ttyd/camdrv.h>
@@ -618,8 +618,7 @@ void overwriteNewFileStrings()
   if (!ClearCacheNewFileStrings && (NextSeq == Game))
   {
     ClearCacheNewFileStrings = true;
-    ttyd::OSCache::DCFlushRange(reinterpret_cast<uint32_t *>(aaa_00_Address), 16);
-    ttyd::OSCache::ICInvalidateRange(reinterpret_cast<uint32_t *>(aaa_00_Address), 16);
+    clearcache::clearCache(aaa_00_Address, 16);
   }
 }
 
@@ -1032,19 +1031,14 @@ void writeAdditionalLZRandoAssemblyPatches()
   {
     ClearCacheFlag = true;
     
-    ttyd::OSCache::DCFlushRange(reinterpret_cast<uint32_t *>(WalkOnWater1), sizeof(uint32_t));
-    ttyd::OSCache::ICInvalidateRange(reinterpret_cast<uint32_t *>(WalkOnWater1), sizeof(uint32_t));
-    
-    ttyd::OSCache::DCFlushRange(reinterpret_cast<uint32_t *>(WalkOnWater2), sizeof(uint32_t));
-    ttyd::OSCache::ICInvalidateRange(reinterpret_cast<uint32_t *>(WalkOnWater2), sizeof(uint32_t));
+    clearcache::clearCache(WalkOnWater1, sizeof(uint32_t));
+    clearcache::clearCache(WalkOnWater2, sizeof(uint32_t));
     
     #ifdef TTYD_EU
-      ttyd::OSCache::DCFlushRange(reinterpret_cast<uint32_t *>(WalkOnWater3), sizeof(uint32_t));
-      ttyd::OSCache::ICInvalidateRange(reinterpret_cast<uint32_t *>(WalkOnWater3), sizeof(uint32_t));
+      clearcache::clearCache(WalkOnWater3, sizeof(uint32_t));
     #endif
     
-    ttyd::OSCache::DCFlushRange(reinterpret_cast<uint32_t *>(aaa_00_Address), 16);
-    ttyd::OSCache::ICInvalidateRange(reinterpret_cast<uint32_t *>(aaa_00_Address), 16);
+    clearcache::clearCache(aaa_00_Address, 16);
   }
   else if (ClearCacheFlag && ((NextSeq == Game) || (NextSeq == Title)))
   {

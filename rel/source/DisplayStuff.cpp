@@ -108,6 +108,7 @@ void Mod::LZRandoChallengeStuff()
     uint32_t BossScore = 0;
     uint32_t CoinCountScore = 0;
     uint32_t BadgeLogScore = 0;
+    uint32_t PartnerUpgradesScore = 0;
     
     // Check Important Items
     uint32_t ImportantItemsAddressesStart = PouchPointer + 0xA0;
@@ -279,8 +280,14 @@ void Mod::LZRandoChallengeStuff()
     // Add 1 point for the badge log count divided by 10
     BadgeLogScore = BadgeLogCount / 10;
     
+    // Add 5 points for each partner upgrade
+    for (int i = 1; i <= 7; i++)
+    {
+      PartnerUpgradesScore += ttyd::mario_pouch::pouchGetPartyAttackLv(i) * 5;
+    }
+    
     // Get total score
-    Score = CrystalStarScore + CurseScore + ImportantItemsScore + FollowerScore + MarioLevelScore + CreditsScore + BossScore + CoinCountScore + BadgeLogScore;
+    Score = CrystalStarScore + CurseScore + ImportantItemsScore + FollowerScore + MarioLevelScore + CreditsScore + BossScore + CoinCountScore + BadgeLogScore + PartnerUpgradesScore;
     
     // Display Score
     int32_t PosX = -232;
@@ -304,7 +311,7 @@ void Mod::LZRandoChallengeStuff()
       PosY = -80;
       
       sprintf(DisplayBuffer,
-        "%ld %ld %ld %ld %ld %ld %ld %ld %ld",
+        "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld",
         CrystalStarScore,
         CurseScore,
         ImportantItemsScore,
@@ -313,7 +320,8 @@ void Mod::LZRandoChallengeStuff()
         CreditsScore,
         BossScore,
         CoinCountScore,
-        BadgeLogScore);
+        BadgeLogScore,
+        PartnerUpgradesScore);
       
       ttyd::fontmgr::FontDrawStart();
       ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
@@ -521,8 +529,8 @@ void Mod::titleScreenStuff()
   
   sprintf(DisplayBuffer,
     "%s\n%s",
-    "Item Randomizers - v1.2.6",
-    "Loading Zone Randomizer Beta - v0.5.12");
+    "Item Randomizers - v1.2.7",
+    "Loading Zone Randomizer Beta - v0.5.13");
   
   ttyd::fontmgr::FontDrawStart();
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));

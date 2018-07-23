@@ -1,6 +1,7 @@
 #include "mod.h"
 #include "items.h"
 #include "patch.h"
+#include "clearcache.h"
 
 #include <ttyd/system.h>
 #include <ttyd/mario_pouch.h>
@@ -714,6 +715,8 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t SweetFeastAddress = 0x803559A8;
     uint32_t ShowstopperAddress = 0x80355BE8;
+    
+    uint32_t ShineSpriteAddress = 0x800D51FC;
   #elif defined TTYD_JP
     uint32_t CrystalStarPointer = 0x800AC284;
     
@@ -772,6 +775,8 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t SweetFeastAddress = 0x803532D0;
     uint32_t ShowstopperAddress = 0x80353510;
+    
+    uint32_t ShineSpriteAddress = 0x800D0FDC;
   #elif defined TTYD_EU
     uint32_t CrystalStarPointer = 0x800AF38C;
     
@@ -830,6 +835,8 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t SweetFeastAddress = 0x80361858;
     uint32_t ShowstopperAddress = 0x80361A98;
+    
+    uint32_t ShineSpriteAddress = 0x800D6004;
   #endif
   
   // Write Crystal Star pointer
@@ -922,6 +929,12 @@ void Mod::writeItemRandoAssemblyPatches()
   
   // Change the amount of SP needed for Showstopper from 2 to 4
   *reinterpret_cast<uint8_t *>(ShowstopperAddress + 0x12) = 0x4;
+  
+  // Modify the pouchGetItem function to give 3 Shine Sprites when you collect one
+  *reinterpret_cast<uint8_t *>(ShineSpriteAddress + 0x3) = 0x3;
+  
+  // Clear the cache for the pouchGetItem address for Shine Sprites, as it gets used during the boot process
+  clearcache::clearCache(ShineSpriteAddress, sizeof(uint32_t));
 }
 
 void Mod::itemRandoStuff()
