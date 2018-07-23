@@ -152,7 +152,7 @@ void Mod::LZRandoChallengeStuff()
     if (MarioLevel > 1)
     {
       // Add 3 points for each level up
-      MarioLevelScore = (MarioLevel - 1) * 3;
+      MarioLevelScore = (MarioLevel - 1) * 2;
     }
     
     // Check for credits warps
@@ -521,8 +521,8 @@ void Mod::titleScreenStuff()
   
   sprintf(DisplayBuffer,
     "%s\n%s",
-    "Item Randomizers - v1.2.5",
-    "Loading Zone Randomizer Beta - v0.5.11");
+    "Item Randomizers - v1.2.6",
+    "Loading Zone Randomizer Beta - v0.5.12");
   
   ttyd::fontmgr::FontDrawStart();
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));

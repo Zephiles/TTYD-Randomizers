@@ -20,6 +20,8 @@
 
 #include <cstdio>
 
+extern bool LZRandoChallenge;
+extern uint32_t TimerCount;
 extern bool LZRando;
 extern bool ReloadCurrentScreen;
 extern char *NextMap;
@@ -31,8 +33,6 @@ extern bool NewFile;
 extern uint32_t GSWAddressesStart;
 extern uint32_t PossibleMaps[];
 extern uint16_t MapArraySize;
-extern bool LZRandoChallenge;
-extern uint32_t TimerCount;
 extern uint32_t seqMainAddress;
 extern bool ClearCacheNewFileStrings;
 // extern uint32_t AreaObjectsAddressesStart;
@@ -53,6 +53,19 @@ extern "C" {
 }
 
 namespace mod {
+
+bool CheckChallengeModeTimerCutoff()
+{
+  uint32_t TimerCountCutoff = 144000; // 40 Minutes
+  if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
 
 extern "C" {
 void getRandomWarp()
@@ -122,7 +135,6 @@ void getRandomWarp()
   
   GameOverFlag = false;
   uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
-  uint32_t TimerCountCutoff = 144000; // 40 Minutes
   bool ConfirmNewMap = false;
   
   while (!ConfirmNewMap)
@@ -135,7 +147,7 @@ void getRandomWarp()
     if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
     {
       // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 373
-      if ((SequencePosition < 373) && LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+      if ((SequencePosition < 373) && CheckChallengeModeTimerCutoff())
       {
         continue;
       }
@@ -186,10 +198,62 @@ void getRandomWarp()
         continue;
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "gon_06") == 0)
+    {
+      // Adjust the Sequence and GSWF(1493) if the player hasn't gotten the Paper Curse yet
+      if (ttyd::mario_pouch::pouchCheckItem(PaperModeCurse) == 0)
+      {
+        // Only run if the player has the Black Key
+        if (ttyd::mario_pouch::pouchCheckItem(BlackKey2) > 0)
+        {
+          // Adjust the Sequence if necessary, as the Sequence being past 44 will set GSWF(1493)
+          if (SequencePosition > 44)
+          {
+            ttyd::swdrv::swByteSet(0, 44);
+          }
+          
+          // Make sure GSWF(1493) is off
+          uint32_t CurseChestAddress = GSWAddresses + 0x230;
+          uint32_t CurseChest = *reinterpret_cast<uint32_t *>(CurseChestAddress); // GSWF(1493)
+          
+          if (CurseChest & (1 << 21)) // Check if the 21 bit is on
+          {
+            // Turn off the 21 bit if it's on
+            *reinterpret_cast<uint32_t *>(CurseChestAddress) &= ~(1 << 21);
+          }
+        }
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "gon_07") == 0)
+    {
+      // Adjust the Sequence and GSWF(1494) if the player hasn't gotten the Paper Curse yet
+      if (ttyd::mario_pouch::pouchCheckItem(PaperModeCurse) == 0)
+      {
+        // Only run if the player hasn't gotten the Black Key yet
+        if (ttyd::mario_pouch::pouchCheckItem(BlackKey2) == 0)
+        {
+          // Adjust the Sequence if necessary, as the Sequence being past 42 will set GSWF(1494)
+          if (SequencePosition > 42)
+          {
+            ttyd::swdrv::swByteSet(0, 42);
+          }
+          
+          // Make sure GSWF(1494) is off
+          uint32_t BlackKeyChestAddress = GSWAddresses + 0x230;
+          uint32_t BlackKeyChest = *reinterpret_cast<uint32_t *>(BlackKeyChestAddress); // GSWF(1494)
+          
+          if (BlackKeyChest & (1 << 22)) // Check if the 22 bit is on
+          {
+            // Turn off the 22 bit if it's on
+            *reinterpret_cast<uint32_t *>(BlackKeyChestAddress) &= ~(1 << 22);
+          }
+        }
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "gon_11") == 0)
     {
       // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 55
-      if ((SequencePosition < 55) && LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+      if ((SequencePosition < 55) && CheckChallengeModeTimerCutoff())
       {
         continue;
       }
@@ -210,7 +274,7 @@ void getRandomWarp()
       bool UltraHammerAmount = ttyd::mario_pouch::pouchCheckItem(UltraHammer) > 0;
       
       // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the player has a Hammer upgrade
-      if ((SuperHammerAmount || UltraHammerAmount) && LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+      if ((SuperHammerAmount || UltraHammerAmount) && CheckChallengeModeTimerCutoff())
       {
         continue;
       }
@@ -218,7 +282,7 @@ void getRandomWarp()
     else if (ttyd::string::strcmp(NextMap, "jin_04") == 0)
     {
       // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
-      if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+      if (CheckChallengeModeTimerCutoff())
       {
         continue;
       }
@@ -248,7 +312,7 @@ void getRandomWarp()
       // Adjust Pit floor if a Pit room is selected
       uint32_t TotalPitFloors = 100;
       
-      if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+      if (CheckChallengeModeTimerCutoff())
       {
         // Prevent Bonetail from being chosen if currently using the challenge mode and 20 minutes have not passed yet
         TotalPitFloors--;
@@ -307,7 +371,7 @@ void getRandomWarp()
     {
       if (SequencePosition < 390)
       {
-        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        if (CheckChallengeModeTimerCutoff())
         {
           // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
           continue;
@@ -325,7 +389,7 @@ void getRandomWarp()
     {
       if (SequencePosition < 387)
       {
-        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        if (CheckChallengeModeTimerCutoff())
         {
           // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
           continue;
@@ -342,7 +406,7 @@ void getRandomWarp()
     {
       if (SequencePosition < 400)
       {
-        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        if (CheckChallengeModeTimerCutoff())
         {
           // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
           continue;
@@ -360,7 +424,7 @@ void getRandomWarp()
     {
       if (SequencePosition < 110)
       {
-        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        if (CheckChallengeModeTimerCutoff())
         {
           // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
           continue;
@@ -377,7 +441,7 @@ void getRandomWarp()
     {
       if (SequencePosition < 252)
       {
-        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        if (CheckChallengeModeTimerCutoff())
         {
           // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
           continue;
@@ -402,7 +466,7 @@ void getRandomWarp()
     else if (ttyd::string::strcmp(NextMap, "rsh_06_a") == 0)
     {
       // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 332
-      if ((SequencePosition < 332) && LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+      if ((SequencePosition < 332) && CheckChallengeModeTimerCutoff())
       {
         continue;
       }
@@ -411,7 +475,7 @@ void getRandomWarp()
     {
       if (SequencePosition < 20)
       {
-        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        if (CheckChallengeModeTimerCutoff())
         {
           // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
           continue;
@@ -428,7 +492,7 @@ void getRandomWarp()
     {
       if (SequencePosition < 163)
       {
-        if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+        if (CheckChallengeModeTimerCutoff())
         {
           // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
           continue;
@@ -474,7 +538,7 @@ void setUpNewFile()
   
   // Start with Yoshi out
   ttyd::mario_party::marioPartyHello(4);
-
+  
   // Start with the Strange Sack
   ttyd::mario_pouch::pouchGetItem(StrangeSack);
   
@@ -864,6 +928,20 @@ void Mod::preventPartyLeft(uint32_t id)
   }
 }
 
+void Mod::preventCountDownStart(uint32_t unk1, uint32_t unk2)
+{
+  // Only prevent from running if the Loading Zone randomizer is currently in use
+  if (LZRando)
+  {
+    return;
+  }
+  else
+  {
+    // Call original function
+    mPFN_countDownStart_trampoline(unk1, unk2);
+  }
+}
+
 void Mod::writeLZRandoAssemblyPatches()
 {
   #ifdef TTYD_US
@@ -895,8 +973,8 @@ void Mod::writeLZRandoAssemblyPatches()
   patch::writeBranch(reinterpret_cast<void *>(PaperModeCheck), reinterpret_cast<void *>(StartEnablePaperTubeModes));
   
   // Adjust branches to be bl instead of b; should modify the patch function to allow for this instead
-  *reinterpret_cast<uint32_t *>(TubeModeCheck) = *reinterpret_cast<uint32_t *>(TubeModeCheck) + 0x1;
-  *reinterpret_cast<uint32_t *>(PaperModeCheck) = *reinterpret_cast<uint32_t *>(PaperModeCheck) + 0x1;
+  *reinterpret_cast<uint32_t *>(TubeModeCheck) += 0x1;
+  *reinterpret_cast<uint32_t *>(PaperModeCheck) += 0x1;
   
   // Allow Boat mode to be used in the Rogueport Sewers room with the 3 Shine Sprites
   patch::writeBranch(reinterpret_cast<void *>(BoatModeCheck), reinterpret_cast<void *>(StartEnableBoatMode));
@@ -929,7 +1007,6 @@ void writeAdditionalLZRandoAssemblyPatches()
     *reinterpret_cast<uint32_t *>(WalkOnWater1) = 0x4182003C; // beq- 0x3C
     *reinterpret_cast<uint32_t *>(WalkOnWater2) = 0x418200A4; // beq- 0xA4
     #ifdef TTYD_EU
-      // Allow Mario to jump while standing on water
       *reinterpret_cast<uint32_t *>(WalkOnWater3) = 0x807F01E8; // lwz r3,0x01E8(r31)
     #endif
   }

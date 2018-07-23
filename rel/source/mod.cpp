@@ -4,6 +4,7 @@
 #include <ttyd/itemdrv.h>
 #include <ttyd/fontmgr.h>
 #include <ttyd/mario_party.h>
+#include <ttyd/countdown.h>
 
 #include "patch.h"
 
@@ -45,6 +46,12 @@ void Mod::init()
   mPFN_partyLeft_trampoline = patch::hookFunction(ttyd::mario_party::partyLeft, [](uint32_t id)
   {
     gMod->preventPartyLeft(id);
+  });
+  
+  // Prevent the escape timer from appearing
+  mPFN_countDownStart_trampoline = patch::hookFunction(ttyd::countdown::countDownStart, [](uint32_t unk1, uint32_t unk2)
+  {
+    gMod->preventCountDownStart(unk1, unk2);
   });
   
   // Make changes that are only done once

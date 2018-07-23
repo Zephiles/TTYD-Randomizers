@@ -797,6 +797,19 @@
 // 801A3578:marioResetCamShiftRate
 // 801A35DC:marioResetCamShift
 
+// countdown.o
+// 801FC2C0:countDownFlagOff
+// 801FC2D4:countDownFlagOn
+// 801FC2E8:countDownStop
+// 801FC320:countDownEnd
+// 801FC33C:countDownGetStatus
+// 801FC35C:countDownDisp
+// 801FC6A8:countDownMain
+// 801FC8D4:countDownSetRestartTime
+801FC8E0:countDownStart
+// 801FC9CC:countDownSaveReStart
+// 801FCADC:countDownInit
+
 // printf.c
 80264108:sprintf
 // unused:snprintf

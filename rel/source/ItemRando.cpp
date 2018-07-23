@@ -14,6 +14,8 @@
 
 extern uint16_t PossibleItems[];
 extern uint16_t ItemArraySize;
+extern bool LZRandoChallenge;
+extern uint32_t TimerCount;
 extern char *NextMap;
 extern bool HitShineSprite;
 extern bool CrystalStarIsInField;
@@ -66,6 +68,16 @@ uint32_t randomizeItem()
   while (!ConfirmNewItem)
   {
     NewItem = PossibleItems[ttyd::system::irand(ItemArraySize)];
+    
+    // If using the challenge mode, prevent the magical map or crystal stars from spawning within the first 5 minutes
+    if ((NewItem == MagicalMapBigger) || ((NewItem >= DiamondStar) && (NewItem <= CrystalStar)))
+    {
+      uint32_t TimerCountCutoff = 198000; // 55 Minutes
+      if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+      {
+        continue;
+      }
+    }
     
     // If current item is an Important Item, check to see if the player already has it
     if ((NewItem <= CrystalStar) && (NewItem != ShineSprite))
@@ -390,7 +402,7 @@ void randomizeShopRewards()
   }
 }
 
-void setValuesMapChangeItem()
+void setValuesMapChange()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
   int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
@@ -699,6 +711,9 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t itemDataTable = 0x803108A8;
     uint16_t KoopaCurseIcon = 390;
     uint16_t DebugBadgeIcon = 108;
+    
+    uint32_t SweetFeastAddress = 0x803559A8;
+    uint32_t ShowstopperAddress = 0x80355BE8;
   #elif defined TTYD_JP
     uint32_t CrystalStarPointer = 0x800AC284;
     
@@ -754,6 +769,9 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t itemDataTable = 0x8030EE58;
     uint16_t KoopaCurseIcon = 382;
     uint16_t DebugBadgeIcon = 100;
+    
+    uint32_t SweetFeastAddress = 0x803532D0;
+    uint32_t ShowstopperAddress = 0x80353510;
   #elif defined TTYD_EU
     uint32_t CrystalStarPointer = 0x800AF38C;
     
@@ -809,6 +827,9 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t itemDataTable = 0x8031C638;
     uint16_t KoopaCurseIcon = 390;
     uint16_t DebugBadgeIcon = 108;
+    
+    uint32_t SweetFeastAddress = 0x80361858;
+    uint32_t ShowstopperAddress = 0x80361A98;
   #endif
   
   // Write Crystal Star pointer
@@ -895,12 +916,18 @@ void Mod::writeItemRandoAssemblyPatches()
   // Change icons for Koopa Curse and Debug Badge
   *reinterpret_cast<uint16_t *>(itemDataTable + (KoopaCurse * 0x28) + 0x20) = KoopaCurseIcon;
   *reinterpret_cast<uint16_t *>(itemDataTable + (DebugBadge * 0x28) + 0x20) = DebugBadgeIcon;
+  
+  // Change the amount of SP needed for Sweet Feast from 5 to 3
+  *reinterpret_cast<uint8_t *>(SweetFeastAddress + 0x12) = 0x3;
+  
+  // Change the amount of SP needed for Showstopper from 2 to 4
+  *reinterpret_cast<uint8_t *>(ShowstopperAddress + 0x12) = 0x4;
 }
 
 void Mod::itemRandoStuff()
 {
   manageEnemyHeldItemArray();
-  setValuesMapChangeItem();
+  setValuesMapChange();
 }
 
 }
