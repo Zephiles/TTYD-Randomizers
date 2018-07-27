@@ -436,7 +436,7 @@
 // 800D3830:pouchRemoveKeepItem
 // 800D3964:pouchAddKeepItem
 800D3A8C:pouchGetPartyAttackLv
-// 800D3AA0:pouchGetHammerLv
+800D3AA0:pouchGetHammerLv
 // 800D3B20:pouchGetJumpLv
 // 800D3BA0:pouchSetAudienceNum
 // 800D3BAC:pouchGetAudienceNum

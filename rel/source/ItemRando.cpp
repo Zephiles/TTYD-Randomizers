@@ -70,13 +70,23 @@ uint32_t randomizeItem()
   {
     NewItem = PossibleItems[ttyd::system::irand(ItemArraySize)];
     
-    // If using the challenge mode, prevent the magical map or crystal stars from spawning within the first 5 minutes
-    if ((NewItem == MagicalMapBigger) || ((NewItem >= DiamondStar) && (NewItem <= CrystalStar)))
+    // Prevent certain things if the challenge mode is in use
+    if (LZRandoChallenge)
     {
-      uint32_t TimerCountCutoff = 198000; // 55 Minutes
-      if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+      // Prevent the Debug Badge from being selected
+      if (NewItem == DebugBadge)
       {
         continue;
+      }
+      
+      // Prevent the Magical Map or crystal stars from spawning within the first 5 minutes
+      if ((NewItem == MagicalMapBigger) || ((NewItem >= DiamondStar) && (NewItem <= CrystalStar)))
+      {
+        uint32_t TimerCountCutoff = 198000; // 55 Minutes
+        if (TimerCount >= TimerCountCutoff)
+        {
+          continue;
+        }
       }
     }
     

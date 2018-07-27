@@ -31,7 +31,7 @@ void pouchReviseMarioParam();
 // pouchRemoveKeepItem
 // pouchAddKeepItem
 int16_t pouchGetPartyAttackLv(uint32_t partnerId);
-// pouchGetHammerLv
+uint32_t pouchGetHammerLv();
 // pouchGetJumpLv
 // pouchSetAudienceNum
 // pouchGetAudienceNum

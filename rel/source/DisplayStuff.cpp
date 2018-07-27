@@ -43,6 +43,26 @@ extern bool ItemRandoV2;
 
 namespace mod {
 
+void fontMgrStart(uint32_t color, float Scale)
+{
+  ttyd::fontmgr::FontDrawStart();
+  ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+  ttyd::fontmgr::FontDrawEdge();
+  ttyd::fontmgr::FontDrawScale(Scale);
+}
+
+void drawStringSingleLine(int32_t PosX, int32_t PosY, uint32_t color, float Scale)
+{
+  fontMgrStart(color, Scale);
+  ttyd::fontmgr::FontDrawString(PosX, PosY, DisplayBuffer);
+}
+
+void drawStringMultipleLines(int32_t PosX, int32_t PosY, uint32_t color, float Scale)
+{
+  fontMgrStart(color, Scale);
+  drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
+}
+
 void Mod::LZRandoDisplayStuff()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
@@ -70,11 +90,7 @@ void Mod::LZRandoDisplayStuff()
     NextBero,
     NextMap);
     
-  ttyd::fontmgr::FontDrawStart();
-  ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-  ttyd::fontmgr::FontDrawEdge();
-  ttyd::fontmgr::FontDrawScale(Scale);
-  drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
+  drawStringMultipleLines(PosX, PosY, color, Scale);
 }
 
 void Mod::LZRandoChallengeStuff()
@@ -298,11 +314,7 @@ void Mod::LZRandoChallengeStuff()
       "Score: %ld",
       Score);
       
-    ttyd::fontmgr::FontDrawStart();
-    ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-    ttyd::fontmgr::FontDrawEdge();
-    ttyd::fontmgr::FontDrawScale(Scale);
-    ttyd::fontmgr::FontDrawString(PosX, PosY, DisplayBuffer);
+    drawStringSingleLine(PosX, PosY, color, Scale);
     
     // Display where the points came from
     if (ShowScoreSources)
@@ -323,11 +335,7 @@ void Mod::LZRandoChallengeStuff()
         BadgeLogScore,
         PartnerUpgradesScore);
       
-      ttyd::fontmgr::FontDrawStart();
-      ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-      ttyd::fontmgr::FontDrawEdge();
-      ttyd::fontmgr::FontDrawScale(Scale);
-      ttyd::fontmgr::FontDrawString(PosX, PosY, DisplayBuffer);
+      drawStringSingleLine(PosX, PosY, color, Scale);
     }
     
     // Get input for whether to display the score sources or not
@@ -410,11 +418,7 @@ void Mod::LZRandoChallengeStuff()
         second,
         modframe);
       
-      ttyd::fontmgr::FontDrawStart();
-      ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-      ttyd::fontmgr::FontDrawEdge();
-      ttyd::fontmgr::FontDrawScale(Scale);
-      ttyd::fontmgr::FontDrawString(FontDrawX, FontDrawY, DisplayBuffer);
+      drawStringSingleLine(FontDrawX, FontDrawY, color, Scale);
     }
     
     if (TimerActive)
@@ -451,11 +455,7 @@ void Mod::LZRandoChallengeStuff()
           "%s",
           "Time's Up!");
         
-        ttyd::fontmgr::FontDrawStart();
-        ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-        ttyd::fontmgr::FontDrawEdge();
-        ttyd::fontmgr::FontDrawScale(Scale);
-        ttyd::fontmgr::FontDrawString(PosX, PosY, DisplayBuffer);
+        drawStringSingleLine(PosX, PosY, color, Scale);
         
         // // Don't display or allow modifying of the options in battles, as trying to warp as the curtain is coming up will crash the game
         if (NextSeq != Battle)
@@ -470,11 +470,7 @@ void Mod::LZRandoChallengeStuff()
             "Press Y to continue playing",
             "Press X to return to the title screen");
           
-          ttyd::fontmgr::FontDrawStart();
-          ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-          ttyd::fontmgr::FontDrawEdge();
-          ttyd::fontmgr::FontDrawScale(Scale);
-          drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
+          drawStringMultipleLines(PosX, PosY, color, Scale);
           
           // Get input for what to do next
           uint32_t ButtonInputTrg = ttyd::system::keyGetButtonTrg(0);
@@ -529,14 +525,10 @@ void Mod::titleScreenStuff()
   
   sprintf(DisplayBuffer,
     "%s\n%s",
-    "Item Randomizers - v1.2.7",
-    "Loading Zone Randomizer Beta - v0.5.13");
+    "Item Randomizers - v1.2.8",
+    "Loading Zone Randomizer Beta - v0.5.14");
   
-  ttyd::fontmgr::FontDrawStart();
-  ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-  ttyd::fontmgr::FontDrawEdge();
-  ttyd::fontmgr::FontDrawScale(Scale);
-  drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
+  drawStringMultipleLines(PosX, PosY, color, Scale);
 }
 
 void Mod::gameModes()
@@ -566,11 +558,7 @@ void Mod::gameModes()
     "X = Loading Zone Randomizer Beta",
     "Z = Loading Zone Randomizer - 1 Hour Challenge");
   
-  ttyd::fontmgr::FontDrawStart();
-  ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-  ttyd::fontmgr::FontDrawEdge();
-  ttyd::fontmgr::FontDrawScale(Scale);
-  drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
+  drawStringMultipleLines(PosX, PosY, color, Scale);
   
   // Set LZRandoText to the appropriate value
   if (LZRando)
@@ -608,11 +596,7 @@ void Mod::gameModes()
     "Loading Zone Randomizer - 1 Hour Challenge: ",
     LZRandoChallengeText);
     
-  ttyd::fontmgr::FontDrawStart();
-  ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-  ttyd::fontmgr::FontDrawEdge();
-  ttyd::fontmgr::FontDrawScale(Scale);
-  drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
+  drawStringMultipleLines(PosX, PosY, color, Scale);
   
   // Get input for game modes
   uint32_t ButtonInput = ttyd::system::keyGetButton(0);
