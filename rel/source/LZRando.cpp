@@ -187,6 +187,15 @@ void getRandomWarp()
         continue;
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "aji_19") == 0)
+    {
+      // Skip the intro cutscene
+      if (SequencePosition < 360)
+      {
+        // Set the Sequence to 360 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 360);
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "eki_03") == 0)
     {
       // Change loading zone to avoid softlocking
@@ -194,10 +203,10 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "eki_05") == 0)
     {
-      // Change the loading zone used if the player has not opened the Ultra Boots chest yet
+      // Change the loading zone used if the player has not opened the Ultra Boots chest yet, and if the Sequence is less than 319
       uint32_t UltraBootsChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x348); // GSWF(3728)
       
-      if (!(UltraBootsChest & (1 << 16))) // Check if the 16 bit is on or off
+      if ((!(UltraBootsChest & (1 << 16))) && (SequencePosition < 319)) // Check if the 16 bit is on or off
       {
         // Run if the 16 bit is off
         ttyd::string::strcpy(NextBero, "w_bero_1");
@@ -288,6 +297,24 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 50);
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "hei_00") == 0)
+    {
+      // Skip the intro cutscene and the Hooktail flying cutscene
+      if (SequencePosition < 24)
+      {
+        // Set the Sequence to 24 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 24);
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "hom_00") == 0)
+    {
+      // Skip the cutscene with Doopliss
+      if (SequencePosition < 310)
+      {
+        // Set the Sequence to 310 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 310);
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "jin_00") == 0)
     {
       // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the player has a Hammer upgrade
@@ -305,9 +332,9 @@ void getRandomWarp()
       }
       
       // Allow Doopliss 1 or 2 to be fought at random
-      int32_t DooplissCheck = ttyd::system::irand(2);
+      bool DooplissCheck = ttyd::system::irand(2) == 0;
       
-      if (DooplissCheck == 0)
+      if (DooplissCheck)
       {
         if (SequencePosition < 199)
         {
@@ -315,7 +342,7 @@ void getRandomWarp()
           ttyd::swdrv::swByteSet(0, 199);
         }
       }
-      else // DooplissCheck == 1
+      else
       {
         if (SequencePosition < 210)
         {
@@ -608,6 +635,9 @@ void setUpNewFile()
   
   // Turn on GSWF(2982), GSWF(2983), and GSWF(2984) to activate the blue switches in Pirate's Grotto
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2EC) |= ((1 << 6) | (1 << 7) | (1 << 8)); // Turn on the 6, 7, and 8 bits
+  
+  // Turn on GSWF(3884) to skip the cutscene on the first screen of the area leading to Fahr Outpost
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x35C) |= (1 << 12); // Turn on the 12 bit
 }
 
 void overwriteNewFileStrings()
@@ -695,12 +725,19 @@ void specificMapEdits()
     // This can be avoided with the edits to the jon REL, which will probably be implemented at a later date
     if (!PartnerPointer)
     {
-      // Bring out Yoshi if no partner is out
-      ttyd::mario_party::marioPartyHello(4);
+      // Bring out Goombella if no partner is out
+      ttyd::mario_party::marioPartyHello(1);
     }
   }
   else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
   {
+    // Make sure a partner is out when fighting the Shadow Queen
+    if (!PartnerPointer)
+    {
+      // Bring out Goombella if no partner is out
+      ttyd::mario_party::marioPartyHello(1);
+    }
+    
     // Warp out of the Shadow Queen room if she is defeated, so that the cutscene is skipped
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
     if (SequencePosition == 401)
@@ -820,7 +857,6 @@ void reloadScreen()
   ReloadCurrentScreen = true;
   
   uint32_t SystemLevel = ttyd::mariost::marioStGetSystemLevel();
-  
   if (SystemLevel == 0)
   {
     return;

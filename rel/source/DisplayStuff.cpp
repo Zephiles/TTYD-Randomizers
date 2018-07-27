@@ -26,6 +26,8 @@ extern bool InCredits;
 extern uint16_t CreditsCount;
 extern bool BossDefeated[14];
 extern uint16_t BossCount;
+extern bool InGameOver;
+extern uint16_t GameOverCount;
 extern bool ShowScoreSources;
 extern bool DenyInput;
 extern bool NewFile;
@@ -67,14 +69,14 @@ void Mod::LZRandoDisplayStuff()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
   int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
-  int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
+  int32_t GameOver = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGameOver);
   
   bool dmo_comparison = ttyd::string::strcmp(NextMap,"dmo_00") == 0;
   bool title_comparison = ttyd::string::strcmp(NextMap,"title") == 0;
   
   // Only display while a file is loaded, and while not in battles
   // Don't display while in the intro or on the title screen
-  if ((NextSeq < Game) || (NextSeq > Battle) || dmo_comparison || title_comparison)
+  if ((NextSeq < Game) || (NextSeq > GameOver) || dmo_comparison || title_comparison)
   {
     return;
   }
@@ -108,11 +110,11 @@ void Mod::LZRandoChallengeStuff()
   
   // Get and display Score
   // Don't display while in the intro or on the title screen
-  if ((NextSeq >= Game) && (NextSeq <= Battle) && !dmo_comparison && !title_comparison)
+  if ((NextSeq >= Game) && (NextSeq <= GameOver) && !dmo_comparison && !title_comparison)
   {
     uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
     uint32_t PouchPointer = reinterpret_cast<uint32_t>(ttyd::mario_pouch::pouchGetPtr());
-    uint32_t Score = 0;
+    int32_t Score = 0;
     
     // Individual scores
     uint32_t CrystalStarScore = 0;
@@ -125,6 +127,7 @@ void Mod::LZRandoChallengeStuff()
     uint32_t CoinCountScore = 0;
     uint32_t BadgeLogScore = 0;
     uint32_t PartnerUpgradesScore = 0;
+    int32_t GameOverScore = 0;
     
     // Check Important Items
     uint32_t ImportantItemsAddressesStart = PouchPointer + 0xA0;
@@ -302,8 +305,22 @@ void Mod::LZRandoChallengeStuff()
       PartnerUpgradesScore += ttyd::mario_pouch::pouchGetPartyAttackLv(i) * 5;
     }
     
+    // Check for Game Over
+    if (!InGameOver && (NextSeq == GameOver))
+    {
+      InGameOver = true;
+      GameOverCount++;
+    }
+    else if (NextSeq != GameOver)
+    {
+      InGameOver = false;
+    }
+    
+    // Subtract 5 points for each Game Over
+    GameOverScore -= GameOverCount * 5;
+    
     // Get total score
-    Score = CrystalStarScore + CurseScore + ImportantItemsScore + FollowerScore + MarioLevelScore + CreditsScore + BossScore + CoinCountScore + BadgeLogScore + PartnerUpgradesScore;
+    Score = CrystalStarScore + CurseScore + ImportantItemsScore + FollowerScore + MarioLevelScore + CreditsScore + BossScore + CoinCountScore + BadgeLogScore + PartnerUpgradesScore + GameOverScore;
     
     // Display Score
     int32_t PosX = -232;
@@ -323,7 +340,7 @@ void Mod::LZRandoChallengeStuff()
       PosY = -80;
       
       sprintf(DisplayBuffer,
-        "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld",
+        "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld",
         CrystalStarScore,
         CurseScore,
         ImportantItemsScore,
@@ -333,7 +350,8 @@ void Mod::LZRandoChallengeStuff()
         BossScore,
         CoinCountScore,
         BadgeLogScore,
-        PartnerUpgradesScore);
+        PartnerUpgradesScore,
+        GameOverScore);
       
       drawStringSingleLine(PosX, PosY, color, Scale);
     }
@@ -526,7 +544,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.8",
-    "Loading Zone Randomizer Beta - v0.5.14");
+    "Loading Zone Randomizer Beta - v0.5.15");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
 }

@@ -72,6 +72,8 @@ uint16_t CreditsCount = 0;
 bool InCredits = false;
 bool BossDefeated[14] = { false };
 uint16_t BossCount = 0;
+bool InGameOver = false;
+uint16_t GameOverCount = 0;
 char *LZRandoChallengeText = new char[4]; // 3 bytes for LZRandoChallengeText, 1 byte for NULL
 
 }
