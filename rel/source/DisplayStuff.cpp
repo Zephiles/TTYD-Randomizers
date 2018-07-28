@@ -385,6 +385,7 @@ void Mod::LZRandoChallengeStuff()
     DisablePlayerControl = false;
     CreditsCount = 0;
     BossCount = 0;
+    GameOverCount = 0;
     ttyd::__mem::memset(BossDefeated, false, sizeof(BossDefeated));
   }
   
@@ -544,7 +545,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.8",
-    "Loading Zone Randomizer Beta - v0.5.15");
+    "Loading Zone Randomizer Beta - v0.5.16");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
 }
