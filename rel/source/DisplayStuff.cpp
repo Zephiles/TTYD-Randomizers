@@ -545,9 +545,14 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.8",
-    "Loading Zone Randomizer Beta - v0.5.16");
+    "Loading Zone Randomizer Beta - v0.5.17");
   
-  drawStringMultipleLines(PosX, PosY, color, Scale);
+  ttyd::fontmgr::FontDrawStart();
+  ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+  ttyd::fontmgr::FontDrawRainbowColor();
+  ttyd::fontmgr::FontDrawEdge();
+  ttyd::fontmgr::FontDrawScale(Scale);
+  drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
 }
 
 void Mod::gameModes()

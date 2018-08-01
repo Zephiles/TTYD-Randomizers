@@ -297,6 +297,15 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 50);
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "gra_06") == 0)
+    {
+      // Skip the intro cutscene
+      if (SequencePosition < 193)
+      {
+        // Set the Sequence to 193 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 193);
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "hei_00") == 0)
     {
       // Skip the intro cutscene and the Hooktail flying cutscene
@@ -416,6 +425,7 @@ void getRandomWarp()
       // Adjust the Sequence to skip the intro cutscene
       if (SequencePosition < 382)
       {
+        // Set the Sequence to 382 to prevent the cutscene from playing
         ttyd::swdrv::swByteSet(0, 382);
       }
     }
@@ -506,6 +516,15 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "pik_02") == 0)
+    {
+      // Skip the cutscene of the Shadow Sirens stealing the fake Garnet Star
+      if (SequencePosition < 336)
+      {
+        // Set the Sequence to 336 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 336);
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "rsh_05_a") == 0)
     {
       // The game will crash if the player enters this room with the Sequence being greater than 338
@@ -557,11 +576,21 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "tou_05") == 0)
+    {
+      // Adjust the Sequence to skip the cutscene of signing up to be a fighter
+      if (SequencePosition < 130)
+      {
+        // Set the Sequence to 130 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 130);
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "usu_00") == 0)
     {
       // Adjust the Sequence to skip the intro cutscene
       if (SequencePosition < 178)
       {
+        // Set the Sequence to 178 to prevent the cutscene from playing
         ttyd::swdrv::swByteSet(0, 178);
       }
     }
@@ -609,7 +638,7 @@ void setUpNewFile()
   // Turn on GSWF(0) to skip shop tutorials
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x178) |= (1 << 0); // Turn on the 0 bit
   
-  // Turn on GSWF(37) and GSWF(38) to prevent emails from being explained for the fitst time
+  // Turn on GSWF(37) and GSWF(38) to prevent emails from being explained for the first time
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x17C) |= ((1 << 5) | (1 << 6)); // Turn on the 5 and 6 bits
   
   // Turn on GSWF(233) to skip save blocks from being explained for the first time
@@ -627,6 +656,12 @@ void setUpNewFile()
   // Turn on GSWF(1781) and GSWF(1782) to skip the Koopie Koo cutscene in Petal Meadows
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x254) |= ((1 << 21) | (1 << 22)); // Turn on the 21 and 22 bits
   
+  // Turn on GSWF(2401) to skip the cutscene of entering Grubba's office through the grate for the first time
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A4) |= (1 << 1); // Turn on the 1 bit
+  
+  // Turn on GSWF(2500) to skip the cutscene of re-signing up to be a fighter
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2B0) |= (1 << 4); // Turn on the 4 bit
+  
   // Turn on GSWF(2867) to drain the water in the Great Tree
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2DC) |= (1 << 19); // Turn on the 19 bit
   
@@ -638,6 +673,9 @@ void setUpNewFile()
   
   // Turn on GSWF(3884) to skip the cutscene on the first screen of the area leading to Fahr Outpost
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x35C) |= (1 << 12); // Turn on the 12 bit
+  
+  // Turn on GSWF(4196) and GSWF(4197) to allow the player to use the crane without needing to insert the Cog
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x384) |= ((1 << 4) | (1 << 5)); // Turn on the 4 and 5 bits
 }
 
 void overwriteNewFileStrings()
