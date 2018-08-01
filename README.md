@@ -10,3 +10,6 @@ https://github.com/Zephiles/TTYD-Randomizers/tree/master/relloader-ttyd/REL_Load
 To use them on an emulator such as Dolphin, you need to either import the save file onto the virtual memory card used by the emulator, or move the file into the GCI folder (this is a Dolphin thing). You must then use either the provided Action Replay code or the provided Gecko code. The Gecko code is shorter, so that is the prefered code to use. The Action Replay code is provided mainly for people who happen to be using the old Action Replay discs, or for people who are having issues applying Gecko codes in Dolphin.  
 https://github.com/Zephiles/TTYD-Randomizers/tree/master/relloader-ttyd/REL_Loader/Action_Replay  
 https://github.com/Zephiles/TTYD-Randomizers/tree/master/relloader-ttyd/REL_Loader/Gecko  
+
+## Known Issues
+The timer does not work properly with 50Hz mode in PAL.
