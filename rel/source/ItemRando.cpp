@@ -57,6 +57,8 @@ extern "C" {
   void BranchBackAdjustSPForNewCrystalStar();
   void StartRandomizeCoinBlocks();
   void BranchBackRandomizeCoinBlocks();
+  void StartDisplayOverworldSPBars();
+  void BranchBackDisplayOverworldSPBars();
 }
 
 namespace mod {
@@ -665,6 +667,22 @@ uint32_t getAudienceItem()
 }
 }
 
+extern "C" {
+bool displayOverworldSPBars(uint32_t CurrentSpecialMoves, int32_t CurrentSPBar)
+{
+  // Check for how many SP bars to display
+  for (int i = 7; i >= CurrentSPBar; i--)
+  {
+    if (CurrentSpecialMoves & (1 << i))
+    {
+      return true;
+    }
+  }
+  
+  return false;
+}
+}
+
 void Mod::writeItemRandoAssemblyPatches()
 {
   #ifdef TTYD_US
@@ -705,17 +723,16 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t PreventUpgradesCrash = 0x800ABCD8;
     
+    uint32_t DisplaySPBarsOverworld = 0x8013D5B8;
     uint32_t DisplaySPBars1 = 0x8013D498;
-    uint32_t DisplaySPBars2 = 0x8013D5B4;
-    uint32_t DisplaySPBars3 = 0x80170F24;
-    uint32_t DisplaySPBars4 = 0x80170F44;
-    uint32_t DisplaySPBars5 = 0x80170F64;
-    uint32_t DisplaySPBars6 = 0x80170F84;
-    uint32_t DisplaySPBars7 = 0x80170FA4;
-    uint32_t DisplaySPBars8 = 0x80170FC4;
-    uint32_t DisplaySPBars9 = 0x80170FE4;
-    uint32_t DisplaySPBars10 = 0x80171004;
-    uint32_t DisplaySPBars11 = 0x8013D5B8;
+    uint32_t DisplaySPBars2 = 0x80170F24;
+    uint32_t DisplaySPBars3 = 0x80170F44;
+    uint32_t DisplaySPBars4 = 0x80170F64;
+    uint32_t DisplaySPBars5 = 0x80170F84;
+    uint32_t DisplaySPBars6 = 0x80170FA4;
+    uint32_t DisplaySPBars7 = 0x80170FC4;
+    uint32_t DisplaySPBars8 = 0x80170FE4;
+    uint32_t DisplaySPBars9 = 0x80171004;
     
     uint32_t KoopaCurseAddress = 0x8036ACA0;
     
@@ -765,17 +782,16 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t PreventUpgradesCrash = 0x800AA01C;
     
+    uint32_t DisplaySPBarsOverworld = 0x80137FEC;
     uint32_t DisplaySPBars1 = 0x80137ECC;
-    uint32_t DisplaySPBars2 = 0x80137FE8;
-    uint32_t DisplaySPBars3 = 0x8016BC70;
-    uint32_t DisplaySPBars4 = 0x8016BC90;
-    uint32_t DisplaySPBars5 = 0x8016BCB0;
-    uint32_t DisplaySPBars6 = 0x8016BCD0;
-    uint32_t DisplaySPBars7 = 0x8016BCF0;
-    uint32_t DisplaySPBars8 = 0x8016BD10;
-    uint32_t DisplaySPBars9 = 0x8016BD30;
-    uint32_t DisplaySPBars10 = 0x8016BD50;
-    uint32_t DisplaySPBars11 = 0x80137FEC;
+    uint32_t DisplaySPBars2 = 0x8016BC70;
+    uint32_t DisplaySPBars3 = 0x8016BC90;
+    uint32_t DisplaySPBars4 = 0x8016BCB0;
+    uint32_t DisplaySPBars5 = 0x8016BCD0;
+    uint32_t DisplaySPBars6 = 0x8016BCF0;
+    uint32_t DisplaySPBars7 = 0x8016BD10;
+    uint32_t DisplaySPBars8 = 0x8016BD30;
+    uint32_t DisplaySPBars9 = 0x8016BD50;
     
     uint32_t KoopaCurseAddress = 0x80368318;
     
@@ -825,17 +841,16 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t PreventUpgradesCrash = 0x800AD0A8;
     
+    uint32_t DisplaySPBarsOverworld = 0x8013F0A0;
     uint32_t DisplaySPBars1 = 0x8013EF80;
-    uint32_t DisplaySPBars2 = 0x8013F09C;
-    uint32_t DisplaySPBars3 = 0x801729C4;
-    uint32_t DisplaySPBars4 = 0x801729E4;
-    uint32_t DisplaySPBars5 = 0x80172A04;
-    uint32_t DisplaySPBars6 = 0x80172A24;
-    uint32_t DisplaySPBars7 = 0x80172A44;
-    uint32_t DisplaySPBars8 = 0x80172A64;
-    uint32_t DisplaySPBars9 = 0x80172A84;
-    uint32_t DisplaySPBars10 = 0x80172AA4;
-    uint32_t DisplaySPBars11 = 0x8013F0A0;
+    uint32_t DisplaySPBars2 = 0x801729C4;
+    uint32_t DisplaySPBars3 = 0x801729E4;
+    uint32_t DisplaySPBars4 = 0x80172A04;
+    uint32_t DisplaySPBars5 = 0x80172A24;
+    uint32_t DisplaySPBars6 = 0x80172A44;
+    uint32_t DisplaySPBars7 = 0x80172A64;
+    uint32_t DisplaySPBars8 = 0x80172A84;
+    uint32_t DisplaySPBars9 = 0x80172AA4;
     
     uint32_t KoopaCurseAddress = 0x80376B68;
     
@@ -897,6 +912,10 @@ void Mod::writeItemRandoAssemblyPatches()
   patch::writeBranch(reinterpret_cast<void *>(CoinBlockAddress), reinterpret_cast<void *>(StartRandomizeCoinBlocks));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackRandomizeCoinBlocks), reinterpret_cast<void *>(CoinBlockAddress + 0x4));
   
+  // Properly display SP Bars
+  patch::writeBranch(reinterpret_cast<void *>(DisplaySPBarsOverworld), reinterpret_cast<void *>(StartDisplayOverworldSPBars));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackDisplayOverworldSPBars), reinterpret_cast<void *>(DisplaySPBarsOverworld + 0x4));
+  
   // Allow enemies to hold items that they can't use
   *reinterpret_cast<uint32_t *>(EnemyItemCanUseCheck1) = 0x60000000; // nop
   *reinterpret_cast<uint32_t *>(EnemyItemCanUseCheck2) = 0x60000000; // nop
@@ -924,8 +943,6 @@ void Mod::writeItemRandoAssemblyPatches()
   *reinterpret_cast<uint32_t *>(DisplaySPBars7) = 0x60000000; // nop
   *reinterpret_cast<uint32_t *>(DisplaySPBars8) = 0x60000000; // nop
   *reinterpret_cast<uint32_t *>(DisplaySPBars9) = 0x60000000; // nop
-  *reinterpret_cast<uint32_t *>(DisplaySPBars10) = 0x60000000; // nop
-  *reinterpret_cast<uint32_t *>(DisplaySPBars11) = 0x2C030000; // cmpwi r3,0
   
   // Make Koopa Curse target all enemies rather than just one
   *reinterpret_cast<uint8_t *>(KoopaCurseAddress) = 0x2;

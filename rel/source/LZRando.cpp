@@ -242,6 +242,24 @@ void getRandomWarp()
         continue;
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "gon_01") == 0)
+    {
+      // Skip the intro cutscene
+      if (SequencePosition < 37)
+      {
+        // Set the Sequence to 37 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 37);
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "gon_03") == 0)
+    {
+      // Skip the cutscene with Koops
+      if (SequencePosition < 38)
+      {
+        // Set the Sequence to 38 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 38);
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "gon_06") == 0)
     {
       // Adjust the Sequence and GSWF(1493) if the player hasn't gotten the Paper Curse yet
@@ -341,7 +359,7 @@ void getRandomWarp()
       }
       
       // Allow Doopliss 1 or 2 to be fought at random
-      bool DooplissCheck = ttyd::system::irand(2) == 0;
+      bool DooplissCheck = ttyd::system::irand(1000) < 500;
       
       if (DooplissCheck)
       {
@@ -516,6 +534,15 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "nok_00") == 0)
+    {
+      // Skip the intro cutscene
+      if (SequencePosition < 26)
+      {
+        // Set the Sequence to 26 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 26);
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "pik_02") == 0)
     {
       // Skip the cutscene of the Shadow Sirens stealing the fake Garnet Star
@@ -559,6 +586,15 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "tou_01") == 0)
+    {
+      // Adjust the Sequence to skip the intro cutscene
+      if (SequencePosition < 127)
+      {
+        // Set the Sequence to 127 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 127);
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "tou_03") == 0)
     {
       if (SequencePosition < 163)
@@ -585,6 +621,15 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 130);
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "tou_06") == 0)
+    {
+      // Adjust the Sequence to skip the Mowz cutscene
+      if (SequencePosition < 148)
+      {
+        // Set the Sequence to 148 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 148);
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "usu_00") == 0)
     {
       // Adjust the Sequence to skip the intro cutscene
@@ -592,6 +637,15 @@ void getRandomWarp()
       {
         // Set the Sequence to 178 to prevent the cutscene from playing
         ttyd::swdrv::swByteSet(0, 178);
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "win_00") == 0)
+    {
+      // Adjust the Sequence to skip the cutscene with the Shadow Sirens
+      if (SequencePosition < 72)
+      {
+        // Set the Sequence to 72 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 72);
       }
     }
     

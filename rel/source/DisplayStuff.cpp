@@ -544,8 +544,8 @@ void Mod::titleScreenStuff()
   
   sprintf(DisplayBuffer,
     "%s\n%s",
-    "Item Randomizers - v1.2.8",
-    "Loading Zone Randomizer Beta - v0.5.17");
+    "Item Randomizers - v1.2.9",
+    "Loading Zone Randomizer Beta - v0.5.18");
   
   ttyd::fontmgr::FontDrawStart();
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
@@ -592,15 +592,15 @@ void Mod::gameModes()
   else
   {
     ttyd::string::strcpy(LZRandoText, "Off");
-    
-    // If the Loading Zone Randomizer is off, then turn the 1 Hour Challenge off
-    LZRandoChallenge = false;
   }
   
   // Set LZRandoChallengeText to the appropriate value
   if (LZRandoChallenge)
   {
     ttyd::string::strcpy(LZRandoChallengeText, "On");
+    
+    // Set the Item Randomizer to v1 if it's not already
+    ItemRandoV2 = false;
   }
   else
   {
@@ -641,6 +641,12 @@ void Mod::gameModes()
     if (!DenyInput)
     {
       LZRando = !LZRando;
+      
+      if (!LZRando)
+      {
+        // Turn the challenge mode off if it's currently on
+        LZRandoChallenge = false;
+      }
     }
     DenyInput = true;
   }
@@ -649,6 +655,12 @@ void Mod::gameModes()
     if (!DenyInput)
     {
       LZRandoChallenge = !LZRandoChallenge;
+      
+      if (LZRandoChallenge)
+      {
+        // Turn the Loading Zone randomizer on if it's currently off
+        LZRando = true;
+      }
     }
     DenyInput = true;
   }
