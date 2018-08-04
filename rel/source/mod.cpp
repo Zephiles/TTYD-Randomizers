@@ -5,6 +5,7 @@
 #include <ttyd/fontmgr.h>
 #include <ttyd/mario_party.h>
 #include <ttyd/countdown.h>
+#include <ttyd/mot_ship.h>
 
 #include "patch.h"
 
@@ -52,6 +53,12 @@ void Mod::init()
   mPFN_countDownStart_trampoline = patch::hookFunction(ttyd::countdown::countDownStart, [](uint32_t unk1, uint32_t unk2)
   {
     gMod->preventCountDownStart(unk1, unk2);
+  });
+  
+  // Prevent the waves in Pirate's Grotto from crashing the game
+  mPFN_marioShipForceStop_trampoline = patch::hookFunction(ttyd::mot_ship::marioShipForceStop, []()
+  {
+    return gMod->preventMarioShipForceStop();
   });
   
   // Make changes that are only done once

@@ -734,7 +734,9 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars8 = 0x80170FE4;
     uint32_t DisplaySPBars9 = 0x80171004;
     
-    uint32_t KoopaCurseAddress = 0x8036ACA0;
+    uint32_t KoopaCurseEffectsAddress = 0x8036AC3C;
+    
+    uint32_t SuperChargeEffectsAddress = 0x80355228;
     
     uint32_t itemDataTable = 0x803108A8;
     uint16_t KoopaCurseIcon = 390;
@@ -793,7 +795,9 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars8 = 0x8016BD30;
     uint32_t DisplaySPBars9 = 0x8016BD50;
     
-    uint32_t KoopaCurseAddress = 0x80368318;
+    uint32_t KoopaCurseEffectsAddress = 0x803682B4;
+    
+    uint32_t SuperChargeEffectsAddress = 0x80352B50;
     
     uint32_t itemDataTable = 0x8030EE58;
     uint16_t KoopaCurseIcon = 382;
@@ -852,7 +856,9 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars8 = 0x80172A84;
     uint32_t DisplaySPBars9 = 0x80172AA4;
     
-    uint32_t KoopaCurseAddress = 0x80376B68;
+    uint32_t KoopaCurseEffectsAddress = 0x80376B04;
+    
+    uint32_t SuperChargeEffectsAddress = 0x803610D8;
     
     uint32_t itemDataTable = 0x8031C638;
     uint16_t KoopaCurseIcon = 390;
@@ -945,11 +951,11 @@ void Mod::writeItemRandoAssemblyPatches()
   *reinterpret_cast<uint32_t *>(DisplaySPBars9) = 0x60000000; // nop
   
   // Make Koopa Curse target all enemies rather than just one
-  *reinterpret_cast<uint8_t *>(KoopaCurseAddress) = 0x2;
+  *reinterpret_cast<uint8_t *>(KoopaCurseEffectsAddress + 0x64) = 0x2;
   
-  // Change icons for Koopa Curse and Debug Badge
-  *reinterpret_cast<uint16_t *>(itemDataTable + (KoopaCurse * 0x28) + 0x20) = KoopaCurseIcon;
-  *reinterpret_cast<uint16_t *>(itemDataTable + (DebugBadge * 0x28) + 0x20) = DebugBadgeIcon;
+  // Make Super Charge and Super Charge P increase attack by 4 instead of 2
+  *reinterpret_cast<uint8_t *>(SuperChargeEffectsAddress + 0x9F) = 0x4; // Super Charge
+  *reinterpret_cast<uint8_t *>(SuperChargeEffectsAddress + 0xC0 + 0x9F) = 0x4; // Super Charge P
   
   // Change the amount of SP needed for Sweet Feast from 5 to 3
   *reinterpret_cast<uint8_t *>(SweetFeastAddress + 0x12) = 0x3;
@@ -959,6 +965,34 @@ void Mod::writeItemRandoAssemblyPatches()
   
   // Modify the pouchGetItem function to give 3 Shine Sprites when you collect one
   *reinterpret_cast<uint8_t *>(ShineSpriteAddress + 0x3) = 0x3;
+  
+  // Change icons for Koopa Curse and Debug Badge
+  *reinterpret_cast<uint16_t *>(itemDataTable + (KoopaCurse * 0x28) + 0x20) = KoopaCurseIcon;
+  *reinterpret_cast<uint16_t *>(itemDataTable + (DebugBadge * 0x28) + 0x20) = DebugBadgeIcon;
+  
+  // Change sell price for Trade Off
+  *reinterpret_cast<uint16_t *>((itemDataTable + (TradeOff * 0x28)) + 0x1A) = 10;
+  
+  // Change sell price for Trial Stew
+  *reinterpret_cast<uint16_t *>((itemDataTable + (TrialStew * 0x28)) + 0x1A) = 25;
+  
+  // Change buy and sell prices for Triple Dip
+  uint32_t TripleDipAddress = itemDataTable + (TripleDip * 0x28);
+  *reinterpret_cast<uint16_t *>(TripleDipAddress + 0x14) = 200; // Buy price
+  *reinterpret_cast<uint16_t *>(TripleDipAddress + 0x16) = 140; // Discounted Buy price
+  *reinterpret_cast<uint16_t *>(TripleDipAddress + 0x1A) = 100; // Sell price
+  
+  // Change buy and sell prices for Super Charge
+  uint32_t SuperChargeAddress = itemDataTable + (SuperCharge * 0x28);
+  *reinterpret_cast<uint16_t *>(SuperChargeAddress + 0x14) = 100; // Buy price
+  *reinterpret_cast<uint16_t *>(SuperChargeAddress + 0x16) = 70; // Discounted Buy price
+  *reinterpret_cast<uint16_t *>(SuperChargeAddress + 0x1A) = 50; // Sell price
+  
+  // Change buy and sell prices for Super Charge P
+  uint32_t SuperChargePAddress = itemDataTable + (SuperChargeP * 0x28);
+  *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x14) = 150; // Buy price
+  *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x16) = 105; // Discounted Buy price
+  *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x1A) = 75; // Sell price
   
   // Clear the cache for the pouchGetItem address for Shine Sprites, as it gets used during the boot process
   clearcache::clearCache(ShineSpriteAddress, sizeof(uint32_t));

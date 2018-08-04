@@ -544,8 +544,8 @@ void Mod::titleScreenStuff()
   
   sprintf(DisplayBuffer,
     "%s\n%s",
-    "Item Randomizers - v1.2.9",
-    "Loading Zone Randomizer Beta - v0.5.18");
+    "Item Randomizers - v1.2.10",
+    "Loading Zone Randomizer Beta - v0.5.19");
   
   ttyd::fontmgr::FontDrawStart();
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));

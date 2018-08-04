@@ -34,6 +34,8 @@ private:
   void (*mPFN_partyLeft_trampoline)(uint32_t) = nullptr;
   void preventCountDownStart(uint32_t, uint32_t);
   void (*mPFN_countDownStart_trampoline)(uint32_t, uint32_t) = nullptr;
+  void *preventMarioShipForceStop();
+  void *(*mPFN_marioShipForceStop_trampoline)() = nullptr;
   
 private:
   void (*mPFN_makeKey_trampoline)() = nullptr;

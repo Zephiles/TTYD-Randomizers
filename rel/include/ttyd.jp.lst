@@ -306,6 +306,23 @@
 80085F50:seq_logoExit
 80085F94:seq_logoInit
 
+// mot_ship.o
+// 8009FD60:checkHarbor
+// 800A0248:shipMove
+// 800A0774:marioChkShipMoveMode
+// 800A07C8:marioShipChgFall
+// 800A081C:mot_ship
+// 800A22C0:mot_ship_post
+// 800A23BC:marioReInit_ship
+// 800A2590:marioForceShipAnime
+// 800A25FC:marioChkShipPlace
+// 800A262C:marioShipSetDispDir
+800A268C:marioShipForceStop
+// 800A26EC:marioChkSwirlPower
+// 800A2724:marioSetSwirlPower
+// 800A2798:marioShipChanging
+// 800A2824:unk_JP_US_PAL_020
+
 // itemdrv.o
 // 800A8864:itemPickUp
 // 800A8898:itemStatus

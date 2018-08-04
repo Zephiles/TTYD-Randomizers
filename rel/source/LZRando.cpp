@@ -50,6 +50,9 @@ extern "C" {
   void BranchBackEnableBoatMode();
   void StartMarioKeyOnFix();
   void BranchBackMarioKeyOnFix();
+  void StartEnableWalkJumpOnWater();
+  void StartEnableLandOnWater();
+  void BranchBackEnableLandOnWater();
 }
 
 namespace mod {
@@ -179,7 +182,16 @@ void getRandomWarp()
     ttyd::string::strcpy(NextMap, NewRandomMap);
     ttyd::string::strncpy(NextArea, NewRandomMap, 3);
     
-    if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
+    if (ttyd::string::strcmp(NextMap, "aji_00") == 0)
+    {
+      // Skip the cutscenes and fight
+      if (SequencePosition < 361)
+      {
+        // Set the Sequence to 361 to prevent the cutscene from playing and to prevent the fight from occuring
+        ttyd::swdrv::swByteSet(0, 361);
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
     {
       // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 373
       if ((SequencePosition < 373) && CheckChallengeModeTimerCutoff())
@@ -552,6 +564,15 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 336);
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "rsh_02_a") == 0)
+    {
+      // Skip the intro cutscene
+      if (SequencePosition < 282)
+      {
+        // Set the Sequence to 282 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 282);
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "rsh_05_a") == 0)
     {
       // The game will crash if the player enters this room with the Sequence being greater than 338
@@ -588,6 +609,9 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "tou_01") == 0)
     {
+      // Change the loading zone used to skip the cutscene of coming off of the blimp
+      ttyd::string::strcpy(NextBero, "a_door_mon");
+      
       // Adjust the Sequence to skip the intro cutscene
       if (SequencePosition < 127)
       {
@@ -703,6 +727,15 @@ void setUpNewFile()
   
   // Turn on GSWF(235) to skip items from being explained for the first time
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x194) |= (1 << 11); // Turn on the 11 bit
+  
+  // Turn on GSWF(1187) to set Zess T. to be blocking the west entrance
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x20C) |= (1 << 3); // Turn on the 3 bit
+  
+  // Turn on GSWF(1189) to have the Contact Lens ordered already
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x20C) |= (1 << 5); // Turn on the 5 bit
+  
+  // Turn on GSWF(1197) to skip Zess T. explaining that he will cook stuff for the player now
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x20C) |= (1 << 13); // Turn on the 13 bit
   
   // Turn on GSWF(1200) to prevent partners from explaining Save Blocks in central Rogueport
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x20C) |= (1 << 16); // Turn on the 16 bit
@@ -1090,6 +1123,21 @@ int32_t fixMarioKeyOn(int32_t currentKeyValue)
 }
 }
 
+extern "C" {
+bool enableWalkOnWater(uint32_t CheckBit)
+{
+  // Allow if the Loading Zone randomizer is in use
+  if (LZRando)
+  {
+    return false;
+  }
+  else
+  {
+    return (CheckBit & (1 << 9)); // Check if the 9 bit is on
+  }
+}
+}
+
 void Mod::preventPartyLeft(uint32_t id)
 {
   // Prevent the game from removing partners
@@ -1119,6 +1167,20 @@ void Mod::preventCountDownStart(uint32_t unk1, uint32_t unk2)
   }
 }
 
+void *Mod::preventMarioShipForceStop()
+{
+  // Only prevent from running if the Loading Zone randomizer is currently in use
+  if (LZRando)
+  {
+    return nullptr;
+  }
+  else
+  {
+    // Call original function
+    return mPFN_marioShipForceStop_trampoline();
+  }
+}
+
 void Mod::writeLZRandoAssemblyPatches()
 {
   #ifdef TTYD_US
@@ -1127,18 +1189,25 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t PaperModeCheck = 0x800A6A3C;
     uint32_t BoatModeCheck = 0x8009268C;
     uint32_t MarioKeyOn = 0x8005C1C8;
+    uint32_t WalkOnWater = 0x8008F940;
+    uint32_t LandOnWater = 0x80092DF4;
   #elif defined TTYD_JP
     uint32_t RandomWarp = 0x800086F0;
     uint32_t TubeModeCheck = 0x80090D90;
     uint32_t PaperModeCheck = 0x800A4DB4;
     uint32_t BoatModeCheck = 0x800910D8;
     uint32_t MarioKeyOn = 0x8005B370;
+    uint32_t WalkOnWater = 0x8008E38C;
+    uint32_t LandOnWater = 0x80091840;
   #elif defined TTYD_EU
     uint32_t RandomWarp = 0x80008994;
     uint32_t TubeModeCheck = 0x800936A0;
     uint32_t PaperModeCheck = 0x800A7E0C;
     uint32_t BoatModeCheck = 0x800939E8;
     uint32_t MarioKeyOn = 0x8005C300;
+    uint32_t WalkOnWater = 0x80090C9C;
+    uint32_t LandOnWater = 0x80094170;
+    uint32_t JumpOnWater = 0x80093CFC;
   #endif
   
   // Random Warps
@@ -1160,43 +1229,31 @@ void Mod::writeLZRandoAssemblyPatches()
   // Fix the marioKeyOn function to prevent the key from becoming negative
   patch::writeBranch(reinterpret_cast<void *>(MarioKeyOn), reinterpret_cast<void *>(StartMarioKeyOnFix));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackMarioKeyOnFix), reinterpret_cast<void *>(MarioKeyOn + 0x4));
+  
+  // Allow Walking, Landing, and Jumping on water
+  patch::writeBranch(reinterpret_cast<void *>(LandOnWater), reinterpret_cast<void *>(StartEnableLandOnWater));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackEnableLandOnWater), reinterpret_cast<void *>(LandOnWater + 0x4));
+  patch::writeBranch(reinterpret_cast<void *>(WalkOnWater), reinterpret_cast<void *>(StartEnableWalkJumpOnWater));
+  #ifdef TTYD_EU
+    patch::writeBranch(reinterpret_cast<void *>(JumpOnWater), reinterpret_cast<void *>(StartEnableWalkJumpOnWater));
+  #endif
+  
+  // Adjust branches to be bl instead of b; should modify the patch function to allow for this instead
+  *reinterpret_cast<uint32_t *>(WalkOnWater) += 0x1;
+  #ifdef TTYD_EU
+    *reinterpret_cast<uint32_t *>(JumpOnWater) += 0x1;
+  #endif
 }
 
 void writeAdditionalLZRandoAssemblyPatches()
 {
   #ifdef TTYD_US
-    uint32_t WalkOnWater1 = 0x8008F938;
-    uint32_t WalkOnWater2 = 0x80092DF8;
     uint32_t aaa_00_Address = 0x802EDE78;
   #elif defined TTYD_JP
-    uint32_t WalkOnWater1 = 0x8008E384;
-    uint32_t WalkOnWater2 = 0x80091844;
     uint32_t aaa_00_Address = 0x802ED930;
   #elif defined TTYD_EU
-    uint32_t WalkOnWater1 = 0x80090C94;
-    uint32_t WalkOnWater2 = 0x80094174;
-    uint32_t WalkOnWater3 = 0x80093CEC;
     uint32_t aaa_00_Address = 0x802F9AD8;
   #endif
-  
-  if (!LZRando)
-  {
-    *reinterpret_cast<uint32_t *>(WalkOnWater1) = 0x4182003C; // beq- 0x3C
-    *reinterpret_cast<uint32_t *>(WalkOnWater2) = 0x418200A4; // beq- 0xA4
-    #ifdef TTYD_EU
-      *reinterpret_cast<uint32_t *>(WalkOnWater3) = 0x807F01E8; // lwz r3,0x01E8(r31)
-    #endif
-  }
-  else
-  {
-    // Allow Mario to walk on water to avoid softlocks
-    *reinterpret_cast<uint32_t *>(WalkOnWater1) = 0x4800003C; // b 0x3C
-    *reinterpret_cast<uint32_t *>(WalkOnWater2) = 0x480000A4; // b 0xA4
-    #ifdef TTYD_EU
-      // Allow Mario to jump while standing on water
-      *reinterpret_cast<uint32_t *>(WalkOnWater3) = 0x38600000; // li r3,0
-    #endif
-  }
   
   // Clear Cache
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
@@ -1208,14 +1265,6 @@ void writeAdditionalLZRandoAssemblyPatches()
   if (!ClearCacheFlag && (NextSeq == Load) && (seqMainCheck == 4))
   {
     ClearCacheFlag = true;
-    
-    clearcache::clearCache(WalkOnWater1, sizeof(uint32_t));
-    clearcache::clearCache(WalkOnWater2, sizeof(uint32_t));
-    
-    #ifdef TTYD_EU
-      clearcache::clearCache(WalkOnWater3, sizeof(uint32_t));
-    #endif
-    
     clearcache::clearCache(aaa_00_Address, 16);
   }
   else if (ClearCacheFlag && ((NextSeq == Game) || (NextSeq == Title)))
