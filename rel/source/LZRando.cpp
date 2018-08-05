@@ -53,6 +53,8 @@ extern "C" {
   void StartEnableWalkJumpOnWater();
   void StartEnableLandOnWater();
   void BranchBackEnableLandOnWater();
+  void StartSpawnPartnerBattle();
+  void BranchBackSpawnPartnerBattle();
 }
 
 namespace mod {
@@ -844,19 +846,9 @@ void specificMapEdits()
   uint32_t AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZsAddressesStart);
   AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x4);
   
-  if (ttyd::string::strcmp(NextMap, "jon_06") == 0)
+  if (ttyd::string::strcmp(NextMap, "las_29") == 0)
   {
-    // Make sure a partner is out when fighting Bonetail
-    // This can be avoided with the edits to the jon REL, which will probably be implemented at a later date
-    if (!PartnerPointer)
-    {
-      // Bring out Goombella if no partner is out
-      ttyd::mario_party::marioPartyHello(1);
-    }
-  }
-  else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
-  {
-    // Make sure a partner is out when fighting the Shadow Queen
+    // Make sure a partner is out for the Shadow Queen cutscene
     if (!PartnerPointer)
     {
       // Bring out Goombella if no partner is out
@@ -1138,6 +1130,21 @@ bool enableWalkOnWater(uint32_t CheckBit)
 }
 }
 
+extern "C" {
+uint32_t spawnPartnerBattle(uint32_t PartnerValue)
+{
+  // Force a partner out of one isn't already
+  // Only force a partner out if the Loading Zone randomizer is in use
+  if ((PartnerValue == 0) && LZRando)
+  {
+    // Bring out Goombella
+    return 224;
+  }
+  
+  return PartnerValue;
+}
+}
+
 void Mod::preventPartyLeft(uint32_t id)
 {
   // Prevent the game from removing partners
@@ -1191,6 +1198,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t MarioKeyOn = 0x8005C1C8;
     uint32_t WalkOnWater = 0x8008F940;
     uint32_t LandOnWater = 0x80092DF4;
+    uint32_t SpawnPartnerInBattle = 0x800F8B44;
   #elif defined TTYD_JP
     uint32_t RandomWarp = 0x800086F0;
     uint32_t TubeModeCheck = 0x80090D90;
@@ -1199,6 +1207,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t MarioKeyOn = 0x8005B370;
     uint32_t WalkOnWater = 0x8008E38C;
     uint32_t LandOnWater = 0x80091840;
+    uint32_t SpawnPartnerInBattle = 0x800F3BF4;
   #elif defined TTYD_EU
     uint32_t RandomWarp = 0x80008994;
     uint32_t TubeModeCheck = 0x800936A0;
@@ -1208,6 +1217,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t WalkOnWater = 0x80090C9C;
     uint32_t LandOnWater = 0x80094170;
     uint32_t JumpOnWater = 0x80093CFC;
+    uint32_t SpawnPartnerInBattle = 0x800F99B0;
   #endif
   
   // Random Warps
@@ -1243,6 +1253,10 @@ void Mod::writeLZRandoAssemblyPatches()
   #ifdef TTYD_EU
     *reinterpret_cast<uint32_t *>(JumpOnWater) += 0x1;
   #endif
+  
+  // Force a partner out in battle if entering without one out
+  patch::writeBranch(reinterpret_cast<void *>(SpawnPartnerInBattle), reinterpret_cast<void *>(StartSpawnPartnerBattle));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackSpawnPartnerBattle), reinterpret_cast<void *>(SpawnPartnerInBattle + 0x4));
 }
 
 void writeAdditionalLZRandoAssemblyPatches()
