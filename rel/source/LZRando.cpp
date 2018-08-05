@@ -55,6 +55,8 @@ extern "C" {
   void BranchBackEnableLandOnWater();
   void StartSpawnPartnerBattle();
   void BranchBackSpawnPartnerBattle();
+  void StartResetFileLoadSpawn();
+  void BranchBackResetFileLoadSpawn();
 }
 
 namespace mod {
@@ -964,6 +966,65 @@ void reloadScreen()
     return;
   }
   
+  // Prevent reloading the room if the player is currently in a room with a boss. This prevents the player from repeatedly killing the boss for SP and/or points.
+  uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
+  if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
+  {
+    if (SequencePosition < 373)
+    {
+      return;
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "gon_11") == 0)
+  {
+    if (SequencePosition < 55)
+    {
+      return;
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "las_09") == 0)
+  {
+    if (SequencePosition == 390)
+    {
+      return;
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "las_26") == 0)
+  {
+    if (SequencePosition == 387)
+    {
+      return;
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "muj_12") == 0)
+  {
+    if (SequencePosition == 252)
+    {
+      return;
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "rsh_06_a") == 0)
+  {
+    if (SequencePosition < 332)
+    {
+      return;
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "tik_02") == 0)
+  {
+    if (SequencePosition == 20)
+    {
+      return;
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "tou_03") == 0)
+  {
+    if (SequencePosition == 163)
+    {
+      return;
+    }
+  }
+  
   // Not in the pause menu
   // A separate address for NextBero is needed, as the original value will be cleared during the reloading process
   // The game will crash if NextMap is used directly in seqSetSeq, so a separate address must be used instead
@@ -998,6 +1059,23 @@ void setNextBero()
   if (ttyd::string::strcmp(NextMap, "eki_03") == 0)
   {
     return;
+  }
+  
+  // Prevent changing the loading zone for rooms that need it to be set to a specific value
+  uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
+  if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
+  {
+    if (SequencePosition < 373)
+    {
+      return;
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
+  {
+    if (SequencePosition == 400)
+    {
+      return;
+    }
   }
   
   uint32_t ButtonInput = ttyd::system::keyGetButton(0);
@@ -1044,12 +1122,18 @@ void resetValuesOnGameOver()
     return;
   }
   
-  // Adjust the Sequence if the player got a Game Over on Magnus 1. This will prevent the Emerald Star cutscene from playing if they happen to warp back there
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   if (SequencePosition == 111)
   {
+    // Adjust the Sequence if the player got a Game Over on Magnus 1. This will prevent the Emerald Star cutscene from playing if they happen to warp back there
     // Set the Sequence back one
     ttyd::swdrv::swByteSet(0, 110);
+  }
+  else if (SequencePosition == 400)
+  {
+    // Adjust the Sequence if the player got a Game Over on the Shadow Queen. This will prevent warping back into the cutscene for her.
+    // Set the Sequence to an arbitary value right before anything major
+    ttyd::swdrv::swByteSet(0, 393);
   }
   
   ReloadCurrentScreen = false;
@@ -1145,6 +1229,21 @@ uint32_t spawnPartnerBattle(uint32_t PartnerValue)
 }
 }
 
+extern "C" {
+void resetFileLoadSpawn(void *GSWAddressesPointer)
+{
+  // Only reset if using the Loading Zone randomizer
+  if (LZRando)
+  {
+    uint32_t GSWAddresses = reinterpret_cast<uint32_t>(GSWAddressesPointer);
+    
+    *reinterpret_cast<float *>(GSWAddresses + 0x11D4) = 0; // Coordinate X
+    *reinterpret_cast<float *>(GSWAddresses + 0x11D8) = 0; // Coordinate Y
+    *reinterpret_cast<float *>(GSWAddresses + 0x11DC) = 0; // Coordinate Z
+  }
+}
+}
+
 void Mod::preventPartyLeft(uint32_t id)
 {
   // Prevent the game from removing partners
@@ -1199,6 +1298,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t WalkOnWater = 0x8008F940;
     uint32_t LandOnWater = 0x80092DF4;
     uint32_t SpawnPartnerInBattle = 0x800F8B44;
+    uint32_t ResetFileLoadCoordinates = 0x800F3A1C;
   #elif defined TTYD_JP
     uint32_t RandomWarp = 0x800086F0;
     uint32_t TubeModeCheck = 0x80090D90;
@@ -1208,6 +1308,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t WalkOnWater = 0x8008E38C;
     uint32_t LandOnWater = 0x80091840;
     uint32_t SpawnPartnerInBattle = 0x800F3BF4;
+    uint32_t ResetFileLoadCoordinates = 0x800EED60;
   #elif defined TTYD_EU
     uint32_t RandomWarp = 0x80008994;
     uint32_t TubeModeCheck = 0x800936A0;
@@ -1218,6 +1319,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t LandOnWater = 0x80094170;
     uint32_t JumpOnWater = 0x80093CFC;
     uint32_t SpawnPartnerInBattle = 0x800F99B0;
+    uint32_t ResetFileLoadCoordinates = 0x800F4888;
   #endif
   
   // Random Warps
@@ -1257,6 +1359,10 @@ void Mod::writeLZRandoAssemblyPatches()
   // Force a partner out in battle if entering without one out
   patch::writeBranch(reinterpret_cast<void *>(SpawnPartnerInBattle), reinterpret_cast<void *>(StartSpawnPartnerBattle));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackSpawnPartnerBattle), reinterpret_cast<void *>(SpawnPartnerInBattle + 0x4));
+  
+  // Reset Mario's coordinates upon loading a file
+  patch::writeBranch(reinterpret_cast<void *>(ResetFileLoadCoordinates), reinterpret_cast<void *>(StartResetFileLoadSpawn));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackResetFileLoadSpawn), reinterpret_cast<void *>(ResetFileLoadCoordinates + 0x4));
 }
 
 void writeAdditionalLZRandoAssemblyPatches()

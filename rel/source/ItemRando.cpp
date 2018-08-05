@@ -25,7 +25,7 @@ extern uint16_t CrystalStarNewItem;
 extern bool MarioRunAwayCoinDrop;
 extern bool EnemyHeldItemArrayInUse;
 extern bool ItemRandoV2;
-extern uint8_t EnemyHeldItemArrayCounter;
+extern int8_t EnemyHeldItemArrayCounter;
 extern bool RanAwayFromBattle;
 extern uint16_t EnemyHeldItemArray[8][8];
 extern uint32_t GSWAddressesStart;
@@ -323,6 +323,12 @@ uint32_t assignEnemyHeldItem(void *OriginalEnemyHeldItemArray, uint32_t ArrayInd
 extern "C" {
 uint32_t getEnemyItemDrop()
 {
+  // Prevent EnemyHeldItemArrayCounter from becoming negative; temporary fix for First Attack/Bump Attack
+  if (EnemyHeldItemArrayCounter < 1)
+  {
+    return 0;
+  }
+  
   // Decrement EnemyHeldItemArrayCounter
   EnemyHeldItemArrayCounter--;
   

@@ -12,7 +12,7 @@ extern "C" {
 // pouchOpenMail
 // pouchReceiveMail
 // pouchReceiveMailCount
-// pouchGetStarStone
+void pouchGetStarStone(uint32_t id);
 // pouchAddKpaScore
 // pouchGetKpaScore
 // pouchAddKpaCoin

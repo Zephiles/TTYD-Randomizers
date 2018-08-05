@@ -2,10 +2,11 @@
 
 #include <ttyd/system.h>
 #include <ttyd/itemdrv.h>
-#include <ttyd/fontmgr.h>
+#include <ttyd/mario_pouch.h>
 #include <ttyd/mario_party.h>
 #include <ttyd/countdown.h>
 #include <ttyd/mot_ship.h>
+#include <ttyd/fontmgr.h>
 
 #include "patch.h"
 
@@ -40,6 +41,9 @@ void Mod::init()
   {
     return gMod->getRandomItem(const_cast<char *>(itemName), itemId, itemMode, wasCollectedExpr, reinterpret_cast<uint32_t *>(itemPickupScript), itemCoordinateX, itemCoordinateY, itemCoordinateZ);
   });
+  
+  // Prevent Crystal Stars from bosses adjusting the max SP and giving special moves
+  patch::hookFunction(ttyd::mario_pouch::pouchGetStarStone, [](uint32_t id){});
   
   // LZ Rando
   // Prevent the game from removing partners

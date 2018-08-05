@@ -434,7 +434,7 @@
 // 800D2EB4:pouchOpenMail
 // 800D2EF4:pouchReceiveMail
 // 800D300C:pouchReceiveMailCount
-// 800D30E0:pouchGetStarStone
+800D30E0:pouchGetStarStone
 // 800D3154:pouchAddKpaScore
 // 800D3184:pouchGetKpaScore
 // 800D3190:pouchAddKpaCoin
