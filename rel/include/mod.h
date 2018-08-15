@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ttyd/party.h>
+
 #include <cstdint>
 
 namespace mod {
@@ -30,8 +32,10 @@ private:
   // LZ Rando
   void LZRandoStuff();
   void writeLZRandoAssemblyPatches();
-  void preventPartyLeft(uint32_t);
-  void (*mPFN_partyLeft_trampoline)(uint32_t) = nullptr;
+  void preventPartyLeft(ttyd::party::Party);
+  void (*mPFN_partyLeft_trampoline)(ttyd::party::Party) = nullptr;
+  int32_t randomizeGivenFollower(ttyd::party::Party, float, float, float);
+  int32_t (*mPFN_randomizeGivenFollower_trampoline)(ttyd::party::Party, float, float, float) = nullptr;
   void preventCountDownStart(uint32_t, uint32_t);
   void (*mPFN_countDownStart_trampoline)(uint32_t, uint32_t) = nullptr;
   void *preventMarioShipForceStop();

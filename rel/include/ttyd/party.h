@@ -1,6 +1,31 @@
 #pragma once
 
+#include <cstdint>
+
 namespace ttyd::party {
+
+enum class Party : uint8_t
+{
+  Goombella = 1,
+  Koops,
+  Bobbery,
+  Yoshi,
+  Flurrie,
+  Vivian,
+  MsMowz,
+  Egg,
+  Flavio,
+  Punio,
+  Frankly,
+  Gus,
+  GoombellaFollower,
+  KoopsFollower,
+  BobberyFollower,
+  YoshiFollower,
+  FlurrieFollower,
+  VivianFollower,
+  MsMowzFollower,
+};
 
 extern "C" {
 
@@ -45,7 +70,7 @@ extern "C" {
 // partyUsePost
 // partyReInit
 // partyInit
-// partyEntry2Pos
+int32_t partyEntry2Pos(Party id, float x, float y, float z);
 // partyEntry2Hello
 // partyEntry2
 // partyEntryMain

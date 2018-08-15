@@ -6,14 +6,15 @@
 #include <ttyd/seqdrv.h>
 #include <ttyd/string.h>
 #include <ttyd/swdrv.h>
+#include <ttyd/mariost.h>
 #include <ttyd/fontmgr.h>
 #include <ttyd/mario_pouch.h>
 #include <ttyd/party.h>
 #include <ttyd/mario_party.h>
 #include <ttyd/system.h>
 #include <ttyd/__mem.h>
-#include <ttyd/mariost.h>
 #include <ttyd/mario.h>
+#include <ttyd/windowdrv.h>
 #include <ttyd/dispdrv.h>
 
 #include <cstdio>
@@ -45,23 +46,21 @@ extern bool ItemRandoV2;
 
 namespace mod {
 
-void fontMgrStart(uint32_t color, float Scale)
+void drawStringSingleLine(int32_t PosX, int32_t PosY, uint32_t color, float Scale)
 {
   ttyd::fontmgr::FontDrawStart();
   ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
   ttyd::fontmgr::FontDrawEdge();
   ttyd::fontmgr::FontDrawScale(Scale);
-}
-
-void drawStringSingleLine(int32_t PosX, int32_t PosY, uint32_t color, float Scale)
-{
-  fontMgrStart(color, Scale);
   ttyd::fontmgr::FontDrawString(PosX, PosY, DisplayBuffer);
 }
 
 void drawStringMultipleLines(int32_t PosX, int32_t PosY, uint32_t color, float Scale)
 {
-  fontMgrStart(color, Scale);
+  ttyd::fontmgr::FontDrawStart();
+  ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
+  ttyd::fontmgr::FontDrawEdge();
+  ttyd::fontmgr::FontDrawScale(Scale);
   drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
 }
 
@@ -71,8 +70,8 @@ void Mod::LZRandoDisplayStuff()
   int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
   int32_t GameOver = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGameOver);
   
-  bool dmo_comparison = ttyd::string::strcmp(NextMap,"dmo_00") == 0;
-  bool title_comparison = ttyd::string::strcmp(NextMap,"title") == 0;
+  bool dmo_comparison = ttyd::string::strcmp(NextMap, "dmo_00") == 0;
+  bool title_comparison = ttyd::string::strcmp(NextMap, "title") == 0;
   
   // Only display while a file is loaded, and while not in battles
   // Don't display while in the intro or on the title screen
@@ -105,8 +104,8 @@ void Mod::LZRandoChallengeStuff()
   int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
   uint32_t color = 0xFFFFFFFF;
   
-  bool dmo_comparison = ttyd::string::strcmp(NextMap,"dmo_00") == 0;
-  bool title_comparison = ttyd::string::strcmp(NextMap,"title") == 0;
+  bool dmo_comparison = ttyd::string::strcmp(NextMap, "dmo_00") == 0;
+  bool title_comparison = ttyd::string::strcmp(NextMap, "title") == 0;
   
   // Get and display Score
   // Don't display while in the intro or on the title screen
@@ -277,6 +276,12 @@ void Mod::LZRandoChallengeStuff()
     // Add 1 point for Mario's coin count divided by 100
     int16_t CoinCount = *reinterpret_cast<int16_t *>(PouchPointer + 0x78);
     CoinCountScore = CoinCount / 100;
+    
+    // Add additional point for 999 coins
+    if (CoinCount >= 999)
+    {
+      CoinCountScore++;
+    }
     
     // Check badge log
     uint32_t BadgeLogAddressesStart = GSWAddresses + 0x188;
@@ -471,7 +476,6 @@ void Mod::LZRandoChallengeStuff()
         float Scale = 1.5;
         
         sprintf(DisplayBuffer,
-          "%s",
           "Time's Up!");
         
         drawStringSingleLine(PosX, PosY, color, Scale);
@@ -532,7 +536,25 @@ void Mod::titleScreenStuff()
     return;
   }
   
-  uint32_t color = 0xFFFFFFFF;
+  // Display Item Randomizer versions and Loading Zone Randomizer version
+  // Draw window for the text to go in
+  uint32_t color = 0x000000CC;
+  float CoordX = -260;
+  float CoordY = -25;
+  float Width = 532;
+  float Height = 65;
+  float Curve = 10;
+  
+  #ifdef TTYD_JP
+    CoordX += 10;
+    CoordY += 30;
+    Width -= 15;
+  #endif
+  
+  ttyd::windowdrv::windowDispGX_Waku_col(0, reinterpret_cast<uint8_t *>(&color), CoordX, CoordY, Width, Height, Curve);
+  
+  // Display the text
+  color = 0xFFFFFFFF;
   int32_t PosX = -245;
   int32_t PosY = -35;
   float Scale = 0.9;
@@ -545,14 +567,22 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.11",
-    "Loading Zone Randomizer Beta - v0.5.21");
+    "Loading Zone Randomizer Beta - v0.5.22");
   
-  ttyd::fontmgr::FontDrawStart();
-  ttyd::fontmgr::FontDrawColor(reinterpret_cast<uint8_t *>(&color));
-  ttyd::fontmgr::FontDrawRainbowColor();
-  ttyd::fontmgr::FontDrawEdge();
-  ttyd::fontmgr::FontDrawScale(Scale);
-  drawstring::drawStringMultiline(PosX, PosY, DisplayBuffer);
+  drawStringMultipleLines(PosX, PosY, color, Scale);
+  
+  // Display overall version
+  PosX = -245;
+  PosY = -160;
+  
+  #ifdef TTYD_JP
+    PosY += 10;
+  #endif
+  
+  sprintf(DisplayBuffer,
+    "v1.1.23");
+  
+  drawStringSingleLine(PosX, PosY, color, Scale);
 }
 
 void Mod::gameModes()

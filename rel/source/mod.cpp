@@ -4,6 +4,7 @@
 #include <ttyd/itemdrv.h>
 #include <ttyd/mario_pouch.h>
 #include <ttyd/mario_party.h>
+#include <ttyd/party.h>
 #include <ttyd/countdown.h>
 #include <ttyd/mot_ship.h>
 #include <ttyd/fontmgr.h>
@@ -48,9 +49,14 @@ void Mod::init()
   // LZ Rando
   // Prevent the game from removing partners
   // Prevent partyLeft from running
-  mPFN_partyLeft_trampoline = patch::hookFunction(ttyd::mario_party::partyLeft, [](uint32_t id)
+  mPFN_partyLeft_trampoline = patch::hookFunction(ttyd::mario_party::partyLeft, [](ttyd::party::Party id)
   {
     gMod->preventPartyLeft(id);
+  });
+  
+  mPFN_randomizeGivenFollower_trampoline = patch::hookFunction(ttyd::party::partyEntry2Pos, [](ttyd::party::Party id, float x, float y, float z)
+  {
+    return gMod->randomizeGivenFollower(id, x, y, z);
   });
   
   // Prevent the escape timer from appearing

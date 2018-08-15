@@ -157,6 +157,81 @@
 // 80037A1C:make_pri_table
 // 80037B48:evtGetWork
 
+// npcdrv.o
+// 80043020:fbatPreventMarioEventChk
+// 80043054:npcCheckBlow
+// 80043194:npcCalcScore
+// 8004329C:fbatSandersBombTriggerOn
+// 800432B0:npcKoopaModeMobjBoundDeadCheck
+// 80043378:npcKoopaModeEncountCheck
+// 800434F4:npcClearDeadInfo
+// 80043528:npcGetBackItemEntry
+// 800435C4:_majinai_effect
+// 8004367C:_check
+// 800436EC:npcExecAllReglEvt
+// 800437AC:npcWaitAllInitEvtEnd
+// 80043880:npcExecAllInitEvt
+// 8004394C:dbGetDefData
+// 800439BC:npcSetLink
+// 800439C8:npcSetSlave
+// 800439DC:npcSetBtlSetupWork
+// 800439EC:npcGetBtlSetupWork
+// 800439FC:npcBlurOff
+// 80043AA0:npcBlurOn
+// 80043BBC:npcSetColor
+// 80043C48:npcStartForOneEvent
+// 80043CB0:npcStartForEvent
+// 80043D60:npcStopForOneEvent
+// 80043DC0:npcStopForEvent
+// 80043E68:npcSetBattleInfo
+// 80043F60:npcSetupBattleInfo
+// 800441E0:npcCheckInterrupt
+// 80044414:_npcHitCheckHammerAllMotion
+// 8004479C:_npcHitCheckSphere
+// 80044914:fbatHitCheck
+// 800466EC:fbatHitCheckAll
+// 80046714:fbatNpcTalkCheck
+// 80046774:npcGroupDead
+// 800467B8:_npcGroupDead
+// 80046B14:_npcDead
+// 80046B60:fbatBattleMode
+// 800471C4:fbatTalkMode
+// 80047364:fbatEncountCheck
+// 80047EE4:_fbatFirstAttackAnnouceDisp
+// 80048268:fbatSetAttackAnnounceEnable
+// 8004827C:fbatSetAttackAnnounce
+// 80048374:fbatChangeMode
+80048384:fbatGetPointer
+// 80048390:npcNearDistCheck
+// 80048500:npcHitCheckSide
+// 80048E18:npcTransRytoFaceDir
+// 80048E54:npcTuningRy
+// 80048E84:npcMoveG
+// 800491B4:npcCheckHitMarioSide
+// 8004972C:npcSetStayPose
+// 80049884:npcSetTalkPose
+// 800499DC:npcSetMarioAutoTalkPose
+// 80049A1C:npcNameToPtr_NoAssert
+// 80049AC8:npcNameToPtr
+// 80049B64:npcMain
+// 8004B508:npcDeleteGroup
+// 8004B54C:_npcDeleteGroup
+// 8004B7F0:npcDelete
+// 8004B910:npcGetTribe
+// 8004B97C:npcEntry
+// 8004BBCC:npcGetReactionOfLivingBody
+// 8004BBE4:npcReset
+// 8004BC58:npcInit
+// 8004BD24:npcDisp_blur
+// 8004C010:npcDisp_offscreen
+// 8004C31C:npcDisp_offscreen_xlu
+// 8004C5F4:npcDisp
+// 8004C8C8:npcDisp_xlu
+// 8004CB68:mtx_setup
+// 8004CE20:npcRecoveryFiledNpc
+// 8004CF40:npcReleaseFiledNpc
+// 8004D054:npcGetWorkPtr
+
 // mario.o
 800562B8:toFrontPose
 800567E8:toRearPose
@@ -284,6 +359,25 @@
 80078E98:fontmgrTexSetup
 80078EC4:fontmgrInit
 
+// windowdrv.o
+// 8007BFEC:getWakuTexObj
+// 8007BFFC:windowGetPointer
+// 8007C00C:windowCheckID
+// 8007C024:windowDispGX2_Waku_col
+8007C708:windowDispGX_Waku_col
+// 8007CD94:windowDispGX_Message
+// 8007D064:_windowDispGX_Message
+// 8007EC50:windowDispGX_System
+// 8007FCAC:windowDispGX_Kanban
+// 80080CA8:windowMain
+// 80080D10:windowDeleteID
+// 80080D7C:windowDelete
+// 80080DC8:windowEntry
+// 80080E50:windowReInit
+// 80080E94:windowTexSetup
+// 80080FAC:unk_JP_US_PAL_012
+// 80081040:windowInit
+
 // swdrv.o
 // 80086A98:_swByteGet
 // 80086AA8:_swByteSet
@@ -399,7 +493,7 @@
 // 800BDC68:partyUsePost
 // 800BDCC4:partyReInit
 // 800BE3E0:partyInit
-// 800BE40C:partyEntry2Pos
+800BE40C:partyEntry2Pos
 // 800BE7DC:partyEntry2Hello
 // 800BEB04:partyEntry2
 // 800BEE78:partyEntryMain
@@ -590,7 +684,7 @@
 // 800F9680:BattleGetSystemPtr
 // 800F96E0:BattleGetUnitPartsPtr
 // 800F9720:BattleSetUnitPtr
-800F9738:BattleGetUnitPtr
+// 800F9738:BattleGetUnitPtr
 // 800F9774:BattleFree
 // 800F97A0:BattleAlloc
 // 800F97C8:BattleIncSeq
@@ -782,7 +876,7 @@
 // 80142C80:marioPartyKill
 80142CEC:marioPartyGoodbye
 80142D34:marioPartyHello
-// 80142DE4:marioPartyEntry
+80142DE4:marioPartyEntry
 // 80142EF4:unk_JP_US_PAL_062
 // 80142F88:marioUseParty
 

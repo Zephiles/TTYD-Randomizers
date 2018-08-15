@@ -9,8 +9,8 @@
 #include <ttyd/swdrv.h>
 #include <ttyd/system.h>
 #include <ttyd/mario_pouch.h>
+#include <ttyd/npcdrv.h>
 #include <ttyd/mario_party.h>
-#include <ttyd/party.h>
 #include <ttyd/seqdrv.h>
 #include <ttyd/mario.h>
 #include <ttyd/mariost.h>
@@ -31,12 +31,14 @@ extern char *NextBero;
 extern char *NextArea;
 extern bool NewFile;
 extern uint32_t GSWAddressesStart;
-extern uint32_t PossibleMaps[];
-extern uint16_t MapArraySize;
+extern uint32_t PossibleLZMaps[];
+extern uint16_t LZMapArraySize;
+extern uint32_t PossibleChallengeMaps[];
+extern uint16_t ChallengeMapArraySize;
 extern uint32_t seqMainAddress;
 extern bool ClearCacheNewFileStrings;
 // extern uint32_t AreaObjectsAddressesStart;
-extern uint32_t AreaLZsAddressesStart;
+// extern uint32_t AreaLZsAddressesStart;
 // extern uint32_t NPCAddressesStart;
 extern char *NewBero;
 extern char *NewMap;
@@ -85,6 +87,7 @@ void getRandomWarp()
   }
   
   uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
+  uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   
   // Don't run if currently reloading the current screen
   if (ReloadCurrentScreen)
@@ -120,6 +123,23 @@ void getRandomWarp()
       if (ttyd::mario_pouch::pouchCheckItem(TubeModeCurse) > 0)
       {
         *reinterpret_cast<uint32_t *>(GSWAddresses + 0x268) |= (1 << 11); // Turn on the 11 bit
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "mri_09") == 0)
+    {
+      // Check if the Blue Key chest is open or not
+      uint32_t BlueKeyChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2DC); // GSWF(2852)
+      if (!(BlueKeyChest & (1 << 4))) // Check if the 4 bit is off
+      {
+        // Manually close the chest if the player already has the Blue Key
+        if (ttyd::mario_pouch::pouchCheckItem(BlueKey) > 0)
+        {
+          // Turn on GSWF(2852) to manually close the chest
+          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2DC) |= (1 << 4); // Turn on the 4 bit
+          
+          // Update the Sequence to what it would normally be after getting the Blue Key (98)
+          ttyd::swdrv::swByteSet(0, 98);
+        }
       }
     }
     
@@ -168,7 +188,6 @@ void getRandomWarp()
   }
   
   // Prevent random warp upon starting a new file
-  uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   if (SequencePosition == 0)
   {
     // Set flag to allow new file stuff to be set up
@@ -182,13 +201,28 @@ void getRandomWarp()
   while (!ConfirmNewMap)
   {
     // Get new map to warp to
-    char *NewRandomMap = reinterpret_cast<char *>(PossibleMaps[ttyd::system::irand(MapArraySize)]);
+    uint32_t *MapArray;
+    uint16_t MapArraySize;
+    
+    if (LZRandoChallenge)
+    {
+      MapArray = PossibleChallengeMaps;
+      MapArraySize = ChallengeMapArraySize;
+    }
+    else
+    {
+      MapArray = PossibleLZMaps;
+      MapArraySize = LZMapArraySize;
+    }
+    
+    char *NewRandomMap = reinterpret_cast<char *>(MapArray[ttyd::system::irand(MapArraySize)]);
     ttyd::string::strcpy(NextMap, NewRandomMap);
     ttyd::string::strncpy(NextArea, NewRandomMap, 3);
     
     if (ttyd::string::strcmp(NextMap, "aji_00") == 0)
     {
       // Skip the cutscenes and fight
+      // Need to skip this cutscene and fight to prevent a crash
       if (SequencePosition < 361)
       {
         // Set the Sequence to 361 to prevent the cutscene from playing and to prevent the fight from occuring
@@ -203,15 +237,6 @@ void getRandomWarp()
         continue;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "aji_19") == 0)
-    {
-      // Skip the intro cutscene
-      if (SequencePosition < 360)
-      {
-        // Set the Sequence to 360 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 360);
-      }
-    }
     else if (ttyd::string::strcmp(NextMap, "eki_03") == 0)
     {
       // Change loading zone to avoid softlocking
@@ -222,58 +247,35 @@ void getRandomWarp()
       // Change the loading zone used if the player has not opened the Ultra Boots chest yet, and if the Sequence is less than 319
       uint32_t UltraBootsChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x348); // GSWF(3728)
       
-      if ((!(UltraBootsChest & (1 << 16))) && (SequencePosition < 319)) // Check if the 16 bit is on or off
+      if ((!(UltraBootsChest & (1 << 16))) && (SequencePosition < 319)) // Check if the 16 bit is off
       {
         // Run if the 16 bit is off
         ttyd::string::strcpy(NextBero, "w_bero_1");
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "end_00") == 0)
-    {
-      // Prevent warping to the credits if not using the challenge mode
-      if (!LZRandoChallenge)
-      {
-        continue;
-      }
-      
-      #ifdef TTYD_US
-        uint8_t StarValue = 0xDE;
-      #elif defined TTYD_JP
-        uint16_t StarValue = 0x8199;
-      #elif defined TTYD_EU
-        uint8_t StarValue = 0xDE;
-      #endif
-      
-      #ifdef TTYD_JP
-        // Get the first 2 bytes of the file name
-        uint16_t CurrentNameChars = *reinterpret_cast<uint16_t *>(GSWAddresses + 0x11BC);
-      #else
-        // Get the first byte of the file name
-        uint8_t CurrentNameChars = *reinterpret_cast<uint8_t *>(GSWAddresses + 0x11BC);
-      #endif
-      
-      // Don't warp to credits if using the Star character as the file name
-      if (CurrentNameChars == StarValue)
-      {
-        continue;
-      }
-    }
     else if (ttyd::string::strcmp(NextMap, "gon_01") == 0)
     {
-      // Skip the intro cutscene
-      if (SequencePosition < 37)
+      if (LZRandoChallenge)
       {
-        // Set the Sequence to 37 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 37);
+        // Skip the intro cutscene if using the challenge mode
+        if (SequencePosition < 37)
+        {
+          // Set the Sequence to 37 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 37);
+        }
       }
+      
     }
     else if (ttyd::string::strcmp(NextMap, "gon_03") == 0)
     {
-      // Skip the cutscene with Koops
-      if (SequencePosition < 38)
+      if (LZRandoChallenge)
       {
-        // Set the Sequence to 38 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 38);
+        // Skip the cutscene with Koops using the challenge mode
+        if (SequencePosition < 38)
+        {
+          // Set the Sequence to 38 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 38);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "gon_06") == 0)
@@ -324,38 +326,50 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "gon_12") == 0)
     {
-      // Skip the Mowz cutscene
-      if (SequencePosition < 50)
+      if (LZRandoChallenge)
       {
-        // Set the Sequence to 50 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 50);
+        // Skip the Mowz cutscene if using the challenge mode
+        if (SequencePosition < 50)
+        {
+          // Set the Sequence to 50 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 50);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "gra_06") == 0)
     {
-      // Skip the intro cutscene
-      if (SequencePosition < 193)
+      if (LZRandoChallenge)
       {
-        // Set the Sequence to 193 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 193);
+        // Skip the intro cutscene if using the challenge mode
+        if (SequencePosition < 193)
+        {
+          // Set the Sequence to 193 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 193);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "hei_00") == 0)
     {
-      // Skip the intro cutscene and the Hooktail flying cutscene
-      if (SequencePosition < 24)
+      if (LZRandoChallenge)
       {
-        // Set the Sequence to 24 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 24);
+        // Skip the intro cutscene and the Hooktail flying cutscene if using the challenge mode
+        if (SequencePosition < 24)
+        {
+          // Set the Sequence to 24 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 24);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "hom_00") == 0)
     {
-      // Skip the cutscene with Doopliss
-      if (SequencePosition < 310)
+      if (LZRandoChallenge)
       {
-        // Set the Sequence to 310 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 310);
+        // Skip the cutscene with Doopliss if using the challenge mode
+        if (SequencePosition < 310)
+        {
+          // Set the Sequence to 310 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 310);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "jin_00") == 0)
@@ -454,15 +468,6 @@ void getRandomWarp()
       // Change loading zone to the pipe above the room
       ttyd::string::strcpy(NextBero, "dokan_2");
     }
-    else if (ttyd::string::strcmp(NextMap, "las_00") == 0)
-    {
-      // Adjust the Sequence to skip the intro cutscene
-      if (SequencePosition < 382)
-      {
-        // Set the Sequence to 382 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 382);
-      }
-    }
     else if (ttyd::string::strcmp(NextMap, "las_09") == 0)
     {
       if (SequencePosition < 390)
@@ -516,6 +521,16 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "moo_00") == 0)
+    {
+      // Skip the intro cutscene
+      // Need to skip this cutscene to prevent a crash
+      if (SequencePosition < 358)
+      {
+        // Set the Sequence to 358 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 358);
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "mri_01") == 0)
     {
       if (SequencePosition < 110)
@@ -552,29 +567,20 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "nok_00") == 0)
     {
-      // Skip the intro cutscene
       if (SequencePosition < 26)
       {
-        // Set the Sequence to 26 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 26);
-      }
-    }
-    else if (ttyd::string::strcmp(NextMap, "pik_02") == 0)
-    {
-      // Skip the cutscene of the Shadow Sirens stealing the fake Garnet Star
-      if (SequencePosition < 336)
-      {
-        // Set the Sequence to 336 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 336);
-      }
-    }
-    else if (ttyd::string::strcmp(NextMap, "rsh_02_a") == 0)
-    {
-      // Skip the intro cutscene
-      if (SequencePosition < 282)
-      {
-        // Set the Sequence to 282 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 282);
+        if (LZRandoChallenge)
+        {
+          // Skip the intro cutscene
+          // Set the Sequence to 26 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 26);
+        }
+        else
+        {
+          // Clear a pointer to prevent a crash with the intro cutscene
+          uint32_t fbatPreviousInteractionPointer = reinterpret_cast<uint32_t>(ttyd::npcdrv::fbatGetPointer());
+          *reinterpret_cast<uint32_t *>(fbatPreviousInteractionPointer + 0x4) = 0;
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "rsh_05_a") == 0)
@@ -612,15 +618,18 @@ void getRandomWarp()
       }
     }
     else if (ttyd::string::strcmp(NextMap, "tou_01") == 0)
-    {
-      // Change the loading zone used to skip the cutscene of coming off of the blimp
-      ttyd::string::strcpy(NextBero, "a_door_mon");
-      
-      // Adjust the Sequence to skip the intro cutscene
-      if (SequencePosition < 127)
+    { 
+      if (LZRandoChallenge)
       {
-        // Set the Sequence to 127 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 127);
+        // Change the loading zone used to skip the cutscene of coming off of the blimp if using the challenge mode
+        ttyd::string::strcpy(NextBero, "a_door_mon");
+        
+        // Adjust the Sequence to skip the intro cutscene if using the challenge mode
+        if (SequencePosition < 127)
+        {
+          // Set the Sequence to 127 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 127);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "tou_03") == 0)
@@ -642,38 +651,50 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "tou_05") == 0)
     {
-      // Adjust the Sequence to skip the cutscene of signing up to be a fighter
-      if (SequencePosition < 130)
+      if (LZRandoChallenge)
       {
-        // Set the Sequence to 130 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 130);
+        // Adjust the Sequence to skip the cutscene of signing up to be a fighter if using the challenge mode
+        if (SequencePosition < 130)
+        {
+          // Set the Sequence to 130 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 130);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "tou_06") == 0)
     {
-      // Adjust the Sequence to skip the Mowz cutscene
-      if (SequencePosition < 148)
+      if (LZRandoChallenge)
       {
-        // Set the Sequence to 148 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 148);
+        // Adjust the Sequence to skip the Mowz cutscene if using the challenge mode
+        if (SequencePosition < 148)
+        {
+          // Set the Sequence to 148 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 148);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "usu_00") == 0)
     {
-      // Adjust the Sequence to skip the intro cutscene
-      if (SequencePosition < 178)
+      if (LZRandoChallenge)
       {
-        // Set the Sequence to 178 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 178);
+        // Adjust the Sequence to skip the intro cutscene if using the challenge mode
+        if (SequencePosition < 178)
+        {
+          // Set the Sequence to 178 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 178);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "win_00") == 0)
     {
-      // Adjust the Sequence to skip the cutscene with the Shadow Sirens
-      if (SequencePosition < 72)
+      if (LZRandoChallenge)
       {
-        // Set the Sequence to 72 to prevent the cutscene from playing
-        ttyd::swdrv::swByteSet(0, 72);
+        // Adjust the Sequence to skip the cutscene with the Shadow Sirens if using the challenge mode
+        if (SequencePosition < 72)
+        {
+          // Set the Sequence to 72 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 72);
+        }
       }
     }
     
@@ -701,14 +722,14 @@ void setUpNewFile()
   // Add all partners
   for (int i = 1; i <= 7; i++)
   {
-    ttyd::mario_party::partyJoin(i);
+    ttyd::mario_party::partyJoin(static_cast<ttyd::party::Party>(i));
   }
   
   // Randomize Yoshi color
   ttyd::party::yoshiSetColor();
   
   // Start with Yoshi out
-  ttyd::mario_party::marioPartyHello(4);
+  ttyd::mario_party::marioPartyHello(ttyd::party::Party::Yoshi);
   
   // Start with the Strange Sack
   ttyd::mario_pouch::pouchGetItem(StrangeSack);
@@ -747,6 +768,9 @@ void setUpNewFile()
   // Turn on GSWF(1781) and GSWF(1782) to skip the Koopie Koo cutscene in Petal Meadows
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x254) |= ((1 << 21) | (1 << 22)); // Turn on the 21 and 22 bits
   
+  // Turn on GSWF(2075) to skip Vivian's textbox in Twilight Trail
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x278) |= (1 << 27); // Turn on the 27 bit
+  
   // Turn on GSWF(2401) to skip the cutscene of entering Grubba's office through the grate for the first time
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A4) |= (1 << 1); // Turn on the 1 bit
   
@@ -762,11 +786,20 @@ void setUpNewFile()
   // Turn on GSWF(2982), GSWF(2983), and GSWF(2984) to activate the blue switches in Pirate's Grotto
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2EC) |= ((1 << 6) | (1 << 7) | (1 << 8)); // Turn on the 6, 7, and 8 bits
   
+  // Turn on GSWF(3131) to skip the cutscene with Four-Eyes after Bobbery is taken by the Embers
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2FC) |= (1 << 27); // Turn on the 27 bit
+  
   // Turn on GSWF(3884) to skip the cutscene on the first screen of the area leading to Fahr Outpost
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x35C) |= (1 << 12); // Turn on the 12 bit
   
   // Turn on GSWF(4196) and GSWF(4197) to allow the player to use the crane without needing to insert the Cog
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x384) |= ((1 << 4) | (1 << 5)); // Turn on the 4 and 5 bits
+  
+  // Turn on GSWF(4218) to skip the crane game tutorial
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x384) |= (1 << 26); // Turn on the 26 bit
+  
+  // Turn on GSWF(5374) to skip the Trouble Center tutorial
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x414) |= (1 << 30); // Turn on the 30 bit
 }
 
 void overwriteNewFileStrings()
@@ -833,6 +866,18 @@ void marioNeverTransform()
   }
 }
 
+uint8_t getPartnerOut(uint32_t PartnerPointer)
+{
+  if (PartnerPointer != 0)
+  {
+    return *reinterpret_cast<uint8_t *>(PartnerPointer + 0x31);
+  }
+  else
+  {
+    return 0;
+  }
+}
+
 void specificMapEdits()
 {
   int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
@@ -843,22 +888,49 @@ void specificMapEdits()
     return;
   }
   
+  uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   uint32_t PartnerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId()));
   // uint32_t AreaObjectAddresses = *reinterpret_cast<uint32_t *>(AreaObjectsAddressesStart + 0x4);
-  uint32_t AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZsAddressesStart);
-  AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x4);
+  // uint32_t AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZsAddressesStart);
+  // AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x4);
   
-  if (ttyd::string::strcmp(NextMap, "las_29") == 0)
+  if (ttyd::string::strcmp(NextMap, "gon_12") == 0)
+  {
+    if (SequencePosition < 50)
+    {
+      uint8_t CurrentPartnerOut = getPartnerOut(PartnerPointer);
+      
+      if ((CurrentPartnerOut == 0) || (CurrentPartnerOut > static_cast<uint8_t>(ttyd::party::Party::Koops)))
+      {
+        // Bring out Goombella if either no partner is out or a partner from past Chapter 1 is out
+        ttyd::mario_party::marioPartyEntry(ttyd::party::Party::Goombella);
+      }
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "jin_04") == 0)
+  {
+    // Check if the Sequence is currently set to fight Doopliss 2
+    if ((SequencePosition == 210) || (SequencePosition == 211))
+    {
+      uint8_t CurrentPartnerOut = getPartnerOut(PartnerPointer);
+      
+      if (CurrentPartnerOut != static_cast<uint8_t>(ttyd::party::Party::Vivian))
+      {
+        // Force Vivian out
+        ttyd::mario_party::marioPartyEntry(ttyd::party::Party::Vivian);
+      }
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
   {
     // Make sure a partner is out for the Shadow Queen cutscene
     if (!PartnerPointer)
     {
       // Bring out Goombella if no partner is out
-      ttyd::mario_party::marioPartyHello(1);
+      ttyd::mario_party::marioPartyHello(ttyd::party::Party::Goombella);
     }
     
     // Warp out of the Shadow Queen room if she is defeated, so that the cutscene is skipped
-    uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
     if (SequencePosition == 401)
     {
       if (LZRandoChallenge)
@@ -874,11 +946,6 @@ void specificMapEdits()
         ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "end_00", nullptr);
       }
     }
-  }
-  else if (ttyd::string::strcmp(NextMap, "pik_02") == 0)
-  {
-    // Disable the pipe in the fake Garnet Star room
-    *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x280) = 0;
   }
 }
 
@@ -992,6 +1059,13 @@ void reloadScreen()
   else if (ttyd::string::strcmp(NextMap, "las_26") == 0)
   {
     if (SequencePosition == 387)
+    {
+      return;
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
+  {
+    if (SequencePosition == 400)
     {
       return;
     }
@@ -1221,8 +1295,28 @@ uint32_t spawnPartnerBattle(uint32_t PartnerValue)
   // Only force a partner out if the Loading Zone randomizer is in use
   if ((PartnerValue == 0) && LZRando)
   {
-    // Bring out Goombella
-    return 224;
+    uint32_t Goombella = 224;
+    
+    // Check if fighting Doopliss 2
+    if (ttyd::string::strcmp(NextMap, "jin_04") == 0)
+    {
+      uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
+      if (SequencePosition == 210)
+      {
+        // Don't bring out a partner if currently fighting Doopliss 2
+        return 0;
+      }
+      else
+      {
+        // Not fighting Doopliss 2, so bring out Goombella
+        return Goombella;
+      }
+    }
+    else
+    {
+      // Bring out Goombella
+      return Goombella;
+    }
   }
   
   return PartnerValue;
@@ -1244,7 +1338,7 @@ void resetFileLoadSpawn(void *GSWAddressesPointer)
 }
 }
 
-void Mod::preventPartyLeft(uint32_t id)
+void Mod::preventPartyLeft(ttyd::party::Party id)
 {
   // Prevent the game from removing partners
   // Only prevent from running if the Loading Zone randomizer is currently in use
@@ -1257,6 +1351,19 @@ void Mod::preventPartyLeft(uint32_t id)
     // Call original function
     mPFN_partyLeft_trampoline(id);
   }
+}
+
+int32_t Mod::randomizeGivenFollower(ttyd::party::Party id, float x, float y, float z)
+{
+  // Randomize given followers
+  // Only randomize if the Loading Zone randomizer is currently in use
+  if (LZRando)
+  {
+    id = static_cast<ttyd::party::Party>(ttyd::system::irand(5) + 8);
+  }
+  
+  // Call original function
+  return mPFN_randomizeGivenFollower_trampoline(id, x, y, z);
 }
 
 void Mod::preventCountDownStart(uint32_t unk1, uint32_t unk2)

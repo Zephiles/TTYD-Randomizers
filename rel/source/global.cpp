@@ -17,7 +17,7 @@ extern "C" {
   char *NextMap = reinterpret_cast<char *>(r13 + 0x1148);
   char *NextArea = reinterpret_cast<char *>(r13 + 0x1168);
   uint32_t seqMainAddress = r13 + 0x1300;
-  uint32_t AreaObjectsAddressesStart = 0x803CA2D8;
+  // uint32_t AreaObjectsAddressesStart = 0x803CA2D8;
   // uint32_t NPCAddressesStart = r13 + 0x1448;
 #elif defined TTYD_EU
   uint32_t r13 = 0x80429760;
@@ -25,13 +25,13 @@ extern "C" {
   char *NextMap = reinterpret_cast<char *>(r13 + 0x1788);
   char *NextArea = reinterpret_cast<char *>(r13 + 0x17A8);
   uint32_t seqMainAddress = r13 + 0x1940;
-  uint32_t AreaObjectsAddressesStart = 0x803DA6F8;
+  // uint32_t AreaObjectsAddressesStart = 0x803DA6F8;
   // uint32_t NPCAddressesStart = r13 + 0x1A80;
 #endif
 
 uint32_t GSWAddressesStart = r13 - 0x6F50;
 uint32_t CrystalStarPointerAddress = r13 - 0x7040;
-uint32_t AreaLZsAddressesStart = r13 - 0x6F58;
+// uint32_t AreaLZsAddressesStart = r13 - 0x6F58;
 
 // Display Stuff
 char *DisplayBuffer = new char[256];
