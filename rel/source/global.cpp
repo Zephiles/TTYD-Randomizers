@@ -68,8 +68,6 @@ bool ClearCacheFlag = false;
 char *LZRandoText = new char[4]; // 3 bytes for LZRandoText, 1 byte for NULL
 
 // LZ Rando Challenge
-uint16_t CreditsCount = 0;
-bool InCredits = false;
 bool BossDefeated[14] = { false };
 uint16_t BossCount = 0;
 bool InGameOver = false;

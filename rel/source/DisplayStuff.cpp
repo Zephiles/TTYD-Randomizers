@@ -23,8 +23,6 @@ extern char *NextMap;
 extern char *DisplayBuffer;
 extern char *NextBero;
 extern uint32_t GSWAddressesStart;
-extern bool InCredits;
-extern uint16_t CreditsCount;
 extern bool BossDefeated[14];
 extern uint16_t BossCount;
 extern bool InGameOver;
@@ -121,7 +119,6 @@ void Mod::LZRandoChallengeStuff()
     uint32_t ImportantItemsScore = 0;
     uint32_t FollowerScore = 0;
     uint32_t MarioLevelScore = 0;
-    uint32_t CreditsScore = 0;
     uint32_t BossScore = 0;
     uint32_t CoinCountScore = 0;
     uint32_t BadgeLogScore = 0;
@@ -173,21 +170,6 @@ void Mod::LZRandoChallengeStuff()
       // Add 3 points for each level up
       MarioLevelScore = (MarioLevel - 1) * 2;
     }
-    
-    // Check for credits warps
-    bool CreditsCheck = ttyd::string::strcmp(NextMap, "end_00") == 0;
-    if (!InCredits && CreditsCheck)
-    {
-      InCredits = true;
-      CreditsCount++;
-    }
-    else if (!CreditsCheck)
-    {
-      InCredits = false;
-    }
-    
-    // Add 5 points for each credits warp
-    CreditsScore = CreditsCount * 5;
     
     // Check for bosses
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
@@ -325,7 +307,7 @@ void Mod::LZRandoChallengeStuff()
     GameOverScore -= GameOverCount * 5;
     
     // Get total score
-    Score = CrystalStarScore + CurseScore + ImportantItemsScore + FollowerScore + MarioLevelScore + CreditsScore + BossScore + CoinCountScore + BadgeLogScore + PartnerUpgradesScore + GameOverScore;
+    Score = CrystalStarScore + CurseScore + ImportantItemsScore + FollowerScore + MarioLevelScore + BossScore + CoinCountScore + BadgeLogScore + PartnerUpgradesScore + GameOverScore;
     
     // Display Score
     int32_t PosX = -232;
@@ -345,13 +327,12 @@ void Mod::LZRandoChallengeStuff()
       PosY = -80;
       
       sprintf(DisplayBuffer,
-        "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld",
+        "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld",
         CrystalStarScore,
         CurseScore,
         ImportantItemsScore,
         FollowerScore,
         MarioLevelScore,
-        CreditsScore,
         BossScore,
         CoinCountScore,
         BadgeLogScore,
@@ -388,7 +369,6 @@ void Mod::LZRandoChallengeStuff()
     TimerDisabled = false;
     TimerActive = false;
     DisablePlayerControl = false;
-    CreditsCount = 0;
     BossCount = 0;
     GameOverCount = 0;
     ttyd::__mem::memset(BossDefeated, false, sizeof(BossDefeated));
@@ -567,7 +547,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.11",
-    "Loading Zone Randomizer Beta - v0.5.22");
+    "Loading Zone Randomizer Beta - v0.5.23");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
   
@@ -580,7 +560,7 @@ void Mod::titleScreenStuff()
   #endif
   
   sprintf(DisplayBuffer,
-    "v1.1.23");
+    "v1.1.24");
   
   drawStringSingleLine(PosX, PosY, color, Scale);
 }
