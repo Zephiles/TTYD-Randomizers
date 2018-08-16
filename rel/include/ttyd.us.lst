@@ -924,6 +924,44 @@
 // 80200E14:countDownSaveReStart
 // 80200F40:countDownInit
 
+// runtime.c
+802648BC:_savefpr_14
+802648C0:_savefpr_15
+802648C4:_savefpr_16
+802648C8:_savefpr_17
+802648CC:_savefpr_18
+802648D0:_savefpr_19
+802648D4:_savefpr_20
+802648D8:_savefpr_21
+802648DC:_savefpr_22
+802648E0:_savefpr_23
+802648E4:_savefpr_24
+802648E8:_savefpr_25
+802648EC:_savefpr_26
+802648F0:_savefpr_27
+802648F4:_savefpr_28
+802648F8:_savefpr_29
+802648FC:_savefpr_30
+80264900:_savefpr_31
+80264954:_savegpr_14
+80264958:_savegpr_15
+8026495C:_savegpr_16
+80264960:_savegpr_17
+80264964:_savegpr_18
+80264968:_savegpr_19
+8026496C:_savegpr_20
+80264970:_savegpr_21
+80264974:_savegpr_22
+80264978:_savegpr_23
+8026497C:_savegpr_24
+80264980:_savegpr_25
+80264984:_savegpr_26
+80264988:_savegpr_27
+8026498C:_savegpr_28
+80264990:_savegpr_29
+80264994:_savegpr_30
+80264998:_savegpr_31
+
 // printf.c
 8026A0B8:sprintf
 // unused:snprintf

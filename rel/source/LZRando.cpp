@@ -94,40 +94,81 @@ void getRandomWarp()
     // If reloading the room with a Curse chest, make sure the chest is closed if the player has the Curse from it
     if (ttyd::string::strcmp(NextMap, "dou_07") == 0)
     {
-      // Turn on GSWF(2980) if the player has the Boat curse
-      if (ttyd::mario_pouch::pouchCheckItem(BoatModeCurse) > 0)
+      // Check if the Curse chest is open or not
+      uint32_t CurstChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2EC);
+      
+      if (!(CurstChest & (1 << 4))) // Check if the 4 bit is off
       {
-        *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2EC) |= (1 << 4); // Turn on the 4 bit
+        // Manually close the chest if the player already has the curse
+        if (ttyd::mario_pouch::pouchCheckItem(BoatModeCurse) > 0)
+        {
+          // Turn on GSWF(2980) to manually close the chest
+          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2EC) |= (1 << 4); // Turn on the 4 bit
+        
+          // Update the Sequence to what it would normally be after getting the curse
+          ttyd::swdrv::swByteSet(0, 247);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "gon_06") == 0)
     {
-      // Turn on GSWF(1493) if the player has the Paper curse
-      if (ttyd::mario_pouch::pouchCheckItem(PaperModeCurse) > 0)
+      // Check if the Curse chest is open or not
+      uint32_t CurstChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x230);
+      
+      if (!(CurstChest & (1 << 21))) // Check if the 21 bit is off
       {
-        *reinterpret_cast<uint32_t *>(GSWAddresses + 0x230) |= (1 << 21); // Turn on the 21 bit
+        // Manually close the chest if the player already has the curse
+        if (ttyd::mario_pouch::pouchCheckItem(PaperModeCurse) > 0)
+        {
+          // Turn on GSWF(1493) to manually close the chest
+          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x230) |= (1 << 21); // Turn on the 21 bit
+        
+          // Update the Sequence to what it would normally be after getting the curse
+          ttyd::swdrv::swByteSet(0, 45);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "tik_19") == 0)
     {
-      // Turn on GSWF(1352) if the player has the Plane curse
-      if (ttyd::mario_pouch::pouchCheckItem(PlaneModeCurse) > 0)
+      // Check if the Curse chest is open or not
+      uint32_t CurstChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x220);
+      
+      if (!(CurstChest & (1 << 8))) // Check if the 8 bit is off
       {
-        *reinterpret_cast<uint32_t *>(GSWAddresses + 0x220) |= (1 << 8); // Turn on the 8 bit
+        // Manually close the chest if the player already has the curse
+        if (ttyd::mario_pouch::pouchCheckItem(PlaneModeCurse) > 0)
+        {
+          // Turn on GSWF(1352) to manually close the chest
+          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x220) |= (1 << 8); // Turn on the 8 bit
+        
+          // Update the Sequence to what it would normally be after getting the curse
+          ttyd::swdrv::swByteSet(0, 15);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "usu_01") == 0)
     {
-      // Turn on GSWF(1931) if the player has the Tube curse
-      if (ttyd::mario_pouch::pouchCheckItem(TubeModeCurse) > 0)
+      // Check if the Curse chest is open or not
+      uint32_t CurstChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x268);
+      
+      if (!(CurstChest & (1 << 11))) // Check if the 11 bit is off
       {
-        *reinterpret_cast<uint32_t *>(GSWAddresses + 0x268) |= (1 << 11); // Turn on the 11 bit
+        // Manually close the chest if the player already has the curse
+        if (ttyd::mario_pouch::pouchCheckItem(TubeModeCurse) > 0)
+        {
+          // Turn on GSWF(1931) to manually close the chest
+          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x268) |= (1 << 11); // Turn on the 11 bit
+        
+          // Update the Sequence to what it would normally be after getting the curse
+          ttyd::swdrv::swByteSet(0, 187);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "mri_09") == 0)
     {
       // Check if the Blue Key chest is open or not
       uint32_t BlueKeyChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2DC); // GSWF(2852)
+      
       if (!(BlueKeyChest & (1 << 4))) // Check if the 4 bit is off
       {
         // Manually close the chest if the player already has the Blue Key
@@ -136,7 +177,7 @@ void getRandomWarp()
           // Turn on GSWF(2852) to manually close the chest
           *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2DC) |= (1 << 4); // Turn on the 4 bit
           
-          // Update the Sequence to what it would normally be after getting the Blue Key (98)
+          // Update the Sequence to what it would normally be after getting the Blue Key
           ttyd::swdrv::swByteSet(0, 98);
         }
       }
@@ -228,6 +269,16 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 361);
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "aji_07") == 0)
+    {
+      // Set the Loading Zone to be able to get the Cog if the player doesn't have it already
+      uint32_t CogFlag = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x384); // GSWF(4194)
+      
+      if (!(CogFlag & (1 << 2))) // Check if the 2 bit is off
+      {
+        ttyd::string::strcpy(NextBero, "tenjo");
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
     {
       // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 373
@@ -262,8 +313,7 @@ void getRandomWarp()
           // Set the Sequence to 37 to prevent the cutscene from playing
           ttyd::swdrv::swByteSet(0, 37);
         }
-      }
-      
+      }      
     }
     else if (ttyd::string::strcmp(NextMap, "gon_03") == 0)
     {
@@ -335,6 +385,11 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "gor_04") == 0)
+    {
+      // Set the Loading Zone to south
+      ttyd::string::strcpy(NextBero, "s_bero");
+    }
     else if (ttyd::string::strcmp(NextMap, "gra_06") == 0)
     {
       if (LZRandoChallenge)
@@ -373,10 +428,20 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "jin_00") == 0)
     {
-      // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the player has a Hammer upgrade
-      if ((ttyd::mario_pouch::pouchGetHammerLv() > 1) && CheckChallengeModeTimerCutoff())
+      if (LZRandoChallenge)
       {
-        continue;
+        // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the player has a Hammer upgrade
+        if ((ttyd::mario_pouch::pouchGetHammerLv() > 1) && CheckChallengeModeTimerCutoff())
+        {
+          continue;
+        }
+        
+        // Adjust the Sequence to skip the intro cutscene
+        if (SequencePosition < 194)
+        {
+          // Set the Sequence to 194 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 194);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "jin_04") == 0)
@@ -693,6 +758,18 @@ void getRandomWarp()
         {
           // Set the Sequence to 72 to prevent the cutscene from playing
           ttyd::swdrv::swByteSet(0, 72);
+        }
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "win_01") == 0)
+    {
+      if (LZRandoChallenge)
+      {
+        // Adjust the Sequence to skip the cutscene with Punio going through the pipe to the Great Tree
+        if (SequencePosition < 73)
+        {
+          // Set the Sequence to 73 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 73);
         }
       }
     }
@@ -1020,6 +1097,15 @@ void reloadScreen()
   
   if ((NextSeq < Game) || (NextSeq > MapChange))
   {
+    return;
+  }
+  
+  int32_t Seq = ttyd::seqdrv::seqGetSeq();
+  int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
+  
+  if (Seq == Battle)
+  {
+    // Reloading the room with the Seq set to Battle will cause the game to crash, so don't allow it
     return;
   }
   
