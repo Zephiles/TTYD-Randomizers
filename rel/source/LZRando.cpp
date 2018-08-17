@@ -238,23 +238,23 @@ void getRandomWarp()
   GameOverFlag = false;
   bool ConfirmNewMap = false;
   
+  // Get new map to warp to
+  uint32_t *MapArray;
+  uint16_t MapArraySize;
+  
+  if (LZRandoChallenge)
+  {
+    MapArray = PossibleChallengeMaps;
+    MapArraySize = ChallengeMapArraySize;
+  }
+  else
+  {
+    MapArray = PossibleLZMaps;
+    MapArraySize = LZMapArraySize;
+  }
+  
   while (!ConfirmNewMap)
   {
-    // Get new map to warp to
-    uint32_t *MapArray;
-    uint16_t MapArraySize;
-    
-    if (LZRandoChallenge)
-    {
-      MapArray = PossibleChallengeMaps;
-      MapArraySize = ChallengeMapArraySize;
-    }
-    else
-    {
-      MapArray = PossibleLZMaps;
-      MapArraySize = LZMapArraySize;
-    }
-    
     char *NewRandomMap = reinterpret_cast<char *>(MapArray[ttyd::system::irand(MapArraySize)]);
     ttyd::string::strcpy(NextMap, NewRandomMap);
     ttyd::string::strncpy(NextArea, NewRandomMap, 3);
@@ -325,6 +325,20 @@ void getRandomWarp()
           // Set the Sequence to 38 to prevent the cutscene from playing
           ttyd::swdrv::swByteSet(0, 38);
         }
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "gon_05") == 0)
+    {
+      // Randomize the entrance used
+      bool LowerWestEntranceCheck = ttyd::system::irand(1000) < 500;
+      
+      if (LowerWestEntranceCheck)
+      {
+        ttyd::string::strcpy(NextBero, "w_bero_2");
+      }
+      else
+      {
+        ttyd::string::strcpy(NextBero, "w_bero_4");
       }
     }
     else if (ttyd::string::strcmp(NextMap, "gon_06") == 0)
@@ -428,14 +442,22 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "jin_00") == 0)
     {
-      if (LZRandoChallenge)
+      if (CheckChallengeModeTimerCutoff())
       {
-        // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the player has a Hammer upgrade
-        if ((ttyd::mario_pouch::pouchGetHammerLv() > 1) && CheckChallengeModeTimerCutoff())
+        if (ttyd::mario_pouch::pouchGetHammerLv() > 1)
         {
+          // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the player has a Hammer upgrade
           continue;
         }
-        
+        else if (SequencePosition < 194)
+        {
+          // Adjust the Sequence to skip the intro cutscene
+          // Set the Sequence to 194 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 194);
+        }
+      }
+      else if (LZRandoChallenge)
+      {
         // Adjust the Sequence to skip the intro cutscene
         if (SequencePosition < 194)
         {
@@ -840,6 +862,9 @@ void setUpNewFile()
   
   // Turn on GSWF(1200) to prevent partners from explaining Save Blocks in central Rogueport
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x20C) |= (1 << 16); // Turn on the 16 bit
+  
+  // Turn on GSWF(1334) to have the entrances revealed already in tik_03
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x21C) |= (1 << 22); // Turn on the 22 bit
   
   // Turn on GSWF(1781) and GSWF(1782) to skip the Koopie Koo cutscene in Petal Meadows
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x254) |= ((1 << 21) | (1 << 22)); // Turn on the 21 and 22 bits
