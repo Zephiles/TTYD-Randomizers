@@ -23,7 +23,7 @@ extern char *NextMap;
 extern char *NextBero;
 extern uint8_t TimesUpCounter;
 extern uint32_t GSWAddressesStart;
-extern bool BossDefeated[14];
+extern bool BossDefeated[15];
 extern uint16_t BossCount;
 extern bool InGameOver;
 extern uint16_t GameOverCount;
@@ -168,7 +168,7 @@ void Mod::LZRandoChallengeStuff()
       
       // Check for bosses
       uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-      uint16_t SequenceChecks[] = { 21, 56, 112, 164, 200, 211, 253, 332, 373, 388, 391 };
+      uint16_t SequenceChecks[] = { 21, 56, 85, 112, 164, 200, 211, 253, 332, 373, 388, 391 };
       int32_t BossDefeatedIndex = 0;
       
       // Check for bosses based on Sequence
@@ -577,7 +577,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.11",
-    "Loading Zone Randomizer Beta - v0.5.27");
+    "Loading Zone Randomizer Beta - v0.5.28");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
   
@@ -590,7 +590,7 @@ void Mod::titleScreenStuff()
   #endif
   
   sprintf(DisplayBuffer,
-    "v1.1.28");
+    "v1.1.29");
   
   drawStringSingleLine(PosX, PosY, color, Scale);
 }

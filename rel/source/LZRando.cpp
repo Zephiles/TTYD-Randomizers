@@ -615,19 +615,11 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "las_26") == 0)
     {
-      if (SequencePosition < 387)
+      if ((SequencePosition < 387) && !CheckChallengeModeTimerCutoff())
       {
-        if (CheckChallengeModeTimerCutoff())
-        {
-          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
-          continue;
-        }
-        else
-        {
-          // Allow Gloomtail to be fought if the Sequence is not past 387
-          // Set the Sequence to 387 so that Gloomtail can be fought
-          ttyd::swdrv::swByteSet(0, 387);
-        }
+        // Allow Gloomtail to be fought if the Sequence is not past 387
+        // Set the Sequence to 387 so that Gloomtail can be fought
+        ttyd::swdrv::swByteSet(0, 387);
       }
     }
     else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
@@ -729,53 +721,51 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "tik_02") == 0)
     {
-      if (SequencePosition < 20)
+      if ((SequencePosition < 20) && !CheckChallengeModeTimerCutoff())
       {
-        if (CheckChallengeModeTimerCutoff())
-        {
-          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
-          continue;
-        }
-        else
-        {
-          // Allow Blooper to be fought if the Sequence is not past 20
-          // Set the Sequence to 20 so that Blooper can be fought
-          ttyd::swdrv::swByteSet(0, 20);
-        }
+        // Allow Blooper to be fought if the Sequence is not past 20
+        // Set the Sequence to 20 so that Blooper can be fought
+        ttyd::swdrv::swByteSet(0, 20);
       }
+    }
+    else if (ttyd::string::strcmp(NextMap, "tik_21") == 0)
+    {
+      // Change the loading zone to prevent spawning on the spikes
+      ttyd::string::strcpy(NextBero, "s_bero");
     }
     else if (ttyd::string::strcmp(NextMap, "tou_01") == 0)
     {
       // Adjust the Sequence to allow the player to get the Super Hammer if they don't have it already
-      // Only adjust the Sequence if it is currently less than what is needed
-      if (SequencePosition < 139)
+      if (ttyd::mario_pouch::pouchCheckItem(SuperHammer) == 0)
       {
-        if (ttyd::mario_pouch::pouchCheckItem(SuperHammer) == 0)
+        // Set the Sequence to 139 so that the player can get the Super Hammer
+        ttyd::swdrv::swByteSet(0, 139);
+        
+        if (LZRandoChallenge)
         {
-          // Set the Sequence to 139 so that the player can get the Super Hammer
-          ttyd::swdrv::swByteSet(0, 139);
-          
-          if (LZRandoChallenge)
-          {
-            // Change the loading zone used to skip the cutscene of coming off of the blimp if using the challenge mode
-            ttyd::string::strcpy(NextBero, "a_door_mon");
-          }
+          // Change the loading zone used to skip the cutscene of coming off of the blimp if using the challenge mode
+          ttyd::string::strcpy(NextBero, "a_door_mon");
         }
-        else if (LZRandoChallenge)
+      }
+      else if (SequencePosition == 139)
+      {
+        // Set the Sequence to 140 so that the player cannot get the Super Hammer again
+        ttyd::swdrv::swByteSet(0, 140);
+        
+        if (LZRandoChallenge)
         {
-          // Skip the intro cutscene
-          if (SequencePosition < 127)
-          {
-            // Set the Sequence to 127 to prevent the intro cutscene from playing
-            ttyd::swdrv::swByteSet(0, 127);
-          }
-          
           // Change the loading zone used to skip the cutscene of coming off of the blimp if using the challenge mode
           ttyd::string::strcpy(NextBero, "a_door_mon");
         }
       }
       else if (LZRandoChallenge)
       {
+        if (SequencePosition < 127)
+        {
+          // Set the Sequence to 127 to prevent the intro cutscene from playing
+          ttyd::swdrv::swByteSet(0, 127);
+        }
+        
         // Change the loading zone used to skip the cutscene of coming off of the blimp if using the challenge mode
         ttyd::string::strcpy(NextBero, "a_door_mon");
       }
@@ -835,13 +825,24 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "win_00") == 0)
     {
-      if (LZRandoChallenge)
+      if (SequencePosition < 84)
       {
-        // Adjust the Sequence to skip the cutscene with the Shadow Sirens if using the challenge mode
-        if (SequencePosition < 72)
+        if (CheckChallengeModeTimerCutoff())
         {
-          // Set the Sequence to 72 to prevent the cutscene from playing
-          ttyd::swdrv::swByteSet(0, 72);
+          // Currently using the challenge mode and 20 minutes have not passed, so don't set the sequence for the Shadow Sirens
+          if (LZRandoChallenge && (SequencePosition < 72))
+          {
+            // Adjust the Sequence to skip the cutscene with the Shadow Sirens if using the challenge mode
+            // Set the Sequence to 72 to prevent the cutscene from playing
+            ttyd::swdrv::swByteSet(0, 72);
+          }
+        }
+        else
+        {
+          // Allow the Shadow Sirens to be fought if the Sequence is not past 84
+          // Set the Sequence to 84 so that the Shadow Sirens can be fought
+          ttyd::swdrv::swByteSet(0, 84);
+          ttyd::string::strcpy(NextBero, "w_bero");
         }
       }
     }
