@@ -19,14 +19,14 @@ void pouchGetStarStone(uint32_t id);
 // pouchGetKpaCoin
 // pouchMajinaiInit
 // pouchArriveBadge
-// unk_JP_US_PAL_049
+// pouchUnEquipBadgeID
 // pouchEquipBadgeID
 // pouchEquipCheckBadgeIndex
 // pouchEquipCheckBadge
 // pouchUnEquipBadgeIndex
 // pouchEquipBadgeIndex
 // pouchGetStarPoint
-// pouchRevisePartyParam
+void pouchRevisePartyParam();
 void pouchReviseMarioParam();
 // pouchRemoveKeepItem
 // pouchAddKeepItem

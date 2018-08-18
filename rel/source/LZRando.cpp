@@ -7,10 +7,11 @@
 
 #include <ttyd/string.h>
 #include <ttyd/swdrv.h>
-#include <ttyd/system.h>
 #include <ttyd/mario_pouch.h>
+#include <ttyd/system.h>
 #include <ttyd/npcdrv.h>
 #include <ttyd/mario_party.h>
+#include <ttyd/evt_pouch.h>
 #include <ttyd/seqdrv.h>
 #include <ttyd/mario.h>
 #include <ttyd/mariost.h>
@@ -182,6 +183,19 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "tou_01") == 0)
+    {
+      // Prevent the player from being able to get the Super Hammer multiple times
+      if (SequencePosition < 140)
+      {
+        // Check if the player has the Super Hammer or not
+        if (ttyd::mario_pouch::pouchCheckItem(SuperHammer) > 0)
+        {
+          // Update the Sequence to what it would normally be after getting the Super Hammer
+          ttyd::swdrv::swByteSet(0, 140);
+        }
+      }
+    }
     
     return;
   }
@@ -269,6 +283,16 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 361);
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "aji_02") == 0)
+    {
+      // Change the loading zone to prevent spawning on the electric floor
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
+    else if (ttyd::string::strcmp(NextMap, "aji_05") == 0)
+    {
+      // Change the loading zone to prevent spawning on the electric floor
+      ttyd::string::strcpy(NextBero, "e_bero");
+    }
     else if (ttyd::string::strcmp(NextMap, "aji_07") == 0)
     {
       // Set the Loading Zone to be able to get the Cog if the player doesn't have it already
@@ -278,6 +302,11 @@ void getRandomWarp()
       {
         ttyd::string::strcpy(NextBero, "tenjo");
       }
+    }
+    else if (ttyd::string::strcmp(NextMap, "aji_12") == 0)
+    {
+      // Change the loading zone to prevent spawning on the electric floor
+      ttyd::string::strcpy(NextBero, "e_bero");
     }
     else if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
     {
@@ -496,6 +525,13 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "jon_00") == 0)
     {
+      // Prevent warping to the Pit if 10 minutes have not passed
+      uint32_t TimerCountCutoff = 180000; // 50 Minutes
+      if (TimerCount >= TimerCountCutoff)
+      {
+        continue;
+      }
+      
       // Adjust Pit floor if a Pit room is selected
       uint32_t TotalPitFloors = 100;
       
@@ -553,6 +589,11 @@ void getRandomWarp()
       
       // Change loading zone to the pipe above the room
       ttyd::string::strcpy(NextBero, "dokan_2");
+    }
+    else if (ttyd::string::strcmp(NextMap, "las_03") == 0)
+    {
+      // Change the loading zone to prevent spawning on the spikes
+      ttyd::string::strcpy(NextBero, "w_bero");
     }
     else if (ttyd::string::strcmp(NextMap, "las_09") == 0)
     {
@@ -704,18 +745,39 @@ void getRandomWarp()
       }
     }
     else if (ttyd::string::strcmp(NextMap, "tou_01") == 0)
-    { 
-      if (LZRandoChallenge)
+    {
+      // Adjust the Sequence to allow the player to get the Super Hammer if they don't have it already
+      // Only adjust the Sequence if it is currently less than what is needed
+      if (SequencePosition < 139)
+      {
+        if (ttyd::mario_pouch::pouchCheckItem(SuperHammer) == 0)
+        {
+          // Set the Sequence to 139 so that the player can get the Super Hammer
+          ttyd::swdrv::swByteSet(0, 139);
+          
+          if (LZRandoChallenge)
+          {
+            // Change the loading zone used to skip the cutscene of coming off of the blimp if using the challenge mode
+            ttyd::string::strcpy(NextBero, "a_door_mon");
+          }
+        }
+        else if (LZRandoChallenge)
+        {
+          // Skip the intro cutscene
+          if (SequencePosition < 127)
+          {
+            // Set the Sequence to 127 to prevent the intro cutscene from playing
+            ttyd::swdrv::swByteSet(0, 127);
+          }
+          
+          // Change the loading zone used to skip the cutscene of coming off of the blimp if using the challenge mode
+          ttyd::string::strcpy(NextBero, "a_door_mon");
+        }
+      }
+      else if (LZRandoChallenge)
       {
         // Change the loading zone used to skip the cutscene of coming off of the blimp if using the challenge mode
         ttyd::string::strcpy(NextBero, "a_door_mon");
-        
-        // Adjust the Sequence to skip the intro cutscene if using the challenge mode
-        if (SequencePosition < 127)
-        {
-          // Set the Sequence to 127 to prevent the cutscene from playing
-          ttyd::swdrv::swByteSet(0, 127);
-        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "tou_03") == 0)
@@ -822,6 +884,12 @@ void setUpNewFile()
   {
     ttyd::mario_party::partyJoin(static_cast<ttyd::party::Party>(i));
   }
+  
+  // Reset party stats to what they normally would be
+  ttyd::mario_pouch::pouchRevisePartyParam();
+  
+  // Heal all party members, as they will not be healed by pouchRevisePartyParam
+  ttyd::evt_pouch::evt_pouch_all_party_recovery();
   
   // Randomize Yoshi color
   ttyd::party::yoshiSetColor();

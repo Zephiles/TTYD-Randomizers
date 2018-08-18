@@ -68,10 +68,13 @@ bool ClearCacheFlag = false;
 char *LZRandoText = new char[4]; // 3 bytes for LZRandoText, 1 byte for NULL
 
 // LZ Rando Challenge
+uint8_t TimesUpCounter = 0;
 bool BossDefeated[14] = { false };
 uint16_t BossCount = 0;
 bool InGameOver = false;
 uint16_t GameOverCount = 0;
+int32_t FinalScore = 0;
+int32_t DisplayScores[10] = { 0 };
 char *LZRandoChallengeText = new char[4]; // 3 bytes for LZRandoChallengeText, 1 byte for NULL
 
 }
