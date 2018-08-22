@@ -125,7 +125,7 @@ void Mod::LZRandoChallengeStuff()
       for (int i = 0; i < 121; i++)
       {
         uint16_t ImportantItem = *reinterpret_cast<uint16_t *>(ImportantItemsAddressesStart + (i * 0x2));
-        if ((ImportantItem != Hammer) && (ImportantItem != MagicalMap) && (ImportantItem != Boots) && (ImportantItem != MailboxSP) && (ImportantItem != StrangeSack))
+        if ((ImportantItem != Hammer) && (ImportantItem != MagicalMap) && (ImportantItem != Boots) && (ImportantItem != MailboxSP) && (ImportantItem != StrangeSack) && (ImportantItem != BattleTrunks))
         {
           if ((ImportantItem == MagicalMapBigger) || ((ImportantItem >= DiamondStar) && (ImportantItem <= CrystalStar)))
           {
@@ -149,6 +149,9 @@ void Mod::LZRandoChallengeStuff()
           }
         }
       }
+      
+      // Add 1 point per 10 Battle Trunks in the player's inventory
+      MainScores[2] += ttyd::mario_pouch::pouchCheckItem(BattleTrunks) / 10;
       
       // Check for a follower
       uint32_t FollowerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetExtraPartyId()));
@@ -577,7 +580,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.11",
-    "Loading Zone Randomizer Beta - v0.5.28");
+    "Loading Zone Randomizer Beta - v0.5.29");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
   
@@ -590,7 +593,7 @@ void Mod::titleScreenStuff()
   #endif
   
   sprintf(DisplayBuffer,
-    "v1.1.29");
+    "v1.1.30");
   
   drawStringSingleLine(PosX, PosY, color, Scale);
 }

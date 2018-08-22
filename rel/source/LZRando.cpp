@@ -59,6 +59,8 @@ extern "C" {
   void BranchBackSpawnPartnerBattle();
   void StartResetFileLoadSpawn();
   void BranchBackResetFileLoadSpawn();
+  void StartPreventBattleOnRespawn();
+  void BranchBackPreventBattleOnRespawn();
 }
 
 namespace mod {
@@ -186,7 +188,7 @@ void getRandomWarp()
     else if (ttyd::string::strcmp(NextMap, "tou_01") == 0)
     {
       // Prevent the player from being able to get the Super Hammer multiple times
-      if (SequencePosition < 140)
+      if (SequencePosition == 139)
       {
         // Check if the player has the Super Hammer or not
         if (ttyd::mario_pouch::pouchCheckItem(SuperHammer) > 0)
@@ -316,10 +318,30 @@ void getRandomWarp()
         continue;
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "bom_03") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
+    else if (ttyd::string::strcmp(NextMap, "bom_04") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "e_bero4");
+    }
+    else if (ttyd::string::strcmp(NextMap, "dou_02") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "w_bero_1");
+    }
     else if (ttyd::string::strcmp(NextMap, "eki_03") == 0)
     {
       // Change loading zone to avoid softlocking
       ttyd::string::strcpy(NextBero, "w_bero_1");
+    }
+    else if (ttyd::string::strcmp(NextMap, "eki_04") == 0)
+    {
+      // Change the loading zone to prevent spawning in the tube maze
+      ttyd::string::strcpy(NextBero, "s_bero");
     }
     else if (ttyd::string::strcmp(NextMap, "eki_05") == 0)
     {
@@ -408,10 +430,15 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "gon_08") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "e_bero_1");
+    }
     else if (ttyd::string::strcmp(NextMap, "gon_11") == 0)
     {
-      // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 55
-      if ((SequencePosition < 55) && CheckChallengeModeTimerCutoff())
+      // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 56
+      if ((SequencePosition < 56) && CheckChallengeModeTimerCutoff())
       {
         continue;
       }
@@ -433,6 +460,21 @@ void getRandomWarp()
       // Set the Loading Zone to south
       ttyd::string::strcpy(NextBero, "s_bero");
     }
+    else if (ttyd::string::strcmp(NextMap, "gra_01") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "w_bero1");
+    }
+    else if (ttyd::string::strcmp(NextMap, "gra_02") == 0)
+    {
+      // Change the loading zone to prevent the player from being forced to update the Sequence to leave the room
+      ttyd::string::strcpy(NextBero, "w_bero_1");
+    }
+    else if (ttyd::string::strcmp(NextMap, "gra_03") == 0)
+    {
+      // Change the loading zone to prevent falling through the floor
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
     else if (ttyd::string::strcmp(NextMap, "gra_06") == 0)
     {
       if (LZRandoChallenge)
@@ -449,6 +491,9 @@ void getRandomWarp()
     {
       if (LZRandoChallenge)
       {
+        // Change the loading zone to prevent falling through the floor
+        ttyd::string::strcpy(NextBero, "dokan");
+        
         // Skip the intro cutscene and the Hooktail flying cutscene if using the challenge mode
         if (SequencePosition < 24)
         {
@@ -456,6 +501,31 @@ void getRandomWarp()
           ttyd::swdrv::swByteSet(0, 24);
         }
       }
+    }
+    else if (ttyd::string::strcmp(NextMap, "hei_02") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
+    else if (ttyd::string::strcmp(NextMap, "hei_04") == 0)
+    {
+      // Change the loading zone to prevent falling through the floor
+      ttyd::string::strcpy(NextBero, "e_bero");
+    }
+    else if (ttyd::string::strcmp(NextMap, "hei_08") == 0)
+    {
+      // Change the loading zone to prevent spawning on the stone or enemy
+      ttyd::string::strcpy(NextBero, "e_bero");
+    }
+    else if (ttyd::string::strcmp(NextMap, "hei_12") == 0)
+    {
+      // Change the loading zone to prevent spawning on the stone or enemy
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
+    else if (ttyd::string::strcmp(NextMap, "hei_13") == 0)
+    {
+      // Change the loading zone to prevent spawning on the Paragoomba
+      ttyd::string::strcpy(NextBero, "w_bero");
     }
     else if (ttyd::string::strcmp(NextMap, "hom_00") == 0)
     {
@@ -497,31 +567,60 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "jin_04") == 0)
     {
-      // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
-      if (CheckChallengeModeTimerCutoff())
-      {
-        continue;
-      }
+      bool CheckChallengeModeTime = CheckChallengeModeTimerCutoff();
       
-      // Allow Doopliss 1 or 2 to be fought at random
-      bool DooplissCheck = ttyd::system::irand(1000) < 500;
-      
-      if (DooplissCheck)
+      // Check if the sequence is before or at Doopliss 2
+      if (SequencePosition <= 210)
       {
-        if (SequencePosition < 199)
+        // Check if the Sequence is before or at Doopliss 1
+        if (SequencePosition <= 199)
         {
-          // Set up the Sequence to fight Doopliss 1
-          ttyd::swdrv::swByteSet(0, 199);
+          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+          if (CheckChallengeModeTime)
+          {
+            continue;
+          }
+          else
+          {
+            // Allow Doopliss 1 or 2 to be fought at random
+            bool DooplissCheck = ttyd::system::irand(1000) < 500;
+            
+            if (DooplissCheck)
+            {
+              // Set up the Sequence to fight Doopliss 1
+              ttyd::swdrv::swByteSet(0, 199);
+            }
+            else
+            {
+              // Set up the Sequence to fight Doopliss 2
+              ttyd::swdrv::swByteSet(0, 210);
+            }
+          }
+        }
+        else // Sequence is after Doopliss 1 but before or at Doopliss 2
+        {
+          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+          if (CheckChallengeModeTime)
+          {
+            continue;
+          }
+          else
+          {
+            // Set up the Sequence to fight Doopliss 2
+            ttyd::swdrv::swByteSet(0, 210);
+          }
         }
       }
-      else
-      {
-        if (SequencePosition < 210)
-        {
-          // Set up the Sequence to fight Doopliss 2
-          ttyd::swdrv::swByteSet(0, 210);
-        }
-      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "jin_07") == 0)
+    {
+      // Change the loading zone to allow the player to get the Star Piece
+      ttyd::string::strcpy(NextBero, "w_bero_2");
+    }
+    else if (ttyd::string::strcmp(NextMap, "jin_10") == 0)
+    {
+      // Change the loading zone to prevent spawning near the enemies
+      ttyd::string::strcpy(NextBero, "w_bero");
     }
     else if (ttyd::string::strcmp(NextMap, "jon_00") == 0)
     {
@@ -595,9 +694,14 @@ void getRandomWarp()
       // Change the loading zone to prevent spawning on the spikes
       ttyd::string::strcpy(NextBero, "w_bero");
     }
+    else if (ttyd::string::strcmp(NextMap, "las_04") == 0)
+    {
+      // Change the loading zone to prevent spawning under the map
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
     else if (ttyd::string::strcmp(NextMap, "las_09") == 0)
     {
-      if (SequencePosition < 390)
+      if (SequencePosition <= 390)
       {
         if (CheckChallengeModeTimerCutoff())
         {
@@ -606,25 +710,34 @@ void getRandomWarp()
         }
         else
         {
-          // Allow the Shadow Sirens to be fought if the Sequence is not past 390
+          // Allow the Shadow Sirens to be fought if the Sequence is before or at 390
           // Set the Sequence to 390 so that the Shadow Sirens can be fought
           ttyd::swdrv::swByteSet(0, 390);
           ttyd::string::strcpy(NextBero, "e_bero");
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "las_19") == 0)
+    {
+      if (SequencePosition < 390)
+      {
+        // The room changes once the Sequence reaches 390
+        // Change the loading zone to prevent spawning on the Wizzerd
+        ttyd::string::strcpy(NextBero, "w_bero");
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "las_26") == 0)
     {
-      if ((SequencePosition < 387) && !CheckChallengeModeTimerCutoff())
+      if ((SequencePosition <= 387) && !CheckChallengeModeTimerCutoff())
       {
-        // Allow Gloomtail to be fought if the Sequence is not past 387
+        // Allow Gloomtail to be fought if the Sequence is before or at 387
         // Set the Sequence to 387 so that Gloomtail can be fought
         ttyd::swdrv::swByteSet(0, 387);
       }
     }
     else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
     {
-      if (SequencePosition < 400)
+      if (SequencePosition <= 400)
       {
         if (CheckChallengeModeTimerCutoff())
         {
@@ -633,7 +746,7 @@ void getRandomWarp()
         }
         else
         {
-          // Allow the Shadow Queen to be fought if the Sequence is not past 400
+          // Allow the Shadow Queen to be fought if the Sequence is before or at 400
           // Set the Sequence to 400 so that the Shadow Queen can be fought
           ttyd::swdrv::swByteSet(0, 400);
           ttyd::string::strcpy(NextBero, "sekai_yami2");
@@ -650,9 +763,14 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 358);
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "moo_00") == 0)
+    {
+      // Change the loading zone to prevent spawning on the Yux
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
     else if (ttyd::string::strcmp(NextMap, "mri_01") == 0)
     {
-      if (SequencePosition < 110)
+      if (SequencePosition <= 110)
       {
         if (CheckChallengeModeTimerCutoff())
         {
@@ -661,7 +779,7 @@ void getRandomWarp()
         }
         else
         {
-          // Allow Magnus 1.0 to be fought if the Sequence is not past 110
+          // Allow Magnus 1.0 to be fought if the Sequence is before or at 110
           // Set the Sequence to 110 so that Magnus 1.0 can be fought
           ttyd::swdrv::swByteSet(0, 110);
         }
@@ -669,7 +787,7 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "muj_12") == 0)
     {
-      if (SequencePosition < 252)
+      if (SequencePosition <= 252)
       {
         if (CheckChallengeModeTimerCutoff())
         {
@@ -678,7 +796,7 @@ void getRandomWarp()
         }
         else
         {
-          // Allow Cortez to be fought if the Sequence is not past 252
+          // Allow Cortez to be fought if the Sequence is before or at 252
           // Set the Sequence to 252 so that Cortez can be fought
           ttyd::swdrv::swByteSet(0, 252);
         }
@@ -721,12 +839,22 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "tik_02") == 0)
     {
-      if ((SequencePosition < 20) && !CheckChallengeModeTimerCutoff())
+      if ((SequencePosition <= 20) && !CheckChallengeModeTimerCutoff())
       {
-        // Allow Blooper to be fought if the Sequence is not past 20
+        // Allow Blooper to be fought if the Sequence is before or at 20
         // Set the Sequence to 20 so that Blooper can be fought
         ttyd::swdrv::swByteSet(0, 20);
       }
+    }
+    else if (ttyd::string::strcmp(NextMap, "tik_07") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "n_bero");
+    }
+    else if (ttyd::string::strcmp(NextMap, "tik_15") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "w_bero_2");
     }
     else if (ttyd::string::strcmp(NextMap, "tik_21") == 0)
     {
@@ -749,7 +877,7 @@ void getRandomWarp()
       }
       else if (SequencePosition == 139)
       {
-        // Set the Sequence to 140 so that the player cannot get the Super Hammer again
+        // Set the Sequence to 140 so that the player can't get the Super Hammer again
         ttyd::swdrv::swByteSet(0, 140);
         
         if (LZRandoChallenge)
@@ -772,7 +900,7 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "tou_03") == 0)
     {
-      if (SequencePosition < 163)
+      if (SequencePosition <= 163)
       {
         if (CheckChallengeModeTimerCutoff())
         {
@@ -781,11 +909,16 @@ void getRandomWarp()
         }
         else
         {
-          // Allow Grubba to be fought if the Sequence is not past 163
+          // Allow Grubba to be fought if the Sequence is before or at 163
           // Set the Sequence to 163 so that Grubba can be fought
           ttyd::swdrv::swByteSet(0, 163);
         }
       }
+    }
+    else if (ttyd::string::strcmp(NextMap, "tou_04") == 0)
+    {
+      // Change the loading zone to prevent spawning out of bounds
+      ttyd::string::strcpy(NextBero, "w_bero");
     }
     else if (ttyd::string::strcmp(NextMap, "tou_05") == 0)
     {
@@ -825,12 +958,17 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "win_00") == 0)
     {
-      if (SequencePosition < 84)
+      if (SequencePosition <= 84)
       {
         if (CheckChallengeModeTimerCutoff())
         {
           // Currently using the challenge mode and 20 minutes have not passed, so don't set the sequence for the Shadow Sirens
-          if (LZRandoChallenge && (SequencePosition < 72))
+          if (SequencePosition == 84)
+          {
+            // Prevent fighting the Shadow Sirens if the Sequence is exactly 84
+            continue;
+          }
+          else if (SequencePosition < 72)
           {
             // Adjust the Sequence to skip the cutscene with the Shadow Sirens if using the challenge mode
             // Set the Sequence to 72 to prevent the cutscene from playing
@@ -839,7 +977,7 @@ void getRandomWarp()
         }
         else
         {
-          // Allow the Shadow Sirens to be fought if the Sequence is not past 84
+          // Allow the Shadow Sirens to be fought if the Sequence is before or at 84
           // Set the Sequence to 84 so that the Shadow Sirens can be fought
           ttyd::swdrv::swByteSet(0, 84);
           ttyd::string::strcpy(NextBero, "w_bero");
@@ -937,6 +1075,9 @@ void setUpNewFile()
   
   // Turn on GSWF(1781) and GSWF(1782) to skip the Koopie Koo cutscene in Petal Meadows
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x254) |= ((1 << 21) | (1 << 22)); // Turn on the 21 and 22 bits
+  
+  // Turn on GSWF(1805) to skip the cutscene of Goombella explaining her tattles on the bridge screen in Petal Meadows
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x258) |= (1 << 13); // Turn on the 13 bit
   
   // Turn on GSWF(2075) to skip Vivian's textbox in Twilight Trail
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x278) |= (1 << 27); // Turn on the 27 bit
@@ -1503,6 +1644,24 @@ uint32_t spawnPartnerBattle(uint32_t PartnerValue)
 }
 
 extern "C" {
+void *preventBattleOnRespawn(void *fbatPointer)
+{
+  // The reloadScreen function runs too late for this, so the button combo has to be checked
+  uint32_t ButtonInput = ttyd::system::keyGetButton(0);
+  uint16_t ReloadScreenCombo = PAD_L | PAD_B;
+  
+  if ((ButtonInput & ReloadScreenCombo) == ReloadScreenCombo)
+  {
+    return nullptr;
+  }
+  else
+  {
+    return fbatPointer;
+  }
+}
+}
+
+extern "C" {
 void resetFileLoadSpawn(void *GSWAddressesPointer)
 {
   // Only reset if using the Loading Zone randomizer
@@ -1585,6 +1744,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t LandOnWater = 0x80092DF4;
     uint32_t SpawnPartnerInBattle = 0x800F8B44;
     uint32_t ResetFileLoadCoordinates = 0x800F3A1C;
+    uint32_t PreventBattleOnRespawn = 0x800465CC;
   #elif defined TTYD_JP
     uint32_t RandomWarp = 0x800086F0;
     uint32_t TubeModeCheck = 0x80090D90;
@@ -1595,6 +1755,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t LandOnWater = 0x80091840;
     uint32_t SpawnPartnerInBattle = 0x800F3BF4;
     uint32_t ResetFileLoadCoordinates = 0x800EED60;
+    uint32_t PreventBattleOnRespawn = 0x80045F28;
   #elif defined TTYD_EU
     uint32_t RandomWarp = 0x80008994;
     uint32_t TubeModeCheck = 0x800936A0;
@@ -1606,6 +1767,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t JumpOnWater = 0x80093CFC;
     uint32_t SpawnPartnerInBattle = 0x800F99B0;
     uint32_t ResetFileLoadCoordinates = 0x800F4888;
+    uint32_t PreventBattleOnRespawn = 0x800466B4;
   #endif
   
   // Random Warps
@@ -1649,6 +1811,10 @@ void Mod::writeLZRandoAssemblyPatches()
   // Reset Mario's coordinates upon loading a file
   patch::writeBranch(reinterpret_cast<void *>(ResetFileLoadCoordinates), reinterpret_cast<void *>(StartResetFileLoadSpawn));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackResetFileLoadSpawn), reinterpret_cast<void *>(ResetFileLoadCoordinates + 0x4));
+  
+  // Prevent battles occuring when reloading the room
+  patch::writeBranch(reinterpret_cast<void *>(PreventBattleOnRespawn), reinterpret_cast<void *>(StartPreventBattleOnRespawn));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackPreventBattleOnRespawn), reinterpret_cast<void *>(PreventBattleOnRespawn + 0x4));
 }
 
 void writeAdditionalLZRandoAssemblyPatches()
