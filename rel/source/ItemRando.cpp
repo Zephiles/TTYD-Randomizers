@@ -1,7 +1,6 @@
 #include "mod.h"
 #include "items.h"
 #include "patch.h"
-#include "clearcache.h"
 
 #include <ttyd/system.h>
 #include <ttyd/mario_pouch.h>
@@ -10,6 +9,7 @@
 #include <ttyd/seqdrv.h>
 #include <ttyd/mariost.h>
 #include <ttyd/__mem.h>
+#include <ttyd/OSCache.h>
 
 #include <cstdio>
 
@@ -230,8 +230,8 @@ uint32_t randomizeItemWithChecks(uint32_t currentItemId)
     return currentItemId;
   }
   
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Battle = ttyd::seqdrv::SeqIndex::kBattle;
   
   // Prevent changing the item if currently in a battle
   if (NextSeq != Battle)
@@ -269,8 +269,8 @@ void *Mod::getRandomItem(const char *itemName, uint32_t itemId, uint32_t itemMod
 
 void manageEnemyHeldItemArray()
 {
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Battle = ttyd::seqdrv::SeqIndex::kBattle;
   
   if (NextSeq == Battle)
   {
@@ -423,8 +423,8 @@ void randomizeShopRewards()
 
 void setValuesMapChange()
 {
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex MapChange = ttyd::seqdrv::SeqIndex::kMapChange;
   
   // Only set on map change
   if (NextSeq != MapChange)
@@ -972,6 +972,10 @@ void Mod::writeItemRandoAssemblyPatches()
   // Modify the pouchGetItem function to give 3 Shine Sprites when you collect one
   *reinterpret_cast<uint8_t *>(ShineSpriteAddress + 0x3) = 0x3;
   
+  // Clear the cache for the pouchGetItem address for Shine Sprites, as it gets used during the boot process
+  ttyd::OSCache::DCFlushRange(reinterpret_cast<void *>(ShineSpriteAddress), sizeof(uint32_t));
+  ttyd::OSCache::ICInvalidateRange(reinterpret_cast<void *>(ShineSpriteAddress), sizeof(uint32_t));
+  
   // Change icons for Koopa Curse and Debug Badge
   *reinterpret_cast<uint16_t *>(itemDataTable + (KoopaCurse * 0x28) + 0x20) = KoopaCurseIcon;
   *reinterpret_cast<uint16_t *>(itemDataTable + (DebugBadge * 0x28) + 0x20) = DebugBadgeIcon;
@@ -999,9 +1003,6 @@ void Mod::writeItemRandoAssemblyPatches()
   *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x14) = 150; // Buy price
   *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x16) = 105; // Discounted Buy price
   *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x1A) = 75; // Sell price
-  
-  // Clear the cache for the pouchGetItem address for Shine Sprites, as it gets used during the boot process
-  clearcache::clearCache(ShineSpriteAddress, sizeof(uint32_t));
 }
 
 void Mod::itemRandoStuff()

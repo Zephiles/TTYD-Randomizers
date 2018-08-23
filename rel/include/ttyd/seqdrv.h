@@ -33,9 +33,9 @@ extern "C" {
 void seqInit_MARIOSTORY();
 void seqMain();
 void seqSetSeq(SeqIndex seq, const char *mapName, const char *beroName);
-int32_t seqGetSeq();
-int32_t seqGetPrevSeq();
-int32_t seqGetNextSeq();
+SeqIndex seqGetSeq();
+SeqIndex seqGetPrevSeq();
+SeqIndex seqGetNextSeq();
 bool seqCheckSeq();
 
 }

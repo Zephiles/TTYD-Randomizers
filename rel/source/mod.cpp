@@ -49,12 +49,12 @@ void Mod::init()
   // LZ Rando
   // Prevent the game from removing partners
   // Prevent partyLeft from running
-  mPFN_partyLeft_trampoline = patch::hookFunction(ttyd::mario_party::partyLeft, [](ttyd::party::Party id)
+  mPFN_partyLeft_trampoline = patch::hookFunction(ttyd::mario_party::partyLeft, [](ttyd::party::PartyMembers id)
   {
     gMod->preventPartyLeft(id);
   });
   
-  mPFN_randomizeGivenFollower_trampoline = patch::hookFunction(ttyd::party::partyEntry2Pos, [](ttyd::party::Party id, float x, float y, float z)
+  mPFN_randomizeGivenFollower_trampoline = patch::hookFunction(ttyd::party::partyEntry2Pos, [](ttyd::party::PartyMembers id, float x, float y, float z)
   {
     return gMod->randomizeGivenFollower(id, x, y, z);
   });

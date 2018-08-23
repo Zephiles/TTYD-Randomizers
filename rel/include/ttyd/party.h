@@ -4,7 +4,7 @@
 
 namespace ttyd::party {
 
-enum class Party : uint8_t
+enum class PartyMembers : uint8_t
 {
   Goombella = 1,
   Koops,
@@ -70,7 +70,7 @@ extern "C" {
 // partyUsePost
 // partyReInit
 // partyInit
-int32_t partyEntry2Pos(Party id, float x, float y, float z);
+int32_t partyEntry2Pos(PartyMembers id, float x, float y, float z);
 // partyEntry2Hello
 // partyEntry2
 // partyEntryMain

@@ -3,7 +3,6 @@
 #include "items.h"
 #include "buttons.h"
 #include "patch.h"
-#include "clearcache.h"
 
 #include <ttyd/string.h>
 #include <ttyd/swdrv.h>
@@ -12,6 +11,7 @@
 #include <ttyd/npcdrv.h>
 #include <ttyd/mario_party.h>
 #include <ttyd/evt_pouch.h>
+#include <ttyd/OSCache.h>
 #include <ttyd/seqdrv.h>
 #include <ttyd/mario.h>
 #include <ttyd/mariost.h>
@@ -252,7 +252,6 @@ void getRandomWarp()
   }
   
   GameOverFlag = false;
-  bool ConfirmNewMap = false;
   
   // Get new map to warp to
   uint32_t *MapArray;
@@ -269,6 +268,7 @@ void getRandomWarp()
     MapArraySize = LZMapArraySize;
   }
   
+  bool ConfirmNewMap = false;
   while (!ConfirmNewMap)
   {
     char *NewRandomMap = reinterpret_cast<char *>(MapArray[ttyd::system::irand(MapArraySize)]);
@@ -318,6 +318,11 @@ void getRandomWarp()
         continue;
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "aji_19") == 0)
+    {
+      // Change the loading zone to prevent spawning out of bounds
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
     else if (ttyd::string::strcmp(NextMap, "bom_03") == 0)
     {
       // Change the loading zone to prevent spawning close to enemies
@@ -333,6 +338,11 @@ void getRandomWarp()
       // Change the loading zone to prevent spawning close to enemies
       ttyd::string::strcpy(NextBero, "w_bero_1");
     }
+    else if (ttyd::string::strcmp(NextMap, "eki_02") == 0)
+    {
+      // Change the loading zone to prevent spawning out of bounds
+      ttyd::string::strcpy(NextBero, "s_bero");
+    }
     else if (ttyd::string::strcmp(NextMap, "eki_03") == 0)
     {
       // Change loading zone to avoid softlocking
@@ -345,12 +355,19 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "eki_05") == 0)
     {
-      // Change the loading zone used if the player has not opened the Ultra Boots chest yet, and if the Sequence is less than 319
+      // Change the loading zone used if the player has not opened the Ultra Boots chest yet
       uint32_t UltraBootsChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x348); // GSWF(3728)
       
-      if ((!(UltraBootsChest & (1 << 16))) && (SequencePosition < 319)) // Check if the 16 bit is off
+      if (!(UltraBootsChest & (1 << 16))) // Check if the 16 bit is off
       {
         // Run if the 16 bit is off
+        // Change the Sequence to allow the player to get the Ultra Boots
+        if (SequencePosition > 318)
+        {
+          ttyd::swdrv::swByteSet(0, 318);
+        }
+        
+        // Set the correct loading zone for the player to be able to get the Ultra Boots
         ttyd::string::strcpy(NextBero, "w_bero_1");
       }
     }
@@ -365,6 +382,11 @@ void getRandomWarp()
           ttyd::swdrv::swByteSet(0, 37);
         }
       }      
+    }
+    else if (ttyd::string::strcmp(NextMap, "gon_02") == 0)
+    {
+      // Change the loading zone to prevent spawning close to a Koopa
+      ttyd::string::strcpy(NextBero, "e_bero");
     }
     else if (ttyd::string::strcmp(NextMap, "gon_03") == 0)
     {
@@ -467,8 +489,12 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "gra_02") == 0)
     {
-      // Change the loading zone to prevent the player from being forced to update the Sequence to leave the room
-      ttyd::string::strcpy(NextBero, "w_bero_1");
+      if (SequencePosition < 188)
+      {
+        // Only change if the Sequence is currently before the value set by blowing away the tree
+        // Change the loading zone to prevent the player from being forced to update the Sequence to leave the room
+        ttyd::string::strcpy(NextBero, "w_bero_1");
+      }
     }
     else if (ttyd::string::strcmp(NextMap, "gra_03") == 0)
     {
@@ -548,27 +574,52 @@ void getRandomWarp()
           // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the player has a Hammer upgrade
           continue;
         }
-        else if (SequencePosition < 194)
+        else if (SequencePosition < 198)
         {
-          // Adjust the Sequence to skip the intro cutscene
-          // Set the Sequence to 194 to prevent the cutscene from playing
-          ttyd::swdrv::swByteSet(0, 194);
+          // Check if the player has the Steeple Key
+          if (ttyd::mario_pouch::pouchCheckItem(SteepleKey1) == 0)
+          {
+            // Change the loading zone to allow the player to get the Steeple Key
+            ttyd::string::strcpy(NextBero, "e_bero_3");
+            
+            // Adjust the Sequence to skip the intro cutscene if necessary
+            if (SequencePosition < 194)
+            {
+              // Set the Sequence to 194 to prevent the cutscene from playing
+              ttyd::swdrv::swByteSet(0, 194);
+            }
+          }
+          else
+          {
+            // Set the Sequence to 198 to prevent the player from getting another Steeple Key
+            ttyd::swdrv::swByteSet(0, 198);
+          }
         }
       }
-      else if (LZRandoChallenge)
+      else if (SequencePosition < 198)
       {
-        // Adjust the Sequence to skip the intro cutscene
-        if (SequencePosition < 194)
+        // Check if the player has the Steeple Key
+        if (ttyd::mario_pouch::pouchCheckItem(SteepleKey1) == 0)
         {
-          // Set the Sequence to 194 to prevent the cutscene from playing
-          ttyd::swdrv::swByteSet(0, 194);
+          // Change the loading zone to allow the player to get the Steeple Key
+          ttyd::string::strcpy(NextBero, "e_bero_3");
+          
+          if (LZRandoChallenge && (SequencePosition < 194))
+          {
+            // Adjust the Sequence to skip the intro cutscene if necessary
+            // Set the Sequence to 194 to prevent the cutscene from playing
+            ttyd::swdrv::swByteSet(0, 194);
+          }
+        }
+        else
+        {
+          // Set the Sequence to 198 to prevent the player from getting another Steeple Key
+          ttyd::swdrv::swByteSet(0, 198);
         }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "jin_04") == 0)
-    {
-      bool CheckChallengeModeTime = CheckChallengeModeTimerCutoff();
-      
+    { 
       // Check if the sequence is before or at Doopliss 2
       if (SequencePosition <= 210)
       {
@@ -576,7 +627,7 @@ void getRandomWarp()
         if (SequencePosition <= 199)
         {
           // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
-          if (CheckChallengeModeTime)
+          if (CheckChallengeModeTimerCutoff())
           {
             continue;
           }
@@ -600,7 +651,7 @@ void getRandomWarp()
         else // Sequence is after Doopliss 1 but before or at Doopliss 2
         {
           // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
-          if (CheckChallengeModeTime)
+          if (CheckChallengeModeTimerCutoff())
           {
             continue;
           }
@@ -726,6 +777,24 @@ void getRandomWarp()
         ttyd::string::strcpy(NextBero, "w_bero");
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "las_21") == 0)
+    {
+      if (SequencePosition < 390)
+      {
+        // The room changes once the Sequence reaches 390
+        // Change the loading zone to prevent spawning on the Chain Chomp
+        ttyd::string::strcpy(NextBero, "w_bero");
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "las_23") == 0)
+    {
+      if (SequencePosition < 390)
+      {
+        // The room changes once the Sequence reaches 390
+        // Change the loading zone to prevent spawning over spikes
+        ttyd::string::strcpy(NextBero, "w_bero");
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "las_26") == 0)
     {
       if ((SequencePosition <= 387) && !CheckChallengeModeTimerCutoff())
@@ -753,6 +822,11 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "las_30") == 0)
+    {
+      // Change the loading zone to prevent spawning under the map
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
     else if (ttyd::string::strcmp(NextMap, "moo_00") == 0)
     {
       // Skip the intro cutscene
@@ -763,7 +837,7 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 358);
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "moo_00") == 0)
+    else if (ttyd::string::strcmp(NextMap, "moo_02") == 0)
     {
       // Change the loading zone to prevent spawning on the Yux
       ttyd::string::strcpy(NextBero, "w_bero");
@@ -831,10 +905,18 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "rsh_06_a") == 0)
     {
-      // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 332
-      if ((SequencePosition < 332) && CheckChallengeModeTimerCutoff())
+      if (SequencePosition < 332)
       {
-        continue;
+        // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 332
+        if (CheckChallengeModeTimerCutoff())
+        {
+          continue;
+        }
+      }
+      else
+      {
+        // Change the loading zone to prevent spawning under the map
+        ttyd::string::strcpy(NextBero, "w_bero");
       }
     }
     else if (ttyd::string::strcmp(NextMap, "tik_02") == 0)
@@ -855,6 +937,11 @@ void getRandomWarp()
     {
       // Change the loading zone to prevent spawning close to enemies
       ttyd::string::strcpy(NextBero, "w_bero_2");
+    }
+    else if (ttyd::string::strcmp(NextMap, "tik_20") == 0)
+    {
+      // Change the loading zone to prevent spawning near the Spanias
+      ttyd::string::strcpy(NextBero, "w_bero");
     }
     else if (ttyd::string::strcmp(NextMap, "tik_21") == 0)
     {
@@ -956,6 +1043,22 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "usu_01") == 0)
+    {
+      // Check if the player has the Curse or not
+      if (ttyd::mario_pouch::pouchCheckItem(TubeModeCurse) == 0)
+      {
+        // Check if the player has the Black Key for the chest
+        if (ttyd::mario_pouch::pouchCheckItem(BlackKey3) > 0)
+        {
+          // Turn off GSWF(1931) to manually open the chest
+          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x268) &= ~(1 << 11); // Turn off the 11 bit
+          
+          // Manually set the Sequence to allow the player to get the Curse if they have the key for it
+          ttyd::swdrv::swByteSet(0, 185);
+        }
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "win_00") == 0)
     {
       if (SequencePosition <= 84)
@@ -1021,7 +1124,7 @@ void setUpNewFile()
   // Add all partners
   for (int i = 1; i <= 7; i++)
   {
-    ttyd::mario_party::partyJoin(static_cast<ttyd::party::Party>(i));
+    ttyd::mario_party::partyJoin(static_cast<ttyd::party::PartyMembers>(i));
   }
   
   // Reset party stats to what they normally would be
@@ -1034,7 +1137,7 @@ void setUpNewFile()
   ttyd::party::yoshiSetColor();
   
   // Start with Yoshi out
-  ttyd::mario_party::marioPartyHello(ttyd::party::Party::Yoshi);
+  ttyd::mario_party::marioPartyHello(ttyd::party::PartyMembers::Yoshi);
   
   // Start with the Strange Sack
   ttyd::mario_pouch::pouchGetItem(StrangeSack);
@@ -1082,6 +1185,9 @@ void setUpNewFile()
   // Turn on GSWF(2075) to skip Vivian's textbox in Twilight Trail
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x278) |= (1 << 27); // Turn on the 27 bit
   
+  // Turn on GSWF(2228) to prevent the player from being able to use the Steeple Key
+  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x28C) |= (1 << 20); // Turn on the 20 bit
+  
   // Turn on GSWF(2401) to skip the cutscene of entering Grubba's office through the grate for the first time
   *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A4) |= (1 << 1); // Turn on the 1 bit
   
@@ -1115,7 +1221,7 @@ void setUpNewFile()
 
 void overwriteNewFileStrings()
 {
-  // Overwrite aaa_00 and prologue strings, and put back to default when new values are not needed anymore
+  // Overwrite aaa_00 and prologue strings
   #ifdef TTYD_US
     uint32_t aaa_00_Address = 0x802EDE78;
   #elif defined TTYD_JP
@@ -1124,44 +1230,52 @@ void overwriteNewFileStrings()
     uint32_t aaa_00_Address = 0x802F9AD8;
   #endif
   uint32_t prologue_Address = aaa_00_Address + 0x8;
-  
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
-  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Load = ttyd::seqdrv::SeqIndex::kLoad;
+  ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
+  ttyd::seqdrv::SeqIndex Title = ttyd::seqdrv::SeqIndex::kTitle;
   uint32_t seqMainCheck = *reinterpret_cast<uint32_t *>(seqMainAddress + 0x4);
-  uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   
-  if ((NextSeq == Load) && (seqMainCheck == 2))
+  // Only change the strings on the load screen
+  if (NextSeq == Load)
   {
-    // Set the cache of the strings to be cleared later
-    ClearCacheNewFileStrings = false;
-    
-    // Set strings on file select screen curtain
-    if (LZRando)
+    if (seqMainCheck == 2)
     {
-      ttyd::string::strcpy(reinterpret_cast<char *>(aaa_00_Address), "gor_01");
-      ttyd::string::strcpy(reinterpret_cast<char *>(prologue_Address), "s_bero");
+      if (LZRando)
+      {
+        // Set the strings for the Loading Zone randomizer
+        ttyd::string::strcpy(reinterpret_cast<char *>(aaa_00_Address), "gor_01");
+        ttyd::string::strcpy(reinterpret_cast<char *>(prologue_Address), "s_bero");
+      }
+      else
+      {
+        // Set the strings to default
+        ttyd::string::strcpy(reinterpret_cast<char *>(aaa_00_Address), "aaa_00");
+        ttyd::string::strcpy(reinterpret_cast<char *>(prologue_Address), "prologue");
+      }
+    }
+    else if (seqMainCheck == 4)
+    {
+      // Only clear the cache once
+      if (!ClearCacheFlag)
+      {
+        ClearCacheFlag = true;
+        ttyd::OSCache::DCFlushRange(reinterpret_cast<void *>(aaa_00_Address), 16);
+      }
     }
   }
-  else if (!LZRando || ((NextSeq == Game) && (SequencePosition > 0)))
+  else if (ClearCacheFlag && ((NextSeq == Game) || (NextSeq == Title)))
   {
-    // Set strings to default when not using the Loading Zone randomizer, or when the file is already loaded and in central Rogueport
-    ttyd::string::strcpy(reinterpret_cast<char *>(aaa_00_Address), "aaa_00");
-    ttyd::string::strcpy(reinterpret_cast<char *>(prologue_Address), "prologue");
-  }
-  
-  // Clear the cache of the strings upon starting a file
-  if (!ClearCacheNewFileStrings && (NextSeq == Game))
-  {
-    ClearCacheNewFileStrings = true;
-    clearcache::clearCache(aaa_00_Address, 16);
+    // Reset the flag so that the cache can be cleared later when needed
+    ClearCacheFlag = false;
   }
 }
 
 void marioNeverTransform()
 {
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
   
   if (NextSeq != Game)
   {
@@ -1191,8 +1305,8 @@ uint8_t getPartnerOut(uint32_t PartnerPointer)
 
 void specificMapEdits()
 {
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
   
   if (NextSeq != Game)
   {
@@ -1211,10 +1325,10 @@ void specificMapEdits()
     {
       uint8_t CurrentPartnerOut = getPartnerOut(PartnerPointer);
       
-      if ((CurrentPartnerOut == 0) || (CurrentPartnerOut > static_cast<uint8_t>(ttyd::party::Party::Koops)))
+      if ((CurrentPartnerOut == 0) || (CurrentPartnerOut > static_cast<uint8_t>(ttyd::party::PartyMembers::Koops)))
       {
         // Bring out Goombella if either no partner is out or a partner from past Chapter 1 is out
-        ttyd::mario_party::marioPartyEntry(ttyd::party::Party::Goombella);
+        ttyd::mario_party::marioPartyEntry(ttyd::party::PartyMembers::Goombella);
       }
     }
   }
@@ -1225,10 +1339,10 @@ void specificMapEdits()
     {
       uint8_t CurrentPartnerOut = getPartnerOut(PartnerPointer);
       
-      if (CurrentPartnerOut != static_cast<uint8_t>(ttyd::party::Party::Vivian))
+      if (CurrentPartnerOut != static_cast<uint8_t>(ttyd::party::PartyMembers::Vivian))
       {
         // Force Vivian out
-        ttyd::mario_party::marioPartyEntry(ttyd::party::Party::Vivian);
+        ttyd::mario_party::marioPartyEntry(ttyd::party::PartyMembers::Vivian);
       }
     }
   }
@@ -1238,7 +1352,7 @@ void specificMapEdits()
     if (!PartnerPointer)
     {
       // Bring out Goombella if no partner is out
-      ttyd::mario_party::marioPartyHello(ttyd::party::Party::Goombella);
+      ttyd::mario_party::marioPartyHello(ttyd::party::PartyMembers::Goombella);
     }
     
     // Warp out of the Shadow Queen room if she is defeated, so that the cutscene is skipped
@@ -1265,8 +1379,8 @@ void dismountYoshi()
   // This needs to be possible in the event that a cutscene forces Mario off of Yoshi improperly
   uint32_t ButtonInput = ttyd::system::keyGetButton(0);
   uint16_t DismountYoshiCombo = PAD_L | PAD_Z;
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
   
   bool ButtonComparison = (ButtonInput & DismountYoshiCombo) == DismountYoshiCombo;
   
@@ -1282,7 +1396,7 @@ void dismountYoshi()
   {
     // Dismount Yoshi, as well as manually clearing some stuff to allow the player to move around again
     player->currentMotionId = 0;
-    player->flags2 &= ~((1 << 12) | (1 << 2)); // Turn off the 12 and 2 bits
+    player->flags2 &= ~((1 << 2) | (1 << 12)); // Turn off the 2 and 12 bits
     player->wAnimPosition[1] = 0;
     player->wModelPosition[0] = 0;
     player->wModelPosition[2] = 0;
@@ -1291,8 +1405,8 @@ void dismountYoshi()
 
 void resetMarioThroughLZ()
 {
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex MapChange = ttyd::seqdrv::SeqIndex::kMapChange;
   
   // Prevent softlocks by resetting Mario back to normal upon entering a loading zone
   if (NextSeq != MapChange)
@@ -1326,17 +1440,17 @@ void reloadScreen()
     return;
   }
   
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
-  int32_t MapChange = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kMapChange);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
+  ttyd::seqdrv::SeqIndex MapChange = ttyd::seqdrv::SeqIndex::kMapChange;
   
   if ((NextSeq < Game) || (NextSeq > MapChange))
   {
     return;
   }
   
-  int32_t Seq = ttyd::seqdrv::seqGetSeq();
-  int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
+  ttyd::seqdrv::SeqIndex Seq = ttyd::seqdrv::seqGetSeq();
+  ttyd::seqdrv::SeqIndex Battle = ttyd::seqdrv::SeqIndex::kBattle;
   
   if (Seq == Battle)
   {
@@ -1508,8 +1622,8 @@ void failsafeCheats()
 
 void resetValuesOnGameOver()
 {
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t GameOver = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGameOver);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex GameOver = ttyd::seqdrv::SeqIndex::kGameOver;
     
   if (NextSeq != GameOver)
   {
@@ -1536,8 +1650,8 @@ void resetValuesOnGameOver()
 
 void reloadCurrentScreenFlag()
 {
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
   
   if (ReloadCurrentScreen && (NextSeq == Game))
   {
@@ -1676,7 +1790,7 @@ void resetFileLoadSpawn(void *GSWAddressesPointer)
 }
 }
 
-void Mod::preventPartyLeft(ttyd::party::Party id)
+void Mod::preventPartyLeft(ttyd::party::PartyMembers id)
 {
   // Prevent the game from removing partners
   // Only prevent from running if the Loading Zone randomizer is currently in use
@@ -1691,13 +1805,13 @@ void Mod::preventPartyLeft(ttyd::party::Party id)
   }
 }
 
-int32_t Mod::randomizeGivenFollower(ttyd::party::Party id, float x, float y, float z)
+int32_t Mod::randomizeGivenFollower(ttyd::party::PartyMembers id, float x, float y, float z)
 {
   // Randomize given followers
   // Only randomize if the Loading Zone randomizer is currently in use
   if (LZRando)
   {
-    id = static_cast<ttyd::party::Party>(ttyd::system::irand(5) + 8);
+    id = static_cast<ttyd::party::PartyMembers>(ttyd::system::irand(5) + 8);
   }
   
   // Call original function
@@ -1817,34 +1931,6 @@ void Mod::writeLZRandoAssemblyPatches()
   patch::writeBranch(reinterpret_cast<void *>(BranchBackPreventBattleOnRespawn), reinterpret_cast<void *>(PreventBattleOnRespawn + 0x4));
 }
 
-void writeAdditionalLZRandoAssemblyPatches()
-{
-  #ifdef TTYD_US
-    uint32_t aaa_00_Address = 0x802EDE78;
-  #elif defined TTYD_JP
-    uint32_t aaa_00_Address = 0x802ED930;
-  #elif defined TTYD_EU
-    uint32_t aaa_00_Address = 0x802F9AD8;
-  #endif
-  
-  // Clear Cache
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
-  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
-  int32_t Title = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kTitle);
-  uint32_t seqMainCheck = *reinterpret_cast<uint32_t *>(seqMainAddress + 0x4);
-  
-  if (!ClearCacheFlag && (NextSeq == Load) && (seqMainCheck == 4))
-  {
-    ClearCacheFlag = true;
-    clearcache::clearCache(aaa_00_Address, 16);
-  }
-  else if (ClearCacheFlag && ((NextSeq == Game) || (NextSeq == Title)))
-  {
-    ClearCacheFlag = false;
-  }
-}
-
 void Mod::LZRandoStuff()
 {
   // Only run if the Loading Zone Randomizer is being used
@@ -1858,7 +1944,6 @@ void Mod::LZRandoStuff()
   
   // Additional LZ Rando stuff that needs to run no matter what
   overwriteNewFileStrings();
-  writeAdditionalLZRandoAssemblyPatches();
 }
 
 }

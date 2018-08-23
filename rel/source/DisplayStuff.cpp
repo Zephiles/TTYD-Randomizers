@@ -66,9 +66,9 @@ void drawStringMultipleLines(int32_t PosX, int32_t PosY, uint32_t color, float S
 
 void Mod::LZRandoDisplayStuff()
 {
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
-  int32_t GameOver = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGameOver);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
+  ttyd::seqdrv::SeqIndex GameOver = ttyd::seqdrv::SeqIndex::kGameOver;
   
   bool dmo_comparison = ttyd::string::strcmp(NextMap, "dmo_00") == 0;
   bool title_comparison = ttyd::string::strcmp(NextMap, "title") == 0;
@@ -96,12 +96,12 @@ void Mod::LZRandoDisplayStuff()
 
 void Mod::LZRandoChallengeStuff()
 {
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Title = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kTitle);
-  int32_t Game = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGame);
-  int32_t Battle = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kBattle);
-  int32_t GameOver = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kGameOver);
-  int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Title = ttyd::seqdrv::SeqIndex::kTitle;
+  ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
+  ttyd::seqdrv::SeqIndex Battle = ttyd::seqdrv::SeqIndex::kBattle;
+  ttyd::seqdrv::SeqIndex GameOver = ttyd::seqdrv::SeqIndex::kGameOver;
+  ttyd::seqdrv::SeqIndex Load = ttyd::seqdrv::SeqIndex::kLoad;
   uint32_t color = 0xFFFFFFFF;
   
   bool dmo_comparison = ttyd::string::strcmp(NextMap, "dmo_00") == 0;
@@ -419,7 +419,7 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Display timer
-    int32_t Seq = ttyd::seqdrv::seqGetSeq();
+    ttyd::seqdrv::SeqIndex Seq = ttyd::seqdrv::seqGetSeq();
     bool Comparisons = ((Seq == Title) || (Seq == Load) || dmo_comparison || title_comparison) && (TimerCount == 0);
     
     // Don't show the timer on the title screen or file select screen while it is at 0
@@ -540,8 +540,8 @@ void Mod::LZRandoChallengeStuff()
 
 void Mod::titleScreenStuff()
 {
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Title = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kTitle);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Title = ttyd::seqdrv::SeqIndex::kTitle;
   
   // Only run on the title screen
   if (NextSeq != Title)
@@ -579,8 +579,8 @@ void Mod::titleScreenStuff()
   
   sprintf(DisplayBuffer,
     "%s\n%s",
-    "Item Randomizers - v1.2.11",
-    "Loading Zone Randomizer Beta - v0.5.29");
+    "Item Randomizers - v1.2.12",
+    "Loading Zone Randomizer Beta - v0.5.30");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
   
@@ -593,15 +593,15 @@ void Mod::titleScreenStuff()
   #endif
   
   sprintf(DisplayBuffer,
-    "v1.1.30");
+    "v1.1.31");
   
   drawStringSingleLine(PosX, PosY, color, Scale);
 }
 
 void Mod::gameModes()
 {
-  int32_t NextSeq = ttyd::seqdrv::seqGetNextSeq();
-  int32_t Load = static_cast<int32_t>(ttyd::seqdrv::SeqIndex::kLoad);
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Load = ttyd::seqdrv::SeqIndex::kLoad;
   uint32_t seqMainCheck = *reinterpret_cast<uint32_t *>(seqMainAddress + 0x4);
   
   bool Comparisons = (NextSeq == Load) && (seqMainCheck == 2);

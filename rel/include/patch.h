@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ttyd/OSCache.h>
+
 #include <cstdint>
 
 namespace mod::patch {
@@ -12,8 +14,12 @@ Func hookFunction(Func function, Dest destination)
   uint32_t *instructions = reinterpret_cast<uint32_t *>(function);
   
   uint32_t *trampoline = new uint32_t[2];
+  
   // Original instruction
   trampoline[0] = instructions[0];
+  ttyd::OSCache::DCFlushRange(&trampoline[0], sizeof(uint32_t));
+  ttyd::OSCache::ICInvalidateRange(&trampoline[0], sizeof(uint32_t));
+  
   // Branch to original function past hook
   writeBranch(&trampoline[1], &instructions[1]);
   

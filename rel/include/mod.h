@@ -32,10 +32,10 @@ private:
   // LZ Rando
   void LZRandoStuff();
   void writeLZRandoAssemblyPatches();
-  void preventPartyLeft(ttyd::party::Party);
-  void (*mPFN_partyLeft_trampoline)(ttyd::party::Party) = nullptr;
-  int32_t randomizeGivenFollower(ttyd::party::Party, float, float, float);
-  int32_t (*mPFN_randomizeGivenFollower_trampoline)(ttyd::party::Party, float, float, float) = nullptr;
+  void preventPartyLeft(ttyd::party::PartyMembers);
+  void (*mPFN_partyLeft_trampoline)(ttyd::party::PartyMembers) = nullptr;
+  int32_t randomizeGivenFollower(ttyd::party::PartyMembers, float, float, float);
+  int32_t (*mPFN_randomizeGivenFollower_trampoline)(ttyd::party::PartyMembers, float, float, float) = nullptr;
   void preventCountDownStart(uint32_t, uint32_t);
   void (*mPFN_countDownStart_trampoline)(uint32_t, uint32_t) = nullptr;
   void *preventMarioShipForceStop();

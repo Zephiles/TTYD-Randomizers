@@ -1,5 +1,6 @@
 #include "patch.h"
-#include "clearcache.h"
+
+#include <ttyd/OSCache.h>
 
 #include <cstdint>
 
@@ -14,7 +15,8 @@ void writeBranch(void *ptr, void *destination)
   uint32_t *p = reinterpret_cast<uint32_t *>(ptr);
   *p = value;
   
-  clearcache::clearCache(reinterpret_cast<uint32_t>(ptr), sizeof(uint32_t));
+  ttyd::OSCache::DCFlushRange(ptr, sizeof(uint32_t));
+  ttyd::OSCache::ICInvalidateRange(ptr, sizeof(uint32_t));
 }
 
 }
