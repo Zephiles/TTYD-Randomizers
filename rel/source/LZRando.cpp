@@ -457,6 +457,16 @@ void getRandomWarp()
       // Change the loading zone to prevent spawning close to enemies
       ttyd::string::strcpy(NextBero, "e_bero_1");
     }
+    else if (ttyd::string::strcmp(NextMap, "gon_09") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "e_bero");
+    }
+    else if (ttyd::string::strcmp(NextMap, "gon_10") == 0)
+    {
+      // Change the loading zone to prevent spawning out of bounds
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
     else if (ttyd::string::strcmp(NextMap, "gon_11") == 0)
     {
       // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 56
@@ -511,6 +521,9 @@ void getRandomWarp()
           // Set the Sequence to 193 to prevent the cutscene from playing
           ttyd::swdrv::swByteSet(0, 193);
         }
+        
+        // Change the loading zone to prevent falling through the floor
+        ttyd::string::strcpy(NextBero, "n_bero");
       }
     }
     else if (ttyd::string::strcmp(NextMap, "hei_00") == 0)
@@ -1482,6 +1495,11 @@ void reloadScreen()
     {
       return;
     }
+  }
+  else if (ttyd::string::strncmp(NextMap, "jon_00", 3) == 0)
+  {
+    // Prevent the player from constantly reloading floors to kill high level enemies
+    return;
   }
   else if (ttyd::string::strcmp(NextMap, "las_09") == 0)
   {
