@@ -61,16 +61,16 @@ bool LZRandoChallenge = false;
 bool ReloadCurrentScreen = false;
 bool GameOverFlag = false;
 bool NewFile = false;
-bool ClearCacheNewFileStrings = false;
 char *NewBero = new char[32]; // 31 bytes for NextBero, 1 byte for NULL
 char *NewMap = new char[9]; // 8 bytes for NextMap, 1 byte for NULL
 bool ClearCacheFlag = false;
-char *LZRandoText = new char[4]; // 3 bytes for LZRandoText, 1 byte for NULL
 bool SQWarpAway = false;
+char *LZRandoText = new char[4]; // 3 bytes for LZRandoText, 1 byte for NULL
 
 // LZ Rando Challenge
 uint8_t TimesUpCounter = 0;
-bool BossDefeated[15] = { false };
+uint8_t JustDefeatedBoss = 0;
+bool BossDefeated[17] = { false };
 uint16_t BossCount = 0;
 bool InGameOver = false;
 uint16_t GameOverCount = 0;

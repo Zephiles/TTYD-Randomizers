@@ -23,7 +23,8 @@ extern char *NextMap;
 extern char *NextBero;
 extern uint8_t TimesUpCounter;
 extern uint32_t GSWAddressesStart;
-extern bool BossDefeated[15];
+extern uint8_t JustDefeatedBoss;
+extern bool BossDefeated[17];
 extern uint16_t BossCount;
 extern bool InGameOver;
 extern uint16_t GameOverCount;
@@ -170,15 +171,36 @@ void Mod::LZRandoChallengeStuff()
       }
       
       // Check for bosses
-      uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-      uint16_t SequenceChecks[] = { 21, 56, 85, 112, 164, 200, 211, 253, 332, 373, 388, 391 };
-      int32_t BossDefeatedIndex = 0;
+      uint32_t BossDefeatedIndex = 0;
+      
+      // Check for bosses based on current textbox
+      for (int i = 1; i <= 10; i++)
+      {
+        if (JustDefeatedBoss == i)
+        {
+          if (!BossDefeated[BossDefeatedIndex])
+          {
+            BossDefeated[BossDefeatedIndex] = true;
+            BossCount++;
+          }
+        }
+        else
+        {
+          BossDefeated[BossDefeatedIndex] = false;
+        }
+        
+        BossDefeatedIndex++;
+      }
       
       // Check for bosses based on Sequence
+      uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
+      uint16_t SequenceChecks[] = { 85, 200, 211, 388 };
       int32_t ArraySize = sizeof(SequenceChecks) / sizeof(SequenceChecks[0]);
-      while (BossDefeatedIndex < ArraySize)
+      
+      BossDefeatedIndex++;
+      for (int i = 0; i < ArraySize; i++)
       {
-        if (SequenceChecks[BossDefeatedIndex] == SequencePosition)
+        if (SequencePosition == SequenceChecks[i])
         {
           if (!BossDefeated[BossDefeatedIndex])
           {
@@ -195,6 +217,7 @@ void Mod::LZRandoChallengeStuff()
       }
       
       // Check for the Shadow Queen
+      BossDefeatedIndex++;
       if (SequencePosition == 401)
       {
         if (!BossDefeated[BossDefeatedIndex])
@@ -580,7 +603,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.12",
-    "Loading Zone Randomizer Beta - v0.5.32");
+    "Loading Zone Randomizer Beta - v0.5.33");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
   
@@ -593,7 +616,7 @@ void Mod::titleScreenStuff()
   #endif
   
   sprintf(DisplayBuffer,
-    "v1.1.33");
+    "v1.1.34");
   
   drawStringSingleLine(PosX, PosY, color, Scale);
 }

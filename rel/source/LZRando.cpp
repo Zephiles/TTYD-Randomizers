@@ -24,26 +24,28 @@
 extern bool LZRandoChallenge;
 extern uint32_t TimerCount;
 extern bool LZRando;
+extern uint32_t GSWAddressesStart;
 extern bool ReloadCurrentScreen;
 extern char *NextMap;
 extern bool GameOverFlag;
 extern char *NextBero;
 extern char *NextArea;
 extern bool NewFile;
-extern uint32_t GSWAddressesStart;
-extern uint32_t PossibleLZMaps[];
-extern uint16_t LZMapArraySize;
 extern uint32_t PossibleChallengeMaps[];
 extern uint16_t ChallengeMapArraySize;
+extern uint32_t PossibleLZMaps[];
+extern uint16_t LZMapArraySize;
 extern uint32_t seqMainAddress;
-extern bool ClearCacheNewFileStrings;
+extern bool ClearCacheFlag;
+extern bool SQWarpAway;
+extern uint8_t JustDefeatedBoss;
 // extern uint32_t AreaObjectsAddressesStart;
 // extern uint32_t AreaLZsAddressesStart;
 // extern uint32_t NPCAddressesStart;
 extern char *NewBero;
 extern char *NewMap;
-extern bool ClearCacheFlag;
-extern bool SQWarpAway;
+
+
 
 extern "C" {
   void StartGetRandomWarp();
@@ -62,8 +64,8 @@ extern "C" {
   void BranchBackResetFileLoadSpawn();
   void StartPreventBattleOnRespawn();
   void BranchBackPreventBattleOnRespawn();
-  void StartWarpAwaySQNo();
-  void BranchBackWarpAwaySQNo();
+  void StartCheckCurrentTextbox();
+  void BranchBackCheckCurrentTextbox();
 }
 
 namespace mod {
@@ -854,6 +856,24 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 387);
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "las_28") == 0)
+    {
+      if (SequencePosition <= 399)
+      {
+        if (CheckChallengeModeTimerCutoff())
+        {
+          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+          continue;
+        }
+        else
+        {
+          // Allow Grodus and Bowser & Kammy to be fought if the Sequence is before or at 399
+          // Set the Sequence to 399 so that Grodus and Bowser & Kammy can be fought
+          ttyd::swdrv::swByteSet(0, 399);
+          ttyd::string::strcpy(NextBero, "w_bero");
+        }
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
     {
       if (SequencePosition <= 400)
@@ -1366,6 +1386,9 @@ void specificMapEdits()
   // Reset SQWarpAway flag, as it needs to be off once in a new room
   SQWarpAway = false;
   
+  // Reset JustDefeatedBoss, so that it can be used for other bosses
+  JustDefeatedBoss = 0;
+  
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   uint32_t PartnerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId()));
   // uint32_t AreaObjectAddresses = *reinterpret_cast<uint32_t *>(AreaObjectsAddressesStart + 0x4);
@@ -1555,6 +1578,13 @@ void reloadScreen()
       return;
     }
   }
+  else if (ttyd::string::strcmp(NextMap, "las_28") == 0)
+  {
+    if (SequencePosition == 399)
+    {
+      return;
+    }
+  }
   else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
   {
     if (SequencePosition == 400)
@@ -1694,12 +1724,6 @@ void resetValuesOnGameOver()
     // Adjust the Sequence if the player got a Game Over on Magnus 1. This will prevent the Emerald Star cutscene from playing if they happen to warp back there
     // Set the Sequence back one
     ttyd::swdrv::swByteSet(0, 110);
-  }
-  else if (SequencePosition == 400)
-  {
-    // Adjust the Sequence if the player got a Game Over on the Shadow Queen. This will prevent warping back into the cutscene for her.
-    // Set the Sequence to an arbitary value right before anything major
-    ttyd::swdrv::swByteSet(0, 393);
   }
   
   ReloadCurrentScreen = false;
@@ -1849,14 +1873,64 @@ void resetFileLoadSpawn(void *GSWAddressesPointer)
 }
 
 extern "C" {
-char *warpAwaySQNo(char *currentText)
+char *checkCurrentTextbox(char *currentText)
 {
-  if (ttyd::string::strcmp(currentText, "stg8_las_139") == 0)
+  // Only set flags if using the challenge mode
+  if (LZRandoChallenge)
   {
-    // Set a flag to warp away from the Shadow Queen fight if the player says No
-    if (LZRandoChallenge)
+    if (ttyd::string::strcmp(currentText, "mac_0_126") == 0)
     {
-      // Only set the flag if using the challenge mode
+      // Just defeated Blooper
+      JustDefeatedBoss = 1;
+    }
+    else if (ttyd::string::strcmp(currentText, "stg1_gon_33_03") == 0)
+    {
+      // Just defeated Hooktail
+      JustDefeatedBoss = 2;
+    }
+    else if (ttyd::string::strcmp(currentText, "stg2_mri_e25_00_00") == 0)
+    {
+      // Just defeated Magnus 1.0
+      JustDefeatedBoss = 3;
+    }
+    else if (ttyd::string::strcmp(currentText, "stg3_tou_473") == 0)
+    {
+      // Just defeated Grubba
+      JustDefeatedBoss = 4;
+    }
+    else if (ttyd::string::strcmp(currentText, "stg5_dou_25") == 0)
+    {
+      // Just defeated Cortez
+      JustDefeatedBoss = 5;
+    }
+    else if (ttyd::string::strcmp(currentText, "stg6_rsh_247") == 0)
+    {
+      // Just defeated Smorg
+      JustDefeatedBoss = 6;
+    }
+    else if (ttyd::string::strcmp(currentText, "stg7_aji_42") == 0)
+    {
+      // Just defeated Magnus 2.0
+      JustDefeatedBoss = 7;
+    }
+    else if (ttyd::string::strcmp(currentText, "stg8_las_24") == 0)
+    {
+      // Just defeated the Shadow Sirens (Chapter 8)
+      JustDefeatedBoss = 8;
+    }
+    else if (ttyd::string::strcmp(currentText, "stg8_las_70") == 0)
+    {
+      // Just defeated Grodus
+      JustDefeatedBoss = 9;
+    }
+    else if (ttyd::string::strcmp(currentText, "stg8_las_101") == 0)
+    {
+      // Just defeated Bowser & Kammy
+      JustDefeatedBoss = 10;
+    }
+    else if (ttyd::string::strcmp(currentText, "stg8_las_139") == 0)
+    {
+      // Set a flag to warp away from the Shadow Queen fight if the player says No
       SQWarpAway = true;
     }
   }
@@ -1927,7 +2001,7 @@ uint32_t Mod::warpAwayFromSQ(void *ptr)
   {
     // Prevent getting a Game Over if the player said No to the Shadow Queen
     // Warp to a different room
-    ttyd::swdrv::swByteSet(0, 393);
+    ttyd::swdrv::swByteSet(0, 405);
     ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "las_29", "w_bero");
     
     // Prevent the function from running, so that it does not trigger a Game Over
@@ -1953,7 +2027,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t SpawnPartnerInBattle = 0x800F8B44;
     uint32_t ResetFileLoadCoordinates = 0x800F3A1C;
     uint32_t PreventBattleOnRespawn = 0x800465CC;
-    uint32_t WarpAwaySQNo = 0x800D2880;
+    uint32_t CheckCurrentTextbox = 0x800D2880;
   #elif defined TTYD_JP
     uint32_t RandomWarp = 0x800086F0;
     uint32_t TubeModeCheck = 0x80090D90;
@@ -1965,7 +2039,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t SpawnPartnerInBattle = 0x800F3BF4;
     uint32_t ResetFileLoadCoordinates = 0x800EED60;
     uint32_t PreventBattleOnRespawn = 0x80045F28;
-    uint32_t WarpAwaySQNo = 0x800CE750;
+    uint32_t CheckCurrentTextbox = 0x800CE750;
   #elif defined TTYD_EU
     uint32_t RandomWarp = 0x80008994;
     uint32_t TubeModeCheck = 0x800936A0;
@@ -1978,7 +2052,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t SpawnPartnerInBattle = 0x800F99B0;
     uint32_t ResetFileLoadCoordinates = 0x800F4888;
     uint32_t PreventBattleOnRespawn = 0x800466B4;
-    uint32_t WarpAwaySQNo = 0x800D3678;
+    uint32_t CheckCurrentTextbox = 0x800D3678;
   #endif
   
   // Random Warps
@@ -2027,9 +2101,9 @@ void Mod::writeLZRandoAssemblyPatches()
   patch::writeBranch(reinterpret_cast<void *>(PreventBattleOnRespawn), reinterpret_cast<void *>(StartPreventBattleOnRespawn));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackPreventBattleOnRespawn), reinterpret_cast<void *>(PreventBattleOnRespawn + 0x4));
   
-  // Prevent a Game Over occuring when saying No to the Shadow Queen
-  patch::writeBranch(reinterpret_cast<void *>(WarpAwaySQNo), reinterpret_cast<void *>(StartWarpAwaySQNo));
-  patch::writeBranch(reinterpret_cast<void *>(BranchBackWarpAwaySQNo), reinterpret_cast<void *>(WarpAwaySQNo + 0x4));
+  // Check the current textbox to check for specific things to happen
+  patch::writeBranch(reinterpret_cast<void *>(CheckCurrentTextbox), reinterpret_cast<void *>(StartCheckCurrentTextbox));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackCheckCurrentTextbox), reinterpret_cast<void *>(CheckCurrentTextbox + 0x4));
 }
 
 void Mod::LZRandoStuff()
