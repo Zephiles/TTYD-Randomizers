@@ -896,6 +896,10 @@
 // 80128FE0:BtlUnit_Entry
 // 80129694:BtlUnit_Init
 
+// evt_seq.o
+// 8013DDC0:evt_seq_wait
+8013DE10:evt_seq_set_seq
+
 // mario_party.o
 // 80140E60:partyGetTechLv
 // 80140EA4:partyGetHp

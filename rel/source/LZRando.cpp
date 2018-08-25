@@ -43,6 +43,7 @@ extern bool ClearCacheNewFileStrings;
 extern char *NewBero;
 extern char *NewMap;
 extern bool ClearCacheFlag;
+extern bool SQWarpAway;
 
 extern "C" {
   void StartGetRandomWarp();
@@ -61,6 +62,8 @@ extern "C" {
   void BranchBackResetFileLoadSpawn();
   void StartPreventBattleOnRespawn();
   void BranchBackPreventBattleOnRespawn();
+  void StartWarpAwaySQNo();
+  void BranchBackWarpAwaySQNo();
 }
 
 namespace mod {
@@ -551,6 +554,11 @@ void getRandomWarp()
       // Change the loading zone to prevent falling through the floor
       ttyd::string::strcpy(NextBero, "e_bero");
     }
+    else if (ttyd::string::strcmp(NextMap, "hei_06") == 0)
+    {
+      // Change the loading zone to prevent falling through the floor
+      ttyd::string::strcpy(NextBero, "e_bero");
+    }
     else if (ttyd::string::strcmp(NextMap, "hei_08") == 0)
     {
       // Change the loading zone to prevent spawning on the stone or enemy
@@ -753,6 +761,16 @@ void getRandomWarp()
       // Change loading zone to the pipe above the room
       ttyd::string::strcpy(NextBero, "dokan_2");
     }
+    else if (ttyd::string::strcmp(NextMap, "las_01") == 0)
+    {
+      // Change the loading zone to prevent falling through the floor
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
+    else if (ttyd::string::strcmp(NextMap, "las_02") == 0)
+    {
+      // Change the loading zone to prevent spawning on the Bill Blasters
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
     else if (ttyd::string::strcmp(NextMap, "las_03") == 0)
     {
       // Change the loading zone to prevent spawning on the spikes
@@ -761,6 +779,11 @@ void getRandomWarp()
     else if (ttyd::string::strcmp(NextMap, "las_04") == 0)
     {
       // Change the loading zone to prevent spawning under the map
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
+    else if (ttyd::string::strcmp(NextMap, "las_06") == 0)
+    {
+      // Change the loading zone to prevent spawning on the Bill Blasters
       ttyd::string::strcpy(NextBero, "w_bero");
     }
     else if (ttyd::string::strcmp(NextMap, "las_09") == 0)
@@ -806,6 +829,20 @@ void getRandomWarp()
         // The room changes once the Sequence reaches 390
         // Change the loading zone to prevent spawning over spikes
         ttyd::string::strcpy(NextBero, "w_bero");
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "las_24") == 0)
+    {
+      // Change the loading zone to prevent spawning near the Chain Chomp
+      ttyd::string::strcpy(NextBero, "s_bero_2");
+    }
+    else if (ttyd::string::strcmp(NextMap, "las_25") == 0)
+    {
+      if (SequencePosition < 390)
+      {
+        // The room changes once the Sequence reaches 390
+        // Change the loading zone to prevent spawning near the Phantom Embers
+        ttyd::string::strcpy(NextBero, "e_bero");
       }
     }
     else if (ttyd::string::strcmp(NextMap, "las_26") == 0)
@@ -1326,6 +1363,9 @@ void specificMapEdits()
     return;
   }
   
+  // Reset SQWarpAway flag, as it needs to be off once in a new room
+  SQWarpAway = false;
+  
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   uint32_t PartnerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId()));
   // uint32_t AreaObjectAddresses = *reinterpret_cast<uint32_t *>(AreaObjectsAddressesStart + 0x4);
@@ -1808,6 +1848,23 @@ void resetFileLoadSpawn(void *GSWAddressesPointer)
 }
 }
 
+extern "C" {
+char *warpAwaySQNo(char *currentText)
+{
+  if (ttyd::string::strcmp(currentText, "stg8_las_139") == 0)
+  {
+    // Set a flag to warp away from the Shadow Queen fight if the player says No
+    if (LZRandoChallenge)
+    {
+      // Only set the flag if using the challenge mode
+      SQWarpAway = true;
+    }
+  }
+  
+  return currentText;
+}
+}
+
 void Mod::preventPartyLeft(ttyd::party::PartyMembers id)
 {
   // Prevent the game from removing partners
@@ -1864,6 +1921,25 @@ void *Mod::preventMarioShipForceStop()
   }
 }
 
+uint32_t Mod::warpAwayFromSQ(void *ptr)
+{
+  if (SQWarpAway)
+  {
+    // Prevent getting a Game Over if the player said No to the Shadow Queen
+    // Warp to a different room
+    ttyd::swdrv::swByteSet(0, 393);
+    ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "las_29", "w_bero");
+    
+    // Prevent the function from running, so that it does not trigger a Game Over
+    return 0;
+  }
+  else
+  {
+    // Call original function
+    return mPFN_warpAwayFromSQ_trampoline(ptr);
+  }
+}
+
 void Mod::writeLZRandoAssemblyPatches()
 {
   #ifdef TTYD_US
@@ -1877,6 +1953,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t SpawnPartnerInBattle = 0x800F8B44;
     uint32_t ResetFileLoadCoordinates = 0x800F3A1C;
     uint32_t PreventBattleOnRespawn = 0x800465CC;
+    uint32_t WarpAwaySQNo = 0x800D2880;
   #elif defined TTYD_JP
     uint32_t RandomWarp = 0x800086F0;
     uint32_t TubeModeCheck = 0x80090D90;
@@ -1888,6 +1965,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t SpawnPartnerInBattle = 0x800F3BF4;
     uint32_t ResetFileLoadCoordinates = 0x800EED60;
     uint32_t PreventBattleOnRespawn = 0x80045F28;
+    uint32_t WarpAwaySQNo = 0x800CE750;
   #elif defined TTYD_EU
     uint32_t RandomWarp = 0x80008994;
     uint32_t TubeModeCheck = 0x800936A0;
@@ -1900,6 +1978,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t SpawnPartnerInBattle = 0x800F99B0;
     uint32_t ResetFileLoadCoordinates = 0x800F4888;
     uint32_t PreventBattleOnRespawn = 0x800466B4;
+    uint32_t WarpAwaySQNo = 0x800D3678;
   #endif
   
   // Random Warps
@@ -1947,6 +2026,10 @@ void Mod::writeLZRandoAssemblyPatches()
   // Prevent battles occuring when reloading the room
   patch::writeBranch(reinterpret_cast<void *>(PreventBattleOnRespawn), reinterpret_cast<void *>(StartPreventBattleOnRespawn));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackPreventBattleOnRespawn), reinterpret_cast<void *>(PreventBattleOnRespawn + 0x4));
+  
+  // Prevent a Game Over occuring when saying No to the Shadow Queen
+  patch::writeBranch(reinterpret_cast<void *>(WarpAwaySQNo), reinterpret_cast<void *>(StartWarpAwaySQNo));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackWarpAwaySQNo), reinterpret_cast<void *>(WarpAwaySQNo + 0x4));
 }
 
 void Mod::LZRandoStuff()

@@ -66,6 +66,7 @@ char *NewBero = new char[32]; // 31 bytes for NextBero, 1 byte for NULL
 char *NewMap = new char[9]; // 8 bytes for NextMap, 1 byte for NULL
 bool ClearCacheFlag = false;
 char *LZRandoText = new char[4]; // 3 bytes for LZRandoText, 1 byte for NULL
+bool SQWarpAway = false;
 
 // LZ Rando Challenge
 uint8_t TimesUpCounter = 0;

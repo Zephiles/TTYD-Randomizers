@@ -40,6 +40,8 @@ private:
   void (*mPFN_countDownStart_trampoline)(uint32_t, uint32_t) = nullptr;
   void *preventMarioShipForceStop();
   void *(*mPFN_marioShipForceStop_trampoline)() = nullptr;
+  uint32_t warpAwayFromSQ(void *);
+  uint32_t (*mPFN_warpAwayFromSQ_trampoline)(void *) = nullptr;
   
 private:
   void (*mPFN_makeKey_trampoline)() = nullptr;
