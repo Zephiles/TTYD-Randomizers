@@ -929,6 +929,20 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "muj_00") == 0)
+    {
+      if ((SequencePosition <= 259) && !CheckChallengeModeTimerCutoff())
+      {
+        // Allow Crump to be fought if the Sequence is before or at 259
+        // Set the Sequence to 259 so that Crump can be fought
+        ttyd::swdrv::swByteSet(0, 259);
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "muj_03") == 0)
+    {
+      // Change the loading zone to prevent falling through the floor
+      ttyd::string::strcpy(NextBero, "e_bero");
+    }
     else if (ttyd::string::strcmp(NextMap, "muj_12") == 0)
     {
       if (SequencePosition <= 252)
@@ -1588,6 +1602,13 @@ void reloadScreen()
   else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
   {
     if (SequencePosition == 400)
+    {
+      return;
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "muj_00") == 0)
+  {
+    if (SequencePosition == 259)
     {
       return;
     }
