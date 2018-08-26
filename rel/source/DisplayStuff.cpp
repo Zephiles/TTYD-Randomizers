@@ -25,7 +25,7 @@ extern uint8_t TimesUpCounter;
 extern uint32_t GSWAddressesStart;
 extern uint8_t JustDefeatedBoss;
 extern bool BossDefeated[17];
-extern uint16_t BossCount;
+extern uint32_t BossScore;
 extern bool InGameOver;
 extern uint16_t GameOverCount;
 extern int32_t FinalScore;
@@ -166,7 +166,7 @@ void Mod::LZRandoChallengeStuff()
       int16_t MarioLevel = *reinterpret_cast<int16_t *>(PouchPointer + 0x8A);
       if (MarioLevel > 1)
       {
-        // Add 3 points for each level up
+        // Add 2 points for each level up
         MainScores[4] = (MarioLevel - 1) * 2;
       }
       
@@ -174,14 +174,33 @@ void Mod::LZRandoChallengeStuff()
       uint32_t BossDefeatedIndex = 0;
       
       // Check for bosses based on current textbox
-      for (int i = 1; i <= 10; i++)
+      for (int i = 1; i <= 8; i++)
       {
         if (JustDefeatedBoss == i)
         {
           if (!BossDefeated[BossDefeatedIndex])
           {
             BossDefeated[BossDefeatedIndex] = true;
-            BossCount++;
+            BossScore += 10;
+          }
+        }
+        else
+        {
+          BossDefeated[BossDefeatedIndex] = false;
+        }
+        
+        BossDefeatedIndex++;
+      }
+      
+      // Check for Grodus and Bowser & Kammy
+      for (int i = 9; i <= 10; i++)
+      {
+        if (JustDefeatedBoss == i)
+        {
+          if (!BossDefeated[BossDefeatedIndex])
+          {
+            BossDefeated[BossDefeatedIndex] = true;
+            BossScore += 6;
           }
         }
         else
@@ -197,7 +216,6 @@ void Mod::LZRandoChallengeStuff()
       uint16_t SequenceChecks[] = { 85, 200, 211, 388 };
       int32_t ArraySize = sizeof(SequenceChecks) / sizeof(SequenceChecks[0]);
       
-      BossDefeatedIndex++;
       for (int i = 0; i < ArraySize; i++)
       {
         if (SequencePosition == SequenceChecks[i])
@@ -205,7 +223,7 @@ void Mod::LZRandoChallengeStuff()
           if (!BossDefeated[BossDefeatedIndex])
           {
             BossDefeated[BossDefeatedIndex] = true;
-            BossCount++;
+            BossScore += 10;
           }
         }
         else
@@ -217,13 +235,12 @@ void Mod::LZRandoChallengeStuff()
       }
       
       // Check for the Shadow Queen
-      BossDefeatedIndex++;
       if (SequencePosition == 401)
       {
         if (!BossDefeated[BossDefeatedIndex])
         {
           BossDefeated[BossDefeatedIndex] = true;
-          BossCount += 2;
+          BossScore += 20;
         }
       }
       else
@@ -241,7 +258,7 @@ void Mod::LZRandoChallengeStuff()
         if (AtomicBooCheck && !BossDefeated[BossDefeatedIndex])
         {
           BossDefeated[BossDefeatedIndex] = true;
-          BossCount++;
+          BossScore += 10;
         }
       }
       else
@@ -262,7 +279,7 @@ void Mod::LZRandoChallengeStuff()
         if (BonetailCheck && !BossDefeated[BossDefeatedIndex])
         {
           BossDefeated[BossDefeatedIndex] = true;
-          BossCount += 2;
+          BossScore += 20;
         }
       }
       else
@@ -274,7 +291,7 @@ void Mod::LZRandoChallengeStuff()
       }
       
       // Add 10 points for each boss defeated; 20 points for the Shadow Queen and Bonetail
-      MainScores[5] = BossCount * 10;
+      MainScores[5] = BossScore;
       
       // Add 1 point for Mario's coin count divided by 100
       int16_t CoinCount = *reinterpret_cast<int16_t *>(PouchPointer + 0x78);
@@ -419,7 +436,7 @@ void Mod::LZRandoChallengeStuff()
     TimerActive = false;
     DisablePlayerControl = false;
     TimesUpCounter = 0;
-    BossCount = 0;
+    BossScore = 0;
     GameOverCount = 0;
     ttyd::__mem::memset(BossDefeated, false, sizeof(BossDefeated));
   }
@@ -603,7 +620,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.12",
-    "Loading Zone Randomizer Beta - v0.5.33");
+    "Loading Zone Randomizer Beta - v0.5.34");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
   
@@ -616,7 +633,7 @@ void Mod::titleScreenStuff()
   #endif
   
   sprintf(DisplayBuffer,
-    "v1.1.34");
+    "v1.1.35");
   
   drawStringSingleLine(PosX, PosY, color, Scale);
 }
