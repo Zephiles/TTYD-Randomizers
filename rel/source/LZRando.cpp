@@ -45,8 +45,6 @@ extern uint8_t JustDefeatedBoss;
 extern char *NewBero;
 extern char *NewMap;
 
-
-
 extern "C" {
   void StartGetRandomWarp();
   void BranchBackGetRandomWarp();
@@ -343,6 +341,26 @@ void getRandomWarp()
       // Change the loading zone to prevent spawning close to enemies
       ttyd::string::strcpy(NextBero, "w_bero_1");
     }
+    else if (ttyd::string::strcmp(NextMap, "dou_05") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "w_bero_2");
+    }
+    else if (ttyd::string::strcmp(NextMap, "dou_06") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "w_bero");
+    }
+    else if (ttyd::string::strcmp(NextMap, "dou_12") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "w_bero_2");
+    }
+    else if (ttyd::string::strcmp(NextMap, "dou_13") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "e_bero_1");
+    }
     else if (ttyd::string::strcmp(NextMap, "eki_02") == 0)
     {
       // Change the loading zone to prevent spawning out of bounds
@@ -518,6 +536,9 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "gra_06") == 0)
     {
+      // Change the loading zone to prevent falling through the floor
+      ttyd::string::strcpy(NextBero, "n_bero");
+      
       if (LZRandoChallenge)
       {
         // Skip the intro cutscene if using the challenge mode
@@ -526,9 +547,6 @@ void getRandomWarp()
           // Set the Sequence to 193 to prevent the cutscene from playing
           ttyd::swdrv::swByteSet(0, 193);
         }
-        
-        // Change the loading zone to prevent falling through the floor
-        ttyd::string::strcpy(NextBero, "n_bero");
       }
     }
     else if (ttyd::string::strcmp(NextMap, "hei_00") == 0)
@@ -849,11 +867,22 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "las_26") == 0)
     {
-      if ((SequencePosition <= 387) && !CheckChallengeModeTimerCutoff())
+      if (SequencePosition <= 387)
       {
-        // Allow Gloomtail to be fought if the Sequence is before or at 387
-        // Set the Sequence to 387 so that Gloomtail can be fought
-        ttyd::swdrv::swByteSet(0, 387);
+        if (CheckChallengeModeTimerCutoff())
+        {
+          if (SequencePosition == 387)
+          {
+            // Prevent the player from being able to fight Gloomtail if the Sequence is exactly 387
+            continue;
+          }
+        }
+        else
+        {
+          // Allow Gloomtail to be fought if the Sequence is before or at 387
+          // Set the Sequence to 387 so that Gloomtail can be fought
+          ttyd::swdrv::swByteSet(0, 387);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "las_28") == 0)
@@ -931,11 +960,22 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "muj_00") == 0)
     {
-      if ((SequencePosition <= 259) && !CheckChallengeModeTimerCutoff())
+      if (SequencePosition <= 259)
       {
-        // Allow Crump to be fought if the Sequence is before or at 259
-        // Set the Sequence to 259 so that Crump can be fought
-        ttyd::swdrv::swByteSet(0, 259);
+        if (CheckChallengeModeTimerCutoff())
+        {
+          if (SequencePosition == 259)
+          {
+            // Prevent the player from being able to fight Crump if the Sequence is exactly 259
+            continue;
+          }
+        }
+        else
+        {
+          // Allow Crump to be fought if the Sequence is before or at 259
+          // Set the Sequence to 259 so that Crump can be fought
+          ttyd::swdrv::swByteSet(0, 259);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "muj_03") == 0)
@@ -1005,11 +1045,22 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(NextMap, "tik_02") == 0)
     {
-      if ((SequencePosition <= 20) && !CheckChallengeModeTimerCutoff())
+      if (SequencePosition <= 20)
       {
-        // Allow Blooper to be fought if the Sequence is before or at 20
-        // Set the Sequence to 20 so that Blooper can be fought
-        ttyd::swdrv::swByteSet(0, 20);
+        if (CheckChallengeModeTimerCutoff())
+        {
+          if (SequencePosition == 20)
+          {
+            // Prevent the player from being able to fight Blooper if the Sequence is exactly 20
+            continue;
+          }
+        }
+        else
+        {
+          // Allow Blooper to be fought if the Sequence is before or at 20
+          // Set the Sequence to 20 so that Blooper can be fought
+          ttyd::swdrv::swByteSet(0, 20);
+        }
       }
     }
     else if (ttyd::string::strcmp(NextMap, "tik_07") == 0)

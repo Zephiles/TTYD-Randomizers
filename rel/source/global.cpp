@@ -9,7 +9,8 @@ extern "C" {
   char *NextMap = reinterpret_cast<char *>(r13 + 0x16A8);
   char *NextArea = reinterpret_cast<char *>(r13 + 0x16C8);
   uint32_t seqMainAddress = r13 + 0x1860;
-  uint32_t AreaObjectsAddressesStart = 0x803D98A8;
+  uint32_t BattleAddressesStart = r13 + 0x1C70;
+  // uint32_t AreaObjectsAddressesStart = 0x803D98A8;
   // uint32_t NPCAddressesStart = r13 + 0x19A0;
 #elif defined TTYD_JP
   uint32_t r13 = 0x80417260;
@@ -17,6 +18,7 @@ extern "C" {
   char *NextMap = reinterpret_cast<char *>(r13 + 0x1148);
   char *NextArea = reinterpret_cast<char *>(r13 + 0x1168);
   uint32_t seqMainAddress = r13 + 0x1300;
+  uint32_t BattleAddressesStart  = r13 + 0x1710;
   // uint32_t AreaObjectsAddressesStart = 0x803CA2D8;
   // uint32_t NPCAddressesStart = r13 + 0x1448;
 #elif defined TTYD_EU
@@ -25,6 +27,7 @@ extern "C" {
   char *NextMap = reinterpret_cast<char *>(r13 + 0x1788);
   char *NextArea = reinterpret_cast<char *>(r13 + 0x17A8);
   uint32_t seqMainAddress = r13 + 0x1940;
+  uint32_t BattleAddressesStart  = r13 + 0x1D50;
   // uint32_t AreaObjectsAddressesStart = 0x803DA6F8;
   // uint32_t NPCAddressesStart = r13 + 0x1A80;
 #endif

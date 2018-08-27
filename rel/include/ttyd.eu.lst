@@ -716,7 +716,7 @@
 // 800F9680:BattleGetSystemPtr
 // 800F96E0:BattleGetUnitPartsPtr
 // 800F9720:BattleSetUnitPtr
-// 800F9738:BattleGetUnitPtr
+800F9738:BattleGetUnitPtr
 // 800F9774:BattleFree
 // 800F97A0:BattleAlloc
 // 800F97C8:BattleIncSeq

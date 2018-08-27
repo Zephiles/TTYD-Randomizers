@@ -9,6 +9,7 @@
 #include <ttyd/seqdrv.h>
 #include <ttyd/mariost.h>
 #include <ttyd/__mem.h>
+#include <ttyd/battle.h>
 #include <ttyd/OSCache.h>
 
 #include <cstdio>
@@ -31,6 +32,7 @@ extern uint16_t EnemyHeldItemArray[8][8];
 extern uint32_t GSWAddressesStart;
 extern uint32_t CrystalStarPointerAddress;
 extern bool RandomizeGivenItem;
+extern uint32_t BattleAddressesStart;
 
 extern "C" {
   void StartCrystalStarPointerWrite();
@@ -59,6 +61,8 @@ extern "C" {
   void BranchBackRandomizeCoinBlocks();
   void StartDisplayOverworldSPBars();
   void BranchBackDisplayOverworldSPBars();
+  void StartArtAttackHitboxes();
+  void BranchArtAttackHitboxes();
 }
 
 namespace mod {
@@ -689,6 +693,80 @@ bool displayOverworldSPBars(uint32_t CurrentSpecialMoves, int32_t CurrentSPBar)
 }
 }
 
+extern "C" {
+bool checkIfArtAttackHitboxesEnabled()
+{
+  uint32_t BattleAddress = *reinterpret_cast<uint32_t *>(BattleAddressesStart);
+  if (BattleAddress != 0)
+  {
+    uint32_t *BattleAddressPointer = reinterpret_cast<uint32_t *>(BattleAddress);
+    uint32_t MarioBattleAddress = reinterpret_cast<uint32_t>(ttyd::battle::BattleGetMarioPtr(BattleAddressPointer));
+    if (MarioBattleAddress != 0)
+    {
+      #ifdef TTYD_US
+        uint32_t BadgeOffset = 0x2FE;
+      #elif defined TTYD_JP
+        uint32_t BadgeOffset = 0x2FA;
+      #elif defined TTYD_EU
+        uint32_t BadgeOffset = 0x302;
+      #endif
+      
+      bool CheckBadge = *reinterpret_cast<uint8_t *>(MarioBattleAddress + BadgeOffset) > 0;
+      if (CheckBadge)
+      {
+        // Enable hitboxes if the badge is equipped
+        return true;
+      }
+    }
+  }
+  
+  return false;
+}
+}
+
+void enableArtAttackHitboxes()
+{
+  #ifdef TTYD_US
+    uint32_t HookAddress = 0x80231928;
+    uint32_t stwu_address = 0x80231704;
+  #elif defined TTYD_JP
+    uint32_t HookAddress = 0x8022C278;
+    uint32_t stwu_address = 0x8022C054;
+  #elif defined TTYD_EU
+    uint32_t HookAddress = 0x802353B8;
+    uint32_t stwu_address = 0x80235194;
+  #endif
+  
+  uint32_t stw_r0_address = stwu_address + 0x8;
+  uint32_t stmw_address = stw_r0_address + 0x4;
+  uint32_t addi_r3_address = stmw_address + 0x178;
+  uint32_t stw_r6_address = addi_r3_address + 0x8;
+  uint32_t stb_r0_address = stw_r6_address + 0x18;
+  uint32_t lwz_r0_address = stb_r0_address + 0x4;
+  uint32_t stw_r0_2_address = lwz_r0_address + 0x4;
+  uint32_t stw_r3_address = stw_r0_2_address + 0x8;
+  uint32_t addi_r4_address = stw_r3_address + 0x4;
+  uint32_t lwz_r0_2_address = addi_r4_address + 0x70;
+  uint32_t addi_sp_address = lwz_r0_2_address + 0x8;
+
+  // Art Attack assembly overwrites
+  *reinterpret_cast<uint8_t *>(stwu_address + 0x3) = 0x60;
+  *reinterpret_cast<uint8_t *>(stw_r0_address + 0x3) = 0xA4;
+  *reinterpret_cast<uint8_t *>(stmw_address + 0x3) = 0x48;
+  *reinterpret_cast<uint8_t *>(addi_r3_address + 0x3) = 0xC;
+  *reinterpret_cast<uint8_t *>(stw_r6_address + 0x3) = 0x14;
+  *reinterpret_cast<uint8_t *>(stb_r0_address + 0x3) = 0x14;
+  *reinterpret_cast<uint8_t *>(lwz_r0_address + 0x3) = 0x14;
+  *reinterpret_cast<uint8_t *>(stw_r0_2_address + 0x3) = 0xC;
+  *reinterpret_cast<uint8_t *>(stw_r3_address + 0x3) = 0x10;
+  *reinterpret_cast<uint8_t *>(addi_r4_address + 0x3) = 0x10;
+  *reinterpret_cast<uint8_t *>(lwz_r0_2_address + 0x3) = 0xA4;
+  *reinterpret_cast<uint8_t *>(addi_sp_address + 0x3) = 0xA0;
+
+  patch::writeBranch(reinterpret_cast<void *>(HookAddress), reinterpret_cast<void *>(StartArtAttackHitboxes));
+  patch::writeBranch(reinterpret_cast<void *>(BranchArtAttackHitboxes), reinterpret_cast<void *>(HookAddress + 0x4));
+}
+
 void Mod::writeItemRandoAssemblyPatches()
 {
   #ifdef TTYD_US
@@ -1003,6 +1081,13 @@ void Mod::writeItemRandoAssemblyPatches()
   *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x14) = 150; // Buy price
   *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x16) = 105; // Discounted Buy price
   *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x1A) = 75; // Sell price
+  
+  // Change BP cost of badge 335 from 2 to 1
+  uint32_t InvalidItemBadgeNoKnownEffectAddress = itemDataTable + (InvalidItemBadgeNoKnownEffect * 0x28);
+  *reinterpret_cast<uint8_t *>(InvalidItemBadgeNoKnownEffectAddress + 0x1C) = 1; // BP cost
+  
+  // Enable Art Attack hitboxes if a specific badge is equipped
+  enableArtAttackHitboxes();
 }
 
 void Mod::itemRandoStuff()
