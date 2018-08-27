@@ -394,6 +394,11 @@ void getRandomWarp()
         ttyd::string::strcpy(NextBero, "w_bero_1");
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "eki_06") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "e_bero_2");
+    }
     else if (ttyd::string::strcmp(NextMap, "gon_01") == 0)
     {
       if (LZRandoChallenge)
@@ -969,6 +974,11 @@ void getRandomWarp()
             // Prevent the player from being able to fight Crump if the Sequence is exactly 259
             continue;
           }
+          else
+          {
+            // Change the loading zone to prevent landing at the middle of the water
+            ttyd::string::strcpy(NextBero, "n_bero_02");
+          }
         }
         else
         {
@@ -976,6 +986,11 @@ void getRandomWarp()
           // Set the Sequence to 259 so that Crump can be fought
           ttyd::swdrv::swByteSet(0, 259);
         }
+      }
+      else
+      {
+        // Change the loading zone to prevent landing at the middle of the water
+        ttyd::string::strcpy(NextBero, "n_bero_02");
       }
     }
     else if (ttyd::string::strcmp(NextMap, "muj_03") == 0)

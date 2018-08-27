@@ -321,6 +321,17 @@ void Mod::LZRandoChallengeStuff()
         }
       }
       
+      // Check for the 3 badges that were not checked in the previous code
+      uint32_t CurrentAddress = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x194);
+      for (int i = 0; i < 3; i++)
+      {
+        if (CurrentAddress & (1 << i)) // Check the 0, 1, and 2 bits
+        {
+          // Add 1 to the count if the bit is on
+          BadgeLogCount++;
+        }
+      }
+      
       // Add 1 point for the badge log count divided by 10
       MainScores[7] = BadgeLogCount / 10;
       
@@ -620,7 +631,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.13",
-    "Loading Zone Randomizer Beta - v0.5.36");
+    "Loading Zone Randomizer Beta - v0.5.37");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
   
@@ -633,7 +644,7 @@ void Mod::titleScreenStuff()
   #endif
   
   sprintf(DisplayBuffer,
-    "v1.1.37");
+    "v1.1.38");
   
   drawStringSingleLine(PosX, PosY, color, Scale);
 }
