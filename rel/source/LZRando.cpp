@@ -1627,7 +1627,7 @@ void reloadScreen()
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
   {
-    if (SequencePosition < 373)
+    if (SequencePosition <= 373)
     {
       return;
     }
@@ -1668,6 +1668,13 @@ void reloadScreen()
   else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
   {
     if (SequencePosition == 400)
+    {
+      return;
+    }
+  }
+  else if (ttyd::string::strcmp(NextMap, "mri_01") == 0)
+  {
+    if ((SequencePosition == 110) || (SequencePosition == 111))
     {
       return;
     }
