@@ -1149,7 +1149,15 @@ void getRandomWarp()
           // Allow Grubba to be fought if the Sequence is before or at 163
           // Set the Sequence to 163 so that Grubba can be fought
           ttyd::swdrv::swByteSet(0, 163);
+          
+          // Turn off GSWF(2388) to clear any currently-registered fights
+          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A0) &= ~(1 << 20); // Turn off the 20 bit
         }
+      }
+      else
+      {
+        // Turn off GSWF(2388) to clear any currently-registered fights
+        *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A0) &= ~(1 << 20); // Turn off the 20 bit
       }
     }
     else if (ttyd::string::strcmp(NextMap, "tou_04") == 0)
@@ -1180,6 +1188,16 @@ void getRandomWarp()
           ttyd::swdrv::swByteSet(0, 148);
         }
       }
+    }
+    else if (ttyd::string::strcmp(NextMap, "tou_08") == 0)
+    {
+      // Turn off GSWF(2388) to clear any currently-registered fights
+      *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A0) &= ~(1 << 20); // Turn off the 20 bit
+    }
+    else if (ttyd::string::strcmp(NextMap, "tou_10") == 0)
+    {
+      // Turn off GSWF(2388) to clear any currently-registered fights
+      *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A0) &= ~(1 << 20); // Turn off the 20 bit
     }
     else if (ttyd::string::strcmp(NextMap, "usu_00") == 0)
     {
