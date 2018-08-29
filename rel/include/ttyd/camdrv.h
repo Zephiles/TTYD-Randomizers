@@ -22,7 +22,7 @@ void camDispOn(uint32_t unkId);
 // camSetCurNo
 // camGetCurNo
 // camGetCurPtr
-// camGetPtr
+void *camGetPtr(uint32_t unkId);
 // camUnLoadRoad
 // camLoadRoad
 // camDraw

@@ -78,6 +78,12 @@ void Mod::init()
     return gMod->warpAwayFromSQ(ptr);
   });
   
+  // Prevent being able to get items while reloading a room
+  mPFN_preventGetItemOnReload_trampoline = patch::hookFunction(ttyd::mario_pouch::pouchGetItem, [](uint32_t id)
+  {
+    return gMod->preventGetItemOnReload(id);
+  });
+  
   // Make changes that are only done once
   Mod::writeOnce();
   

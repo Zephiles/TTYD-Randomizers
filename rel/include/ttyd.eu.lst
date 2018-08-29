@@ -79,7 +79,7 @@
 // 8000F498:camSetCurNo
 // 8000F4A0:camGetCurNo
 // 8000F4A8:camGetCurPtr
-// 8000F4C0:camGetPtr
+8000F4C0:camGetPtr
 // 8000F4D4:camUnLoadRoad
 // 8000F530:camLoadRoad
 // 8000F618:camDraw

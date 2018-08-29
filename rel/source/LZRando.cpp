@@ -201,6 +201,16 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "tou_08") == 0)
+    {
+      // Turn off GSWF(2388) to clear any currently-registered fights
+      *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A0) &= ~(1 << 20); // Turn off the 20 bit
+    }
+    else if (ttyd::string::strcmp(NextMap, "tou_10") == 0)
+    {
+      // Turn off GSWF(2388) to clear any currently-registered fights
+      *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A0) &= ~(1 << 20); // Turn off the 20 bit
+    }
     
     return;
   }
@@ -1078,6 +1088,11 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "tik_04") == 0)
+    {
+      // Change the loading zone to prevent spawning close to enemies
+      ttyd::string::strcpy(NextBero, "n_bero_5");
+    }
     else if (ttyd::string::strcmp(NextMap, "tik_07") == 0)
     {
       // Change the loading zone to prevent spawning close to enemies
@@ -1609,156 +1624,173 @@ void reloadScreen()
   uint32_t ButtonInput = ttyd::system::keyGetButton(0);
   uint16_t ReloadScreenCombo = PAD_L | PAD_B;
   
-  if ((ButtonInput & ReloadScreenCombo) != ReloadScreenCombo)
-  {
-    return;
-  }
+  ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
+  uint16_t ReceivingItem = 15;
   
   ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
   ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
   ttyd::seqdrv::SeqIndex MapChange = ttyd::seqdrv::SeqIndex::kMapChange;
   
-  if ((NextSeq < Game) || (NextSeq > MapChange))
+  if ((ButtonInput & ReloadScreenCombo) == ReloadScreenCombo)
   {
+    if ((NextSeq < Game) || (NextSeq > MapChange))
+    {
+      return;
+    }
+    
+    ttyd::seqdrv::SeqIndex Seq = ttyd::seqdrv::seqGetSeq();
+    ttyd::seqdrv::SeqIndex Battle = ttyd::seqdrv::SeqIndex::kBattle;
+    
+    if (Seq == Battle)
+    {
+      // Reloading the room with the Seq set to Battle will cause the game to crash, so don't allow it
+      return;
+    }
+    
+    // Prevent reloading the room if currently getting an item. This prevents the player from reloading the room after opening a chest in order to respawn it closed, while at the same time keeping the item from it.
+    
+    if ((player->currentMotionId == ReceivingItem) && (NextSeq != MapChange))
+    {
+      // Only allow if not currently reloading the room already
+      return;
+    }
+    
+    // Prevent reloading the room if the player is currently in a room with a boss. This prevents the player from repeatedly killing the boss for SP and/or points.
+    uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
+    if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
+    {
+      if (SequencePosition <= 373)
+      {
+        return;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "gon_11") == 0)
+    {
+      if (SequencePosition < 55)
+      {
+        return;
+      }
+    }
+    else if (ttyd::string::strncmp(NextMap, "jon_00", 3) == 0)
+    {
+      // Prevent the player from constantly reloading floors to kill high level enemies
+      return;
+    }
+    else if (ttyd::string::strcmp(NextMap, "las_09") == 0)
+    {
+      if (SequencePosition == 390)
+      {
+        return;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "las_26") == 0)
+    {
+      if (SequencePosition == 387)
+      {
+        return;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "las_28") == 0)
+    {
+      if (SequencePosition == 399)
+      {
+        return;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
+    {
+      if (SequencePosition == 400)
+      {
+        return;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "mri_01") == 0)
+    {
+      if ((SequencePosition == 110) || (SequencePosition == 111))
+      {
+        return;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "muj_00") == 0)
+    {
+      if (SequencePosition == 259)
+      {
+        return;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "muj_12") == 0)
+    {
+      if (SequencePosition == 252)
+      {
+        return;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "rsh_06_a") == 0)
+    {
+      if (SequencePosition < 332)
+      {
+        return;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "tik_02") == 0)
+    {
+      if (SequencePosition == 20)
+      {
+        return;
+      }
+    }
+    else if (ttyd::string::strcmp(NextMap, "tou_03") == 0)
+    {
+      if (SequencePosition == 163)
+      {
+        return;
+      }
+    }
+    
+    // Not in the pause menu
+    // A separate address for NextBero is needed, as the original value will be cleared during the reloading process
+    // The game will crash if NextMap is used directly in seqSetSeq, so a separate address must be used instead
+    
+    ttyd::string::strcpy(NewBero, NextBero);
+    ttyd::string::strcpy(NewMap, NextMap);
+    ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, NewMap, NewBero);
+    ReloadCurrentScreen = true;
+    
+    uint32_t SystemLevel = ttyd::mariost::marioStGetSystemLevel();
+    if (SystemLevel == 0)
+    {
+      return;
+    }
+    
+    // Only run the following if the system level is not 0
+    if (SystemLevel == 15)
+    {
+      // Currently in pause menu, so re-enable the camera
+      ttyd::camdrv::camDispOn(4);
+    }
+    
+    // Enable sound effects, set the default camera id for Mario, and give back control to the player
+    ttyd::pmario_sound::psndClearFlag(0x80);
+    ttyd::mario_cam::marioSetCamId(4);
+    ttyd::mariost::marioStSystemLevel(0);
+    
+    // Reset the camera - mainly for the black bars at the top and bottom of the screen
+    uint32_t CameraPointer = reinterpret_cast<uint32_t>(ttyd::camdrv::camGetPtr(8));
+    *reinterpret_cast<uint16_t *>(CameraPointer) &= ~(1 << 9); // Turn off the 9 bit
+    
     return;
   }
   
-  ttyd::seqdrv::SeqIndex Seq = ttyd::seqdrv::seqGetSeq();
-  ttyd::seqdrv::SeqIndex Battle = ttyd::seqdrv::SeqIndex::kBattle;
-  
-  if (Seq == Battle)
+  // Manually reset the System Level and the camera if currently getting an item while the room is trying to load
+  if ((player->currentMotionId == ReceivingItem) && (NextSeq == MapChange))
   {
-    // Reloading the room with the Seq set to Battle will cause the game to crash, so don't allow it
-    return;
+    // Reset the System Level
+    ttyd::mariost::marioStSystemLevel(0);
+    
+    // Reset the camera - mainly for the black bars at the top and bottom of the screen
+    uint32_t CameraPointer = reinterpret_cast<uint32_t>(ttyd::camdrv::camGetPtr(8));
+    *reinterpret_cast<uint16_t *>(CameraPointer) &= ~(1 << 9); // Turn off the 9 bit
   }
-  
-  // Prevent reloading the room if currently getting an item. This prevents the player from reloading the room after opening a chest in order to respawn it closed, while at the same time keeping the item from it.
-  ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
-  uint16_t ReceivingItem = 15;
-  
-  if (player->currentMotionId == ReceivingItem)
-  {
-    return;
-  }
-  
-  // Prevent reloading the room if the player is currently in a room with a boss. This prevents the player from repeatedly killing the boss for SP and/or points.
-  uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-  if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
-  {
-    if (SequencePosition <= 373)
-    {
-      return;
-    }
-  }
-  else if (ttyd::string::strcmp(NextMap, "gon_11") == 0)
-  {
-    if (SequencePosition < 55)
-    {
-      return;
-    }
-  }
-  else if (ttyd::string::strncmp(NextMap, "jon_00", 3) == 0)
-  {
-    // Prevent the player from constantly reloading floors to kill high level enemies
-    return;
-  }
-  else if (ttyd::string::strcmp(NextMap, "las_09") == 0)
-  {
-    if (SequencePosition == 390)
-    {
-      return;
-    }
-  }
-  else if (ttyd::string::strcmp(NextMap, "las_26") == 0)
-  {
-    if (SequencePosition == 387)
-    {
-      return;
-    }
-  }
-  else if (ttyd::string::strcmp(NextMap, "las_28") == 0)
-  {
-    if (SequencePosition == 399)
-    {
-      return;
-    }
-  }
-  else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
-  {
-    if (SequencePosition == 400)
-    {
-      return;
-    }
-  }
-  else if (ttyd::string::strcmp(NextMap, "mri_01") == 0)
-  {
-    if ((SequencePosition == 110) || (SequencePosition == 111))
-    {
-      return;
-    }
-  }
-  else if (ttyd::string::strcmp(NextMap, "muj_00") == 0)
-  {
-    if (SequencePosition == 259)
-    {
-      return;
-    }
-  }
-  else if (ttyd::string::strcmp(NextMap, "muj_12") == 0)
-  {
-    if (SequencePosition == 252)
-    {
-      return;
-    }
-  }
-  else if (ttyd::string::strcmp(NextMap, "rsh_06_a") == 0)
-  {
-    if (SequencePosition < 332)
-    {
-      return;
-    }
-  }
-  else if (ttyd::string::strcmp(NextMap, "tik_02") == 0)
-  {
-    if (SequencePosition == 20)
-    {
-      return;
-    }
-  }
-  else if (ttyd::string::strcmp(NextMap, "tou_03") == 0)
-  {
-    if (SequencePosition == 163)
-    {
-      return;
-    }
-  }
-  
-  // Not in the pause menu
-  // A separate address for NextBero is needed, as the original value will be cleared during the reloading process
-  // The game will crash if NextMap is used directly in seqSetSeq, so a separate address must be used instead
-  
-  ttyd::string::strcpy(NewBero, NextBero);
-  ttyd::string::strcpy(NewMap, NextMap);
-  ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, NewMap, NewBero);
-  ReloadCurrentScreen = true;
-  
-  uint32_t SystemLevel = ttyd::mariost::marioStGetSystemLevel();
-  if (SystemLevel == 0)
-  {
-    return;
-  }
-  
-  // Only run the following if the system level is not 0
-  if (SystemLevel == 15)
-  {
-    // Currently in pause menu, so re-enable the camera
-    ttyd::camdrv::camDispOn(4);
-  }
-  
-  // Enable sound effects, set the default camera id for Mario, and give back control to the player
-  ttyd::pmario_sound::psndClearFlag(0x80);
-  ttyd::mario_cam::marioSetCamId(4);
-  ttyd::mariost::marioStSystemLevel(0);
 }
 
 void setNextBero()
@@ -2123,6 +2155,20 @@ uint32_t Mod::warpAwayFromSQ(void *ptr)
   {
     // Call original function
     return mPFN_warpAwayFromSQ_trampoline(ptr);
+  }
+}
+
+bool Mod::preventGetItemOnReload(uint32_t id)
+{
+  // Only prevent from running if currently reloading a room and if the Loading Zone randomizer is currently in use
+  if (ReloadCurrentScreen && LZRando)
+  {
+    return false;
+  }
+  else
+  {
+    // Call original function
+    return mPFN_preventGetItemOnReload_trampoline(id);
   }
 }
 
