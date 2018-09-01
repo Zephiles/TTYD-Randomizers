@@ -512,6 +512,11 @@ void getRandomWarp()
       {
         continue;
       }
+      else
+      {
+        // Change the loading zone to prevent spawning under the map
+        ttyd::string::strcpy(NextBero, "w_bero");
+      }
     }
     else if (ttyd::string::strcmp(NextMap, "gon_12") == 0)
     {
@@ -1043,6 +1048,19 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "pik_01") == 0)
+    {
+      // Prevent warping to this room if the Sequence is set for the Bowser section
+      // Only prevent if currently using the challenge mode
+      if (LZRandoChallenge)
+      {
+        if ((SequencePosition == 373) || (SequencePosition == 374))
+        {
+          // Get a new map
+          continue;
+        }
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "rsh_05_a") == 0)
     {
       // The game will crash if the player enters this room with the Sequence being greater than 338
@@ -1324,6 +1342,20 @@ void setUpNewFile()
   
   // Start with the Strange Sack
   ttyd::mario_pouch::pouchGetItem(StrangeSack);
+  
+  // Randomize Power Rush and Power Rush P icons
+  // Can only be randomized in the US and EU versions
+  #ifndef TTYD_JP
+    #ifdef TTYD_US
+      uint32_t itemDataTable = 0x803108A8;
+    #elif defined TTYD_EU
+      uint32_t itemDataTable = 0x8031C638;
+    #endif
+    
+    // Randomly pick one of the 5 icons to use
+    *reinterpret_cast<uint16_t *>(itemDataTable + (PowerRush * 0x28) + 0x20) = ttyd::system::irand(5) + 73;
+    *reinterpret_cast<uint16_t *>(itemDataTable + (PowerRushP * 0x28) + 0x20) = ttyd::system::irand(5) + 103;
+  #endif
   
   // Turn off a bit to enable loading zones
   uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
@@ -2186,6 +2218,8 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t ResetFileLoadCoordinates = 0x800F3A1C;
     uint32_t PreventBattleOnRespawn = 0x800465CC;
     uint32_t CheckCurrentTextbox = 0x800D2880;
+    uint32_t PowerRushIconCheck = 0x8001A320;
+    uint32_t PowerRushPIconCheck = 0x8001A314;
   #elif defined TTYD_JP
     uint32_t RandomWarp = 0x800086F0;
     uint32_t TubeModeCheck = 0x80090D90;
@@ -2211,6 +2245,8 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t ResetFileLoadCoordinates = 0x800F4888;
     uint32_t PreventBattleOnRespawn = 0x800466B4;
     uint32_t CheckCurrentTextbox = 0x800D3678;
+    uint32_t PowerRushIconCheck = 0x8001A4E4;
+    uint32_t PowerRushPIconCheck = 0x8001A4D8;
   #endif
   
   // Random Warps
@@ -2262,6 +2298,13 @@ void Mod::writeLZRandoAssemblyPatches()
   // Check the current textbox to check for specific things to happen
   patch::writeBranch(reinterpret_cast<void *>(CheckCurrentTextbox), reinterpret_cast<void *>(StartCheckCurrentTextbox));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackCheckCurrentTextbox), reinterpret_cast<void *>(CheckCurrentTextbox + 0x4));
+  
+  // Allow the Power Rush and Power Rush P icons to be set to the JP icon
+  // Does not need to be changed for the JP version
+  #ifndef TTYD_JP
+    *reinterpret_cast<uint32_t *>(PowerRushIconCheck) = 0x60000000; // nop
+    *reinterpret_cast<uint32_t *>(PowerRushPIconCheck) = 0x60000000; // nop
+  #endif
 }
 
 void Mod::LZRandoStuff()

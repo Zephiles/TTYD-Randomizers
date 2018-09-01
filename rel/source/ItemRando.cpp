@@ -63,6 +63,10 @@ extern "C" {
   void BranchBackDisplayOverworldSPBars();
   void StartArtAttackHitboxes();
   void BranchArtAttackHitboxes();
+  void StartDisplayMegaJumpBadgeBattleMenu();
+  void BranchBackDisplayMegaJumpBadgeBattleMenu();
+  void StartDisplayMegaHammerBadgesBattleMenu();
+  void BranchBackDisplayMegaHammerBadgesBattleMenu();
 }
 
 namespace mod {
@@ -724,6 +728,34 @@ bool checkIfArtAttackHitboxesEnabled()
 }
 }
 
+extern "C" {
+bool displayMegaJumpBadgeInMenu(uint32_t CheckBit)
+{
+  if (ttyd::mario_pouch::pouchEquipCheckBadge(UpgradedPowerJump) > 0)
+  {
+    return false;
+  }
+  else
+  {
+    return (CheckBit & (1 << 9)); // Check if the 9 bit is on
+  }
+}
+}
+
+extern "C" {
+bool displayMegaHammerBadgesInMenu(uint32_t CheckBit)
+{
+  if ((ttyd::mario_pouch::pouchEquipCheckBadge(UpgradedPowerSmash) > 0) || (ttyd::mario_pouch::pouchEquipCheckBadge(UpgradedQuakeHammer) > 0))
+  {
+    return false;
+  }
+  else
+  {
+    return (CheckBit & (1 << 10)); // Check if the 10 bit is on
+  }
+}
+}
+
 void enableArtAttackHitboxes()
 {
   #ifdef TTYD_US
@@ -818,6 +850,9 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars8 = 0x80170FE4;
     uint32_t DisplaySPBars9 = 0x80171004;
     
+    uint32_t DisplayBattleMenuJumpAddress = 0x80122BA4;
+    uint32_t DisplayBattleMenuHammerAddress = 0x80122BB8;
+    
     uint32_t KoopaCurseEffectsAddress = 0x8036AC3C;
     
     uint32_t SuperChargeEffectsAddress = 0x80355228;
@@ -828,6 +863,9 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t SweetFeastAddress = 0x803559A8;
     uint32_t ShowstopperAddress = 0x80355BE8;
+    
+    uint32_t MegaJumpFPAddress = 0x803543E8;
+    uint32_t MegaSmashFPAddress = 0x803549E8;
     
     uint32_t ShineSpriteAddress = 0x800D51FC;
   #elif defined TTYD_JP
@@ -879,6 +917,9 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars8 = 0x8016BD30;
     uint32_t DisplaySPBars9 = 0x8016BD50;
     
+    uint32_t DisplayBattleMenuJumpAddress = 0x8011D6DC;
+    uint32_t DisplayBattleMenuHammerAddress = 0x8011D6F0;
+    
     uint32_t KoopaCurseEffectsAddress = 0x803682B4;
     
     uint32_t SuperChargeEffectsAddress = 0x80352B50;
@@ -889,6 +930,9 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t SweetFeastAddress = 0x803532D0;
     uint32_t ShowstopperAddress = 0x80353510;
+    
+    uint32_t MegaJumpFPAddress = 0x80351D10;
+    uint32_t MegaSmashFPAddress = 0x80352310;
     
     uint32_t ShineSpriteAddress = 0x800D0FDC;
   #elif defined TTYD_EU
@@ -940,6 +984,9 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplaySPBars8 = 0x80172A84;
     uint32_t DisplaySPBars9 = 0x80172AA4;
     
+    uint32_t DisplayBattleMenuJumpAddress = 0x80123AE4;
+    uint32_t DisplayBattleMenuHammerAddress = 0x80123AF8;
+    
     uint32_t KoopaCurseEffectsAddress = 0x80376B04;
     
     uint32_t SuperChargeEffectsAddress = 0x803610D8;
@@ -950,6 +997,9 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t SweetFeastAddress = 0x80361858;
     uint32_t ShowstopperAddress = 0x80361A98;
+    
+    uint32_t MegaJumpFPAddress = 0x80360298;
+    uint32_t MegaSmashFPAddress = 0x80360898;
     
     uint32_t ShineSpriteAddress = 0x800D6004;
   #endif
@@ -1005,6 +1055,12 @@ void Mod::writeItemRandoAssemblyPatches()
   // Properly display SP Bars
   patch::writeBranch(reinterpret_cast<void *>(DisplaySPBarsOverworld), reinterpret_cast<void *>(StartDisplayOverworldSPBars));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackDisplayOverworldSPBars), reinterpret_cast<void *>(DisplaySPBarsOverworld + 0x4));
+  
+  // Display the Mega badges properly in the battle menus
+  patch::writeBranch(reinterpret_cast<void *>(DisplayBattleMenuJumpAddress), reinterpret_cast<void *>(StartDisplayMegaJumpBadgeBattleMenu));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackDisplayMegaJumpBadgeBattleMenu), reinterpret_cast<void *>(DisplayBattleMenuJumpAddress + 0x4));
+  patch::writeBranch(reinterpret_cast<void *>(DisplayBattleMenuHammerAddress), reinterpret_cast<void *>(StartDisplayMegaHammerBadgesBattleMenu));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackDisplayMegaHammerBadgesBattleMenu), reinterpret_cast<void *>(DisplayBattleMenuHammerAddress + 0x4));
   
   // Allow enemies to hold items that they can't use
   *reinterpret_cast<uint32_t *>(EnemyItemCanUseCheck1) = 0x60000000; // nop
@@ -1081,6 +1137,32 @@ void Mod::writeItemRandoAssemblyPatches()
   *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x14) = 150; // Buy price
   *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x16) = 105; // Discounted Buy price
   *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x1A) = 75; // Sell price
+  
+  // Change buy prices, sell prices, and BP cost for Mega Jump
+  uint32_t MegaJumpAddress = itemDataTable + (UpgradedPowerJump * 0x28);
+  *reinterpret_cast<uint16_t *>(MegaJumpAddress + 0x14) = 100; // Buy price
+  *reinterpret_cast<uint16_t *>(MegaJumpAddress + 0x16) = 70; // Discounted Buy price
+  *reinterpret_cast<uint16_t *>(MegaJumpAddress + 0x1A) = 50; // Sell price
+  *reinterpret_cast<uint8_t *>(MegaJumpAddress + 0x1C) = 2; // BP cost
+  
+  // Change the FP needed for Mega Jump from 6 to 4
+  *reinterpret_cast<uint8_t *>(MegaJumpFPAddress + 0x11) = 0x4;
+  
+  // Change buy prices, sell prices, and BP cost for Mega Smash
+  uint32_t MegaSmashAddress = itemDataTable + (UpgradedPowerSmash * 0x28);
+  *reinterpret_cast<uint16_t *>(MegaSmashAddress + 0x14) = 100; // Buy price
+  *reinterpret_cast<uint16_t *>(MegaSmashAddress + 0x16) = 70; // Discounted Buy price
+  *reinterpret_cast<uint16_t *>(MegaSmashAddress + 0x1A) = 50; // Sell price
+  *reinterpret_cast<uint8_t *>(MegaSmashAddress + 0x1C) = 2; // BP cost
+  
+  // Change the FP needed for Mega Smash from 6 to 4
+  *reinterpret_cast<uint8_t *>(MegaSmashFPAddress + 0x11) = 0x4;
+  
+  // Change buy and sell prices for Mega Quake Hammer
+  uint32_t MegaQuakeHammerAddress = itemDataTable + (UpgradedQuakeHammer * 0x28);
+  *reinterpret_cast<uint16_t *>(MegaQuakeHammerAddress + 0x14) = 400; // Buy price
+  *reinterpret_cast<uint16_t *>(MegaQuakeHammerAddress + 0x16) = 280; // Discounted Buy price
+  *reinterpret_cast<uint16_t *>(MegaQuakeHammerAddress + 0x1A) = 200; // Sell price
   
   // Change BP cost of badge 335 from 2 to 1
   uint32_t InvalidItemBadgeNoKnownEffectAddress = itemDataTable + (InvalidItemBadgeNoKnownEffect * 0x28);

@@ -22,7 +22,7 @@ void pouchGetStarStone(uint32_t id);
 // pouchUnEquipBadgeID
 // pouchEquipBadgeID
 // pouchEquipCheckBadgeIndex
-// pouchEquipCheckBadge
+uint32_t pouchEquipCheckBadge(uint32_t id);
 // pouchUnEquipBadgeIndex
 // pouchEquipBadgeIndex
 // pouchGetStarPoint

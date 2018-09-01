@@ -538,7 +538,7 @@
 // 800D3234:pouchUnEquipBadgeID
 // 800D328C:pouchEquipBadgeID
 // 800D32E0:pouchEquipCheckBadgeIndex
-// 800D3300:pouchEquipCheckBadge
+800D3300:pouchEquipCheckBadge
 // 800D33C8:pouchUnEquipBadgeIndex
 // 800D33F8:pouchEquipBadgeIndex
 // 800D3424:pouchGetStarPoint
