@@ -25,10 +25,11 @@
 #endif
 
 StartArtAttackHitboxes:
-bl checkIfArtAttackHitboxesEnabled
+li %r3,335 # InvalidItemBadgeNoKnownEffect
+bl pouchEquipCheckBadge
 
-# Only run if the returned bool is true
-cmpwi %r3,0 # False
+# Only run if at least one is equipped
+cmpwi %r3,0
 beq+ Exit
 
 stfd %f31, 0x0090 (%sp)

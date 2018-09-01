@@ -67,6 +67,12 @@ extern "C" {
   void BranchBackDisplayMegaJumpBadgeBattleMenu();
   void StartDisplayMegaHammerBadgesBattleMenu();
   void BranchBackDisplayMegaHammerBadgesBattleMenu();
+  void StartPreventBlooperCrash1();
+  void BranchBackPreventBlooperCrash1();
+  void StartPreventBlooperCrash2();
+  void BranchBackPreventBlooperCrash2();
+  void StartFillRunAwayMeter();
+  void BranchBackFillRunAwayMeter();
 }
 
 namespace mod {
@@ -698,33 +704,21 @@ bool displayOverworldSPBars(uint32_t CurrentSpecialMoves, int32_t CurrentSPBar)
 }
 
 extern "C" {
-bool checkIfArtAttackHitboxesEnabled()
+void checkIfRunAwayMeterFilled(void *unkPtr, float CurrentRunMeterValue)
 {
-  uint32_t BattleAddress = *reinterpret_cast<uint32_t *>(BattleAddressesStart);
-  if (BattleAddress != 0)
+  float NewRunMeterValue;
+  
+  if (ttyd::mario_pouch::pouchEquipCheckBadge(InvalidItemBadgePNoKnownEffect) > 0)
   {
-    uint32_t *BattleAddressPointer = reinterpret_cast<uint32_t *>(BattleAddress);
-    uint32_t MarioBattleAddress = reinterpret_cast<uint32_t>(ttyd::battle::BattleGetMarioPtr(BattleAddressPointer));
-    if (MarioBattleAddress != 0)
-    {
-      #ifdef TTYD_US
-        uint32_t BadgeOffset = 0x2FE;
-      #elif defined TTYD_JP
-        uint32_t BadgeOffset = 0x2FA;
-      #elif defined TTYD_EU
-        uint32_t BadgeOffset = 0x302;
-      #endif
-      
-      bool CheckBadge = *reinterpret_cast<uint8_t *>(MarioBattleAddress + BadgeOffset) > 0;
-      if (CheckBadge)
-      {
-        // Enable hitboxes if the badge is equipped
-        return true;
-      }
-    }
+    NewRunMeterValue = 100;
+  }
+  else
+  {
+    NewRunMeterValue = CurrentRunMeterValue;
   }
   
-  return false;
+  uint32_t Pointer = reinterpret_cast<uint32_t>(unkPtr);
+  *reinterpret_cast<float *>(Pointer + 0x18) = NewRunMeterValue;
 }
 }
 
@@ -753,6 +747,43 @@ bool displayMegaHammerBadgesInMenu(uint32_t CheckBit)
   {
     return (CheckBit & (1 << 10)); // Check if the 10 bit is on
   }
+}
+}
+
+extern "C" {
+bool checkBattleUnitPointer(void *BattleUnitPointer)
+{
+  uint32_t BattleUnitPtr = reinterpret_cast<uint32_t>(BattleUnitPointer);
+  
+  if ((BattleUnitPtr < 0x80000000) || (BattleUnitPtr >= 0x81800000))
+  {
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+}
+
+extern "C" {
+uint32_t preventBlooperCrash1(uint32_t unkValue, void *BattleUnitPointer)
+{ 
+  if (checkBattleUnitPointer(BattleUnitPointer))
+  {
+    #ifdef TTYD_US
+      uint32_t offset = 0x218;
+    #elif defined TTYD_JP
+      uint32_t offset = 0x214;
+    #elif defined TTYD_EU
+      uint32_t offset = 0x218;
+    #endif
+    
+    uint32_t BattleUnitPtr = reinterpret_cast<uint32_t>(BattleUnitPointer);
+    *reinterpret_cast<uint32_t *>(BattleUnitPtr + offset) = unkValue;
+  }
+  
+  return 2;
 }
 }
 
@@ -853,6 +884,11 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplayBattleMenuJumpAddress = 0x80122BA4;
     uint32_t DisplayBattleMenuHammerAddress = 0x80122BB8;
     
+    uint32_t PreventBlooperCrash1 = 0x8010F810;
+    uint32_t PreventBlooperCrash2 = 0x8010F888;
+    
+    uint32_t FillRunMeter = 0x80136E74;
+    
     uint32_t KoopaCurseEffectsAddress = 0x8036AC3C;
     
     uint32_t SuperChargeEffectsAddress = 0x80355228;
@@ -920,6 +956,11 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t DisplayBattleMenuJumpAddress = 0x8011D6DC;
     uint32_t DisplayBattleMenuHammerAddress = 0x8011D6F0;
     
+    uint32_t PreventBlooperCrash1 = 0x8010A724;
+    uint32_t PreventBlooperCrash2 = 0x8010A79C;
+    
+    uint32_t FillRunMeter = 0x8013196C;
+    
     uint32_t KoopaCurseEffectsAddress = 0x803682B4;
     
     uint32_t SuperChargeEffectsAddress = 0x80352B50;
@@ -986,6 +1027,11 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t DisplayBattleMenuJumpAddress = 0x80123AE4;
     uint32_t DisplayBattleMenuHammerAddress = 0x80123AF8;
+    
+    uint32_t PreventBlooperCrash1 = 0x801106E8;
+    uint32_t PreventBlooperCrash2 = 0x80110760;
+    
+    uint32_t FillRunMeter = 0x8013895C;
     
     uint32_t KoopaCurseEffectsAddress = 0x80376B04;
     
@@ -1061,6 +1107,16 @@ void Mod::writeItemRandoAssemblyPatches()
   patch::writeBranch(reinterpret_cast<void *>(BranchBackDisplayMegaJumpBadgeBattleMenu), reinterpret_cast<void *>(DisplayBattleMenuJumpAddress + 0x4));
   patch::writeBranch(reinterpret_cast<void *>(DisplayBattleMenuHammerAddress), reinterpret_cast<void *>(StartDisplayMegaHammerBadgesBattleMenu));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackDisplayMegaHammerBadgesBattleMenu), reinterpret_cast<void *>(DisplayBattleMenuHammerAddress + 0x4));
+  
+  // Prevent the game crashing when killing Blooper with Quake Hammer/Mega Quake
+  patch::writeBranch(reinterpret_cast<void *>(PreventBlooperCrash1), reinterpret_cast<void *>(StartPreventBlooperCrash1));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackPreventBlooperCrash1), reinterpret_cast<void *>(PreventBlooperCrash1 + 0x4));
+  patch::writeBranch(reinterpret_cast<void *>(PreventBlooperCrash2), reinterpret_cast<void *>(StartPreventBlooperCrash2));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackPreventBlooperCrash2), reinterpret_cast<void *>(PreventBlooperCrash2 + 0x4));
+  
+  // Automatically fill up the Run Meter if badge 336 is equipped
+  patch::writeBranch(reinterpret_cast<void *>(FillRunMeter), reinterpret_cast<void *>(StartFillRunAwayMeter));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackFillRunAwayMeter), reinterpret_cast<void *>(FillRunMeter + 0x4));
   
   // Allow enemies to hold items that they can't use
   *reinterpret_cast<uint32_t *>(EnemyItemCanUseCheck1) = 0x60000000; // nop
@@ -1167,6 +1223,10 @@ void Mod::writeItemRandoAssemblyPatches()
   // Change BP cost of badge 335 from 2 to 1
   uint32_t InvalidItemBadgeNoKnownEffectAddress = itemDataTable + (InvalidItemBadgeNoKnownEffect * 0x28);
   *reinterpret_cast<uint8_t *>(InvalidItemBadgeNoKnownEffectAddress + 0x1C) = 1; // BP cost
+  
+  // Change BP cost of badge 336 from 2 to 1
+  uint32_t InvalidItemBadgePNoKnownEffectAddress = itemDataTable + (InvalidItemBadgePNoKnownEffect * 0x28);
+  *reinterpret_cast<uint8_t *>(InvalidItemBadgePNoKnownEffectAddress + 0x1C) = 1; // BP cost
   
   // Enable Art Attack hitboxes if a specific badge is equipped
   enableArtAttackHitboxes();
