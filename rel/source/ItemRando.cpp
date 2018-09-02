@@ -895,7 +895,9 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t itemDataTable = 0x803108A8;
     uint16_t KoopaCurseIcon = 390;
-    uint16_t DebugBadgeIcon = 108;
+    uint16_t DebugBadgeIcon = 526;
+    uint16_t ArtAttackBadgeIcon = 527;
+    uint16_t RunMeterBadgeIcon = 503;
     
     uint32_t SweetFeastAddress = 0x803559A8;
     uint32_t ShowstopperAddress = 0x80355BE8;
@@ -967,7 +969,9 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t itemDataTable = 0x8030EE58;
     uint16_t KoopaCurseIcon = 382;
-    uint16_t DebugBadgeIcon = 100;
+    uint16_t DebugBadgeIcon = 523;
+    uint16_t ArtAttackBadgeIcon = 524;
+    uint16_t RunMeterBadgeIcon = 495;
     
     uint32_t SweetFeastAddress = 0x803532D0;
     uint32_t ShowstopperAddress = 0x80353510;
@@ -1039,7 +1043,9 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t itemDataTable = 0x8031C638;
     uint16_t KoopaCurseIcon = 390;
-    uint16_t DebugBadgeIcon = 108;
+    uint16_t DebugBadgeIcon = 526;
+    uint16_t ArtAttackBadgeIcon = 527;
+    uint16_t RunMeterBadgeIcon = 503;
     
     uint32_t SweetFeastAddress = 0x80361858;
     uint32_t ShowstopperAddress = 0x80361A98;
@@ -1166,9 +1172,11 @@ void Mod::writeItemRandoAssemblyPatches()
   ttyd::OSCache::DCFlushRange(reinterpret_cast<void *>(ShineSpriteAddress), sizeof(uint32_t));
   ttyd::OSCache::ICInvalidateRange(reinterpret_cast<void *>(ShineSpriteAddress), sizeof(uint32_t));
   
-  // Change icons for Koopa Curse and Debug Badge
+  // Change icons for Koopa Curse, Debug Badge, Art Attack badge, and Run Meter badge
   *reinterpret_cast<uint16_t *>(itemDataTable + (KoopaCurse * 0x28) + 0x20) = KoopaCurseIcon;
   *reinterpret_cast<uint16_t *>(itemDataTable + (DebugBadge * 0x28) + 0x20) = DebugBadgeIcon;
+  *reinterpret_cast<uint16_t *>(itemDataTable + (InvalidItemBadgeNoKnownEffect * 0x28) + 0x20) = ArtAttackBadgeIcon;
+  *reinterpret_cast<uint16_t *>(itemDataTable + (InvalidItemBadgePNoKnownEffect * 0x28) + 0x20) = RunMeterBadgeIcon;
   
   // Change sell price for Trade Off
   *reinterpret_cast<uint16_t *>((itemDataTable + (TradeOff * 0x28)) + 0x1A) = 10;
