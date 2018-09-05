@@ -386,9 +386,9 @@
 // 80086B40:_swSet
 80086B80:swByteGet
 80086BA4:swByteSet
-// 80086BC8:swClear
-// 80086C08:swGet
-// 80086C50:swSet
+80086BC8:swClear
+80086C08:swGet
+80086C50:swSet
 // 80086C90:swReInit
 // 80086CD4:swInit
 

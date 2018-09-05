@@ -29,7 +29,6 @@ extern bool ItemRandoV2;
 extern int8_t EnemyHeldItemArrayCounter;
 extern bool RanAwayFromBattle;
 extern uint16_t EnemyHeldItemArray[8][8];
-extern uint32_t GSWAddressesStart;
 extern uint32_t CrystalStarPointerAddress;
 extern bool RandomizeGivenItem;
 extern uint32_t BattleAddressesStart;
@@ -450,8 +449,7 @@ void setValuesMapChange()
   randomizeShopRewards();
   
   // Set GSWF(1230), which is the flag that opens the shop door leading to Don Pianta
-  uint32_t GSWFAddress = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
-  *reinterpret_cast<uint32_t *>(GSWFAddress + 0x210) |= (1 << 14); // Turn on the 14 bit
+  ttyd::swdrv::swSet(1230);
   
   // Reset EnemyHeldItemArray, in the event that it bugs out for some reason
   // Need to figure out why it bugs out in the first place

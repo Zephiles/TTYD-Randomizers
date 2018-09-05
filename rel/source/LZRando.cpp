@@ -91,7 +91,6 @@ void getRandomWarp()
     return;
   }
   
-  uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   
   // Don't run if currently reloading the current screen
@@ -101,15 +100,14 @@ void getRandomWarp()
     if (ttyd::string::strcmp(NextMap, "dou_07") == 0)
     {
       // Check if the Curse chest is open or not
-      uint32_t CurstChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2EC);
-      
-      if (!(CurstChest & (1 << 4))) // Check if the 4 bit is off
+      // Check if GSWF(2980) is off
+      if (!(ttyd::swdrv::swGet(2980)))
       {
         // Manually close the chest if the player already has the curse
         if (ttyd::mario_pouch::pouchCheckItem(BoatModeCurse) > 0)
         {
           // Turn on GSWF(2980) to manually close the chest
-          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2EC) |= (1 << 4); // Turn on the 4 bit
+          ttyd::swdrv::swSet(2980);
         
           // Update the Sequence to what it would normally be after getting the curse
           ttyd::swdrv::swByteSet(0, 247);
@@ -119,15 +117,14 @@ void getRandomWarp()
     else if (ttyd::string::strcmp(NextMap, "gon_06") == 0)
     {
       // Check if the Curse chest is open or not
-      uint32_t CurstChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x230);
-      
-      if (!(CurstChest & (1 << 21))) // Check if the 21 bit is off
+      // Check if GSWF(1493) is off
+      if (!(ttyd::swdrv::swGet(1493)))
       {
         // Manually close the chest if the player already has the curse
         if (ttyd::mario_pouch::pouchCheckItem(PaperModeCurse) > 0)
         {
           // Turn on GSWF(1493) to manually close the chest
-          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x230) |= (1 << 21); // Turn on the 21 bit
+          ttyd::swdrv::swSet(1493);
         
           // Update the Sequence to what it would normally be after getting the curse
           ttyd::swdrv::swByteSet(0, 45);
@@ -137,15 +134,14 @@ void getRandomWarp()
     else if (ttyd::string::strcmp(NextMap, "tik_19") == 0)
     {
       // Check if the Curse chest is open or not
-      uint32_t CurstChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x220);
-      
-      if (!(CurstChest & (1 << 8))) // Check if the 8 bit is off
+      // Check if GSWF(1352) is off
+      if (!(ttyd::swdrv::swGet(1352)))
       {
         // Manually close the chest if the player already has the curse
         if (ttyd::mario_pouch::pouchCheckItem(PlaneModeCurse) > 0)
         {
           // Turn on GSWF(1352) to manually close the chest
-          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x220) |= (1 << 8); // Turn on the 8 bit
+          ttyd::swdrv::swSet(1352);
         
           // Update the Sequence to what it would normally be after getting the curse
           ttyd::swdrv::swByteSet(0, 15);
@@ -155,15 +151,14 @@ void getRandomWarp()
     else if (ttyd::string::strcmp(NextMap, "usu_01") == 0)
     {
       // Check if the Curse chest is open or not
-      uint32_t CurstChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x268);
-      
-      if (!(CurstChest & (1 << 11))) // Check if the 11 bit is off
+      // Check if GSWF(1931) is off
+      if (!(ttyd::swdrv::swGet(1931)))
       {
         // Manually close the chest if the player already has the curse
         if (ttyd::mario_pouch::pouchCheckItem(TubeModeCurse) > 0)
         {
           // Turn on GSWF(1931) to manually close the chest
-          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x268) |= (1 << 11); // Turn on the 11 bit
+          ttyd::swdrv::swSet(1931);
         
           // Update the Sequence to what it would normally be after getting the curse
           ttyd::swdrv::swByteSet(0, 187);
@@ -173,15 +168,14 @@ void getRandomWarp()
     else if (ttyd::string::strcmp(NextMap, "mri_09") == 0)
     {
       // Check if the Blue Key chest is open or not
-      uint32_t BlueKeyChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2DC); // GSWF(2852)
-      
-      if (!(BlueKeyChest & (1 << 4))) // Check if the 4 bit is off
+      // Check if GSWF(2852) is off
+      if (!(ttyd::swdrv::swGet(2852)))
       {
         // Manually close the chest if the player already has the Blue Key
         if (ttyd::mario_pouch::pouchCheckItem(BlueKey) > 0)
         {
           // Turn on GSWF(2852) to manually close the chest
-          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2DC) |= (1 << 4); // Turn on the 4 bit
+          ttyd::swdrv::swSet(2852);
           
           // Update the Sequence to what it would normally be after getting the Blue Key
           ttyd::swdrv::swByteSet(0, 98);
@@ -204,21 +198,19 @@ void getRandomWarp()
     else if (ttyd::string::strcmp(NextMap, "tou_08") == 0)
     {
       // Turn off GSWF(2388) to clear any currently-registered fights
-      *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A0) &= ~(1 << 20); // Turn off the 20 bit
+      ttyd::swdrv::swClear(2388);
     }
     else if (ttyd::string::strcmp(NextMap, "tou_10") == 0)
     {
       // Turn off GSWF(2388) to clear any currently-registered fights
-      *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A0) &= ~(1 << 20); // Turn off the 20 bit
+      ttyd::swdrv::swClear(2388);
     }
     
     return;
   }
   
-  bool title_comparison = ttyd::string::strcmp(NextMap, "title") == 0;
-  
   // Don't run on the title screen
-  if (title_comparison)
+  if (ttyd::string::strcmp(NextMap, "title") == 0)
   {
     return;
   }
@@ -239,6 +231,12 @@ void getRandomWarp()
     ttyd::string::strcpy(NextBero, "tuzuki");
     ttyd::string::strcpy(NextMap, "aji_14");
     ttyd::string::strncpy(NextArea, "aji_14", 3);
+    return;
+  }
+  
+  // Warp back to Grodus' room if the player just beat him
+  if (ttyd::string::strcmp(NextBero, "koopa_evt") == 0)
+  {
     return;
   }
   
@@ -311,9 +309,8 @@ void getRandomWarp()
     else if (ttyd::string::strcmp(NextMap, "aji_07") == 0)
     {
       // Set the Loading Zone to be able to get the Cog if the player doesn't have it already
-      uint32_t CogFlag = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x384); // GSWF(4194)
-      
-      if (!(CogFlag & (1 << 2))) // Check if the 2 bit is off
+      // Check if GSWF(4194) is off
+      if (!(ttyd::swdrv::swGet(4194)))
       {
         ttyd::string::strcpy(NextBero, "tenjo");
       }
@@ -389,9 +386,8 @@ void getRandomWarp()
     else if (ttyd::string::strcmp(NextMap, "eki_05") == 0)
     {
       // Change the loading zone used if the player has not opened the Ultra Boots chest yet
-      uint32_t UltraBootsChest = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x348); // GSWF(3728)
-      
-      if (!(UltraBootsChest & (1 << 16))) // Check if the 16 bit is off
+      // Check if GSWF(3728) is off
+      if (!(ttyd::swdrv::swGet(3728)))
       {
         // Run if the 16 bit is off
         // Change the Sequence to allow the player to get the Ultra Boots
@@ -467,7 +463,7 @@ void getRandomWarp()
           }
           
           // Turn off GSWF(1493)
-          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x230) &= ~(1 << 21); // Turn off the 21 bit
+          ttyd::swdrv::swClear(1493);
         }
       }
     }
@@ -486,7 +482,7 @@ void getRandomWarp()
           }
           
           // Turn off GSWF(1494)
-          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x230) &= ~(1 << 22); // Turn off the 22 bit
+          ttyd::swdrv::swClear(1494);
         }
       }
     }
@@ -793,7 +789,7 @@ void getRandomWarp()
       }
       
       // Set Pit floor
-      *reinterpret_cast<uint8_t *>(GSWAddresses + 0xAA1) = NewPitFloor; // GSW(1321)
+      ttyd::swdrv::swByteSet(1321, NewPitFloor); // GSW(1321)
       
       // Reset NextMap to proper Pit map
       ttyd::string::strcpy(NextMap, reinterpret_cast<char *>(NewPitMap));
@@ -1184,13 +1180,13 @@ void getRandomWarp()
           ttyd::swdrv::swByteSet(0, 163);
           
           // Turn off GSWF(2388) to clear any currently-registered fights
-          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A0) &= ~(1 << 20); // Turn off the 20 bit
+          ttyd::swdrv::swClear(2388);
         }
       }
       else
       {
         // Turn off GSWF(2388) to clear any currently-registered fights
-        *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A0) &= ~(1 << 20); // Turn off the 20 bit
+        ttyd::swdrv::swClear(2388);
       }
     }
     else if (ttyd::string::strcmp(NextMap, "tou_04") == 0)
@@ -1225,12 +1221,12 @@ void getRandomWarp()
     else if (ttyd::string::strcmp(NextMap, "tou_08") == 0)
     {
       // Turn off GSWF(2388) to clear any currently-registered fights
-      *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A0) &= ~(1 << 20); // Turn off the 20 bit
+      ttyd::swdrv::swClear(2388);
     }
     else if (ttyd::string::strcmp(NextMap, "tou_10") == 0)
     {
       // Turn off GSWF(2388) to clear any currently-registered fights
-      *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A0) &= ~(1 << 20); // Turn off the 20 bit
+      ttyd::swdrv::swClear(2388);
     }
     else if (ttyd::string::strcmp(NextMap, "usu_00") == 0)
     {
@@ -1253,7 +1249,7 @@ void getRandomWarp()
         if (ttyd::mario_pouch::pouchCheckItem(BlackKey3) > 0)
         {
           // Turn off GSWF(1931) to manually open the chest
-          *reinterpret_cast<uint32_t *>(GSWAddresses + 0x268) &= ~(1 << 11); // Turn off the 11 bit
+          ttyd::swdrv::swClear(1931);
           
           // Manually set the Sequence to allow the player to get the Curse if they have the key for it
           ttyd::swdrv::swByteSet(0, 185);
@@ -1362,76 +1358,81 @@ void setUpNewFile()
   *reinterpret_cast<uint32_t *>(GSWAddresses) &= ~(1 << 0); // Turn off the 0 bit
   
   // Turn on GSWF(0) to skip shop tutorials
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x178) |= (1 << 0); // Turn on the 0 bit
+  ttyd::swdrv::swSet(0);
   
   // Turn on GSWF(37) and GSWF(38) to prevent emails from being explained for the first time
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x17C) |= ((1 << 5) | (1 << 6)); // Turn on the 5 and 6 bits
+  ttyd::swdrv::swSet(37);
+  ttyd::swdrv::swSet(38);
   
   // Turn on GSWF(233) to skip save blocks from being explained for the first time
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x194) |= (1 << 9); // Turn on the 9 bit
+  ttyd::swdrv::swSet(233);
   
   // Turn on GSWF(234) to skip recovery blocks from being explained for the first time
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x194) |= (1 << 10); // Turn on the 10 bit
+  ttyd::swdrv::swSet(234);
   
   // Turn on GSWF(235) to skip items from being explained for the first time
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x194) |= (1 << 11); // Turn on the 11 bit
+  ttyd::swdrv::swSet(235);
   
   // Turn on GSWF(1187) to set Zess T. to be blocking the west entrance
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x20C) |= (1 << 3); // Turn on the 3 bit
+  ttyd::swdrv::swSet(1187);
   
   // Turn on GSWF(1189) to have the Contact Lens ordered already
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x20C) |= (1 << 5); // Turn on the 5 bit
+  ttyd::swdrv::swSet(1189);
   
   // Turn on GSWF(1197) to skip Zess T. explaining that he will cook stuff for the player now
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x20C) |= (1 << 13); // Turn on the 13 bit
+  ttyd::swdrv::swSet(1197);
   
   // Turn on GSWF(1200) to prevent partners from explaining Save Blocks in central Rogueport
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x20C) |= (1 << 16); // Turn on the 16 bit
+  ttyd::swdrv::swSet(1200);
   
   // Turn on GSWF(1334) to have the entrances revealed already in tik_03
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x21C) |= (1 << 22); // Turn on the 22 bit
+  ttyd::swdrv::swSet(1334);
   
   // Turn on GSWF(1781) and GSWF(1782) to skip the Koopie Koo cutscene in Petal Meadows
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x254) |= ((1 << 21) | (1 << 22)); // Turn on the 21 and 22 bits
+  ttyd::swdrv::swSet(1781);
+  ttyd::swdrv::swSet(1782);
   
   // Turn on GSWF(1805) to skip the cutscene of Goombella explaining her tattles on the bridge screen in Petal Meadows
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x258) |= (1 << 13); // Turn on the 13 bit
+  ttyd::swdrv::swSet(1805);
   
   // Turn on GSWF(2075) to skip Vivian's textbox in Twilight Trail
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x278) |= (1 << 27); // Turn on the 27 bit
+  ttyd::swdrv::swSet(2075);
   
   // Turn on GSWF(2228) to prevent the player from being able to use the Steeple Key
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x28C) |= (1 << 20); // Turn on the 20 bit
+  ttyd::swdrv::swSet(2228);
   
   // Turn on GSWF(2401) to skip the cutscene of entering Grubba's office through the grate for the first time
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2A4) |= (1 << 1); // Turn on the 1 bit
+  ttyd::swdrv::swSet(2401);
   
   // Turn on GSWF(2500) to skip the cutscene of re-signing up to be a fighter
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2B0) |= (1 << 4); // Turn on the 4 bit
+  ttyd::swdrv::swSet(2500);
   
   // Turn on GSWF(2867) to drain the water in the Great Tree
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2DC) |= (1 << 19); // Turn on the 19 bit
+  ttyd::swdrv::swSet(2867);
   
   // Turn on GSWF(2878) to prevent the player from being able to talk to Jabble
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2DC) |= (1 << 30); // Turn on the 30 bit
+  ttyd::swdrv::swSet(2878);
   
   // Turn on GSWF(2982), GSWF(2983), and GSWF(2984) to activate the blue switches in Pirate's Grotto
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2EC) |= ((1 << 6) | (1 << 7) | (1 << 8)); // Turn on the 6, 7, and 8 bits
+  ttyd::swdrv::swSet(2982);
+  ttyd::swdrv::swSet(2983);
+  ttyd::swdrv::swSet(2984);
   
   // Turn on GSWF(3131) to skip the cutscene with Four-Eyes after Bobbery is taken by the Embers
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x2FC) |= (1 << 27); // Turn on the 27 bit
+  ttyd::swdrv::swSet(3131);
   
   // Turn on GSWF(3884) to skip the cutscene on the first screen of the area leading to Fahr Outpost
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x35C) |= (1 << 12); // Turn on the 12 bit
+  ttyd::swdrv::swSet(3884);
   
   // Turn on GSWF(4196) and GSWF(4197) to allow the player to use the crane without needing to insert the Cog
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x384) |= ((1 << 4) | (1 << 5)); // Turn on the 4 and 5 bits
+  ttyd::swdrv::swSet(4196);
+  ttyd::swdrv::swSet(4197);
   
   // Turn on GSWF(4218) to skip the crane game tutorial
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x384) |= (1 << 26); // Turn on the 26 bit
+  ttyd::swdrv::swSet(4218);
   
   // Turn on GSWF(5374) to skip the Trouble Center tutorial
-  *reinterpret_cast<uint32_t *>(GSWAddresses + 0x414) |= (1 << 30); // Turn on the 30 bit
+  ttyd::swdrv::swSet(5374);
 }
 
 void overwriteNewFileStrings()
@@ -1555,9 +1556,15 @@ void specificMapEdits()
   }
   else if (ttyd::string::strcmp(NextMap, "jin_04") == 0)
   {
-    // Check if the Sequence is currently set to fight Doopliss 2
-    if ((SequencePosition == 210) || (SequencePosition == 211))
+    if (SequencePosition == 200)
     {
+      // Warp to a different room to skip the cutscene of Doopliss getting the Ruby star
+      ttyd::swdrv::swByteSet(0, 201);
+      ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "jin_04", "w_bero");
+    }
+    else if ((SequencePosition == 210) || (SequencePosition == 211))
+    {
+      // Check if the Sequence is currently set to fight Doopliss 2
       uint8_t CurrentPartnerOut = getPartnerOut(PartnerPointer);
       
       if (CurrentPartnerOut != static_cast<uint8_t>(ttyd::party::PartyMembers::Vivian))
@@ -2098,6 +2105,9 @@ char *checkCurrentTextbox(char *currentText)
     {
       // Just defeated Grodus
       JustDefeatedBoss = 9;
+      
+      // Skip most of the Grodus dialogue by warping to the Bowser part
+      ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "las_28", "koopa_evt");
     }
     else if (ttyd::string::strcmp(currentText, "stg8_las_101") == 0)
     {

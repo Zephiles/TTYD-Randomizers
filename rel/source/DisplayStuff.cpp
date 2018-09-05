@@ -253,7 +253,7 @@ void Mod::LZRandoChallengeStuff()
       if (ttyd::string::strcmp(NextMap, "jin_00") == 0)
       {
         // Check GSWF(2226) - Check the 18 bit
-        bool AtomicBooCheck = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x28C) & (1 << 18);
+        bool AtomicBooCheck = ttyd::swdrv::swGet(2226);
         
         if (AtomicBooCheck && !BossDefeated[BossDefeatedIndex])
         {
@@ -266,7 +266,7 @@ void Mod::LZRandoChallengeStuff()
         BossDefeated[BossDefeatedIndex] = false;
         
         // Turn off GSWF(2226) so that the player can refight the Atomic Boo
-        *reinterpret_cast<uint32_t *>(GSWAddresses + 0x28C) &= ~(1 << 18); // Turn off the 18 bit
+        ttyd::swdrv::swClear(2226);
       }
       
       // Check for Bonetail
@@ -274,7 +274,7 @@ void Mod::LZRandoChallengeStuff()
       if (ttyd::string::strcmp(NextMap, "jon_06") == 0)
       {
         // Check GSWF(5085) - Check the 29 bit
-        bool BonetailCheck = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x3F0) & (1 << 29);
+        bool BonetailCheck = ttyd::swdrv::swGet(5085);
         
         if (BonetailCheck && !BossDefeated[BossDefeatedIndex])
         {
@@ -287,7 +287,8 @@ void Mod::LZRandoChallengeStuff()
         BossDefeated[BossDefeatedIndex] = false;
         
         // Turn off GSWF(5084) and GSWF(5085) so that the player can refight Bonetail
-        *reinterpret_cast<uint32_t *>(GSWAddresses + 0x3F0) &= ~((1 << 28) | (1 << 29)); // Turn off the 28 and 29 bits
+        ttyd::swdrv::swClear(5084);
+        ttyd::swdrv::swClear(5085);
       }
       
       // Add 10 points for each boss defeated; 20 points for the Shadow Queen and Bonetail
@@ -630,8 +631,8 @@ void Mod::titleScreenStuff()
   
   sprintf(DisplayBuffer,
     "%s\n%s",
-    "Item Randomizers - v1.2.16",
-    "Loading Zone Randomizer Beta - v0.5.41");
+    "Item Randomizers - v1.2.17",
+    "Loading Zone Randomizer Beta - v0.5.42");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
   
@@ -644,7 +645,7 @@ void Mod::titleScreenStuff()
   #endif
   
   sprintf(DisplayBuffer,
-    "v1.1.44");
+    "v1.1.45");
   
   drawStringSingleLine(PosX, PosY, color, Scale);
 }
