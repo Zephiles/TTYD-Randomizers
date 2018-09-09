@@ -31,6 +31,8 @@ extern bool GameOverFlag;
 extern char *NextBero;
 extern char *NextArea;
 extern bool NewFile;
+extern bool MarioFreeze;
+extern uint32_t _mapEntAddress;
 extern uint32_t PossibleChallengeMaps[];
 extern uint16_t ChallengeMapArraySize;
 extern uint32_t PossibleLZMaps[];
@@ -64,6 +66,8 @@ extern "C" {
   void BranchBackPreventBattleOnRespawn();
   void StartCheckCurrentTextbox();
   void BranchBackCheckCurrentTextbox();
+  void StartReplaceJumpFallAnim();
+  void BranchBackReplaceJumpFallAnim();
 }
 
 namespace mod {
@@ -526,6 +530,11 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "gor_02") == 0)
+    {
+      // Reset GSWF(1207) to allow the player to get the follower again
+      ttyd::swdrv::swClear(1207);
+    }
     else if (ttyd::string::strcmp(NextMap, "gor_04") == 0)
     {
       // Set the Loading Zone to south
@@ -900,6 +909,11 @@ void getRandomWarp()
           ttyd::swdrv::swByteSet(0, 387);
         }
       }
+      else if (SequencePosition == 400)
+      {
+        // Prevent warping to this room if the Sequence is 400, or else the Shadow Queen cutscene will occur
+        continue;
+      }
     }
     else if (ttyd::string::strcmp(NextMap, "las_28") == 0)
     {
@@ -957,6 +971,11 @@ void getRandomWarp()
       // Change the loading zone to prevent spawning on the Yux
       ttyd::string::strcpy(NextBero, "w_bero");
     }
+    else if (ttyd::string::strcmp(NextMap, "mri_00") == 0)
+    {
+      // Reset GSWF(2826) to allow the player to get the follower again
+      ttyd::swdrv::swClear(2826);
+    }
     else if (ttyd::string::strcmp(NextMap, "mri_01") == 0)
     {
       if (SequencePosition <= 110)
@@ -973,6 +992,11 @@ void getRandomWarp()
           ttyd::swdrv::swByteSet(0, 110);
         }
       }
+    }
+    else if (ttyd::string::strcmp(NextMap, "mri_12") == 0)
+    {
+      // Change the loading zone to prevent spawning next to enemies
+      ttyd::string::strcpy(NextBero, "e_bero");
     }
     else if (ttyd::string::strcmp(NextMap, "muj_00") == 0)
     {
@@ -1313,6 +1337,7 @@ void setUpNewFile()
   }
   
   NewFile = false;
+  MarioFreeze = false;
   
   // Set up stuff for new file
   // Set Sequence to be just past getting Goombella
@@ -1353,8 +1378,17 @@ void setUpNewFile()
     *reinterpret_cast<uint16_t *>(itemDataTable + (PowerRushP * 0x28) + 0x20) = ttyd::system::irand(5) + 103;
   #endif
   
-  // Turn off a bit to enable loading zones
+  // Reset the flag used for Jump Storage
+  ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
+  player->flags3 &= ~((1 << 16) | (1 << 17)); // Turn off the 16 and 17 bits
+  
+  // Reset the lottery
   uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
+  uint32_t LotteryAddress = GSWAddresses + 0xE0;
+  *reinterpret_cast<uint32_t *>(LotteryAddress) = 0;
+  *reinterpret_cast<uint32_t *>(LotteryAddress + 0x4) = 0;
+  
+  // Turn off a bit to enable loading zones
   *reinterpret_cast<uint32_t *>(GSWAddresses) &= ~(1 << 0); // Turn off the 0 bit
   
   // Turn on GSWF(0) to skip shop tutorials
@@ -1388,12 +1422,21 @@ void setUpNewFile()
   // Turn on GSWF(1334) to have the entrances revealed already in tik_03
   ttyd::swdrv::swSet(1334);
   
+  // Turn on GSWF(1353) to skip having to talk to the Plane Mode curse chest for the first time
+  ttyd::swdrv::swSet(1353);
+  
+  // Turn on GSWF(1492) to skip having to talk to the Paper Mode curse chest for the first time
+  ttyd::swdrv::swSet(1492);
+  
   // Turn on GSWF(1781) and GSWF(1782) to skip the Koopie Koo cutscene in Petal Meadows
   ttyd::swdrv::swSet(1781);
   ttyd::swdrv::swSet(1782);
   
   // Turn on GSWF(1805) to skip the cutscene of Goombella explaining her tattles on the bridge screen in Petal Meadows
   ttyd::swdrv::swSet(1805);
+  
+  // Turn on GSWF(1932) to skip having to talk to the Tube Mode curse chest for the first time
+  ttyd::swdrv::swSet(1932);
   
   // Turn on GSWF(2075) to skip Vivian's textbox in Twilight Trail
   ttyd::swdrv::swSet(2075);
@@ -1420,6 +1463,9 @@ void setUpNewFile()
   
   // Turn on GSWF(3131) to skip the cutscene with Four-Eyes after Bobbery is taken by the Embers
   ttyd::swdrv::swSet(3131);
+  
+  // Turn on GSWF(3574) to skip the cutscene of the bridge being shown when talking to the conductor at Riverside
+  ttyd::swdrv::swSet(3574);
   
   // Turn on GSWF(3884) to skip the cutscene on the first screen of the area leading to Fahr Outpost
   ttyd::swdrv::swSet(3884);
@@ -1551,6 +1597,47 @@ void specificMapEdits()
       {
         // Bring out Goombella if either no partner is out or a partner from past Chapter 1 is out
         ttyd::mario_party::marioPartyEntry(ttyd::party::PartyMembers::Goombella);
+      }
+    }
+  }
+  if (ttyd::string::strcmp(NextMap, "gor_01") == 0)
+  {
+    ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
+    
+    if (MarioFreeze)
+    {
+      uint32_t RopeAddress = *reinterpret_cast<uint32_t *>(_mapEntAddress);
+      RopeAddress= *reinterpret_cast<uint32_t *>(RopeAddress + 0x154);
+      float RopePosZ = *reinterpret_cast<float *>(RopeAddress + 0x8B4);
+      
+      player->flags1 |= (1 << 1); // Turn on the 1 bit
+      player->wJumpVelocityY = 0;
+      player->wJumpAccelerationY = 0;
+      player->unk_84 = 0;
+      player->playerPosition[0] = -1;
+      player->playerPosition[1] = 59;
+      player->playerPosition[2] = RopePosZ + 10;
+      
+      #ifdef TTYD_JP
+        player->unk_19c = 180;
+        player->wPlayerDirection = 180;
+      #else
+        player->unk_1a0 = 180;
+        player->unk_1b0 = 180;
+      #endif
+    }
+    else
+    {
+      // Should use evt_sub_check_intersect instead
+      if ((player->playerPosition[0] >= -10) && (player->playerPosition[0] <= 10))
+      {
+        if ((player->playerPosition[2] >= 250) && (player->playerPosition[2] <= 267))
+        {
+          if (player->playerPosition[1] >= 58)
+          {
+            MarioFreeze = true;
+          }
+        }
       }
     }
   }
@@ -1794,6 +1881,7 @@ void reloadScreen()
     ttyd::string::strcpy(NewMap, NextMap);
     ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, NewMap, NewBero);
     ReloadCurrentScreen = true;
+    MarioFreeze = false;
     
     uint32_t SystemLevel = ttyd::mariost::marioStGetSystemLevel();
     if (SystemLevel == 0)
@@ -1910,6 +1998,7 @@ void resetValuesOnGameOver()
   }
   
   ReloadCurrentScreen = false;
+  MarioFreeze = false;
   GameOverFlag = true;
 }
 
@@ -2125,6 +2214,22 @@ char *checkCurrentTextbox(char *currentText)
 }
 }
 
+extern "C" {
+const char *replaceJumpFallAnim(char *jumpFallString)
+{
+  if (ttyd::string::strcmp(jumpFallString, "M_J_1C") == 0)
+  {
+    if (MarioFreeze)
+    {
+      // Return an arbitrary string
+      return "w_bero";
+    }
+  }
+  
+  return jumpFallString;
+}
+}
+
 void Mod::preventPartyLeft(ttyd::party::PartyMembers id)
 {
   // Prevent the game from removing partners
@@ -2230,6 +2335,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t CheckCurrentTextbox = 0x800D2880;
     uint32_t PowerRushIconCheck = 0x8001A320;
     uint32_t PowerRushPIconCheck = 0x8001A314;
+    uint32_t ReplaceJumpFallAnim = 0x800411D0;
   #elif defined TTYD_JP
     uint32_t RandomWarp = 0x800086F0;
     uint32_t TubeModeCheck = 0x80090D90;
@@ -2242,6 +2348,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t ResetFileLoadCoordinates = 0x800EED60;
     uint32_t PreventBattleOnRespawn = 0x80045F28;
     uint32_t CheckCurrentTextbox = 0x800CE750;
+    uint32_t ReplaceJumpFallAnim = 0x80040B34;
   #elif defined TTYD_EU
     uint32_t RandomWarp = 0x80008994;
     uint32_t TubeModeCheck = 0x800936A0;
@@ -2257,6 +2364,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t CheckCurrentTextbox = 0x800D3678;
     uint32_t PowerRushIconCheck = 0x8001A4E4;
     uint32_t PowerRushPIconCheck = 0x8001A4D8;
+    uint32_t ReplaceJumpFallAnim = 0x800412B8;
   #endif
   
   // Random Warps
@@ -2315,6 +2423,9 @@ void Mod::writeLZRandoAssemblyPatches()
     *reinterpret_cast<uint32_t *>(PowerRushIconCheck) = 0x60000000; // nop
     *reinterpret_cast<uint32_t *>(PowerRushPIconCheck) = 0x60000000; // nop
   #endif
+  
+  patch::writeBranch(reinterpret_cast<void *>(ReplaceJumpFallAnim), reinterpret_cast<void *>(StartReplaceJumpFallAnim));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackReplaceJumpFallAnim), reinterpret_cast<void *>(ReplaceJumpFallAnim + 0x4));
 }
 
 void Mod::LZRandoStuff()

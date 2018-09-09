@@ -56,7 +56,7 @@ uint32_t pouchGetHammerLv();
 // pouchGetSuperCoin
 // pouchSetCoin
 // pouchAddCoin
-// pouchGetCoin
+int16_t pouchGetCoin();
 // pouchSortItem
 // comp_kind_r
 // comp_aiueo_r

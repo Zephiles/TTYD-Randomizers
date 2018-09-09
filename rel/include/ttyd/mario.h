@@ -73,7 +73,7 @@ struct Player
   float wPlayerAngle;
   float unk_1a8;
   float wPlayerDirection;
-  uint32_t unk_1b0;
+  float unk_1b0;
   uint32_t unk_1b4;
   float wPlayerCollisionBox[3];
   float wPlayerCollisionRelated[3];

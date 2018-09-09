@@ -572,7 +572,7 @@
 // 800D3DC8:pouchGetSuperCoin
 // 800D3DD4:pouchSetCoin
 // 800D3E18:pouchAddCoin
-// 800D3E64:pouchGetCoin
+800D3E64:pouchGetCoin
 // 800D3E70:pouchSortItem
 // 800D44F8:comp_kind_r
 // 800D4540:comp_aiueo_r

@@ -114,148 +114,66 @@ void Mod::LZRandoChallengeStuff()
   {
     int32_t Score = 0;
     int32_t MainScores[10] = { 0 };
+    uint32_t PouchPointer = reinterpret_cast<uint32_t>(ttyd::mario_pouch::pouchGetPtr());
     
-    // Prevent score from updating if time is up
-    if (TimesUpCounter < 2)
+    // Check Important Items
+    uint32_t ImportantItemsAddressesStart = PouchPointer + 0xA0;
+    for (int i = 0; i < 121; i++)
     {
-      uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
-      uint32_t PouchPointer = reinterpret_cast<uint32_t>(ttyd::mario_pouch::pouchGetPtr());
-      
-      // Check Important Items
-      uint32_t ImportantItemsAddressesStart = PouchPointer + 0xA0;
-      for (int i = 0; i < 121; i++)
+      uint16_t ImportantItem = *reinterpret_cast<uint16_t *>(ImportantItemsAddressesStart + (i * 0x2));
+      if ((ImportantItem != Hammer) && (ImportantItem != MagicalMap) && (ImportantItem != Boots) && (ImportantItem != MailboxSP) && (ImportantItem != StrangeSack) && (ImportantItem != BattleTrunks))
       {
-        uint16_t ImportantItem = *reinterpret_cast<uint16_t *>(ImportantItemsAddressesStart + (i * 0x2));
-        if ((ImportantItem != Hammer) && (ImportantItem != MagicalMap) && (ImportantItem != Boots) && (ImportantItem != MailboxSP) && (ImportantItem != StrangeSack) && (ImportantItem != BattleTrunks))
+        if ((ImportantItem == MagicalMapBigger) || ((ImportantItem >= DiamondStar) && (ImportantItem <= CrystalStar)))
         {
-          if ((ImportantItem == MagicalMapBigger) || ((ImportantItem >= DiamondStar) && (ImportantItem <= CrystalStar)))
-          {
-            // Add 2 points for the magical map or a crystal star
-            MainScores[0] += 2;
-          }
-          else if ((ImportantItem >= PaperModeCurse) && (ImportantItem <= BoatModeCurse))
-          {
-            // Add 6 points for curses
-            MainScores[1] += 6;
-          }
-          else if (ImportantItem == 0)
-          {
-            // No more important items, so exit loop
-            break;
-          }
-          else
-          {
-            // Generic Important Item, so add 1 point
-            MainScores[2]++;
-          }
+          // Add 2 points for the magical map or a crystal star
+          MainScores[0] += 2;
         }
-      }
-      
-      // Add 1 point per 10 Battle Trunks in the player's inventory
-      MainScores[2] += ttyd::mario_pouch::pouchCheckItem(BattleTrunks) / 10;
-      
-      // Check for a follower
-      uint32_t FollowerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetExtraPartyId()));
-      if (FollowerPointer)
-      {
-        // Add 2 points if the player has a follower
-        MainScores[3] = 2;
-      }
-      
-      // Check for level ups
-      int16_t MarioLevel = *reinterpret_cast<int16_t *>(PouchPointer + 0x8A);
-      if (MarioLevel > 1)
-      {
-        // Add 2 points for each level up
-        MainScores[4] = (MarioLevel - 1) * 2;
-      }
-      
-      // Check for bosses
-      uint32_t BossDefeatedIndex = 0;
-      
-      // Check for bosses based on current textbox
-      for (int i = 1; i <= 8; i++)
-      {
-        if (JustDefeatedBoss == i)
+        else if ((ImportantItem >= PaperModeCurse) && (ImportantItem <= BoatModeCurse))
         {
-          if (!BossDefeated[BossDefeatedIndex])
-          {
-            BossDefeated[BossDefeatedIndex] = true;
-            BossScore += 10;
-          }
+          // Add 6 points for curses
+          MainScores[1] += 6;
+        }
+        else if (ImportantItem == 0)
+        {
+          // No more important items, so exit loop
+          break;
         }
         else
         {
-          BossDefeated[BossDefeatedIndex] = false;
+          // Generic Important Item, so add 1 point
+          MainScores[2]++;
         }
-        
-        BossDefeatedIndex++;
       }
-      
-      // Check for Grodus and Bowser & Kammy
-      for (int i = 9; i <= 10; i++)
-      {
-        if (JustDefeatedBoss == i)
-        {
-          if (!BossDefeated[BossDefeatedIndex])
-          {
-            BossDefeated[BossDefeatedIndex] = true;
-            BossScore += 6;
-          }
-        }
-        else
-        {
-          BossDefeated[BossDefeatedIndex] = false;
-        }
-        
-        BossDefeatedIndex++;
-      }
-      
-      // Check for bosses based on Sequence
-      uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-      uint16_t SequenceChecks[] = { 85, 200, 211, 260, 388 };
-      int32_t ArraySize = sizeof(SequenceChecks) / sizeof(SequenceChecks[0]);
-      
-      for (int i = 0; i < ArraySize; i++)
-      {
-        if (SequencePosition == SequenceChecks[i])
-        {
-          if (!BossDefeated[BossDefeatedIndex])
-          {
-            BossDefeated[BossDefeatedIndex] = true;
-            BossScore += 10;
-          }
-        }
-        else
-        {
-          BossDefeated[BossDefeatedIndex] = false;
-        }
-        
-        BossDefeatedIndex++;
-      }
-      
-      // Check for the Shadow Queen
-      if (SequencePosition == 401)
+    }
+    
+    // Add 1 point per 10 Battle Trunks in the player's inventory
+    MainScores[2] += ttyd::mario_pouch::pouchCheckItem(BattleTrunks) / 10;
+    
+    // Check for a follower
+    uint32_t FollowerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetExtraPartyId()));
+    if (FollowerPointer)
+    {
+      // Add 2 points if the player has a follower
+      MainScores[3] = 2;
+    }
+    
+    // Check for level ups
+    int16_t MarioLevel = *reinterpret_cast<int16_t *>(PouchPointer + 0x8A);
+    if (MarioLevel > 1)
+    {
+      // Add 2 points for each level up
+      MainScores[4] = (MarioLevel - 1) * 2;
+    }
+    
+    // Check for bosses
+    uint32_t BossDefeatedIndex = 0;
+    
+    // Check for bosses based on current textbox
+    for (int i = 1; i <= 8; i++)
+    {
+      if (JustDefeatedBoss == i)
       {
         if (!BossDefeated[BossDefeatedIndex])
-        {
-          BossDefeated[BossDefeatedIndex] = true;
-          BossScore += 20;
-        }
-      }
-      else
-      {
-        BossDefeated[BossDefeatedIndex] = false;
-      }
-      
-      // Check for the Atomic Boo
-      BossDefeatedIndex++;
-      if (ttyd::string::strcmp(NextMap, "jin_00") == 0)
-      {
-        // Check GSWF(2226) - Check the 18 bit
-        bool AtomicBooCheck = ttyd::swdrv::swGet(2226);
-        
-        if (AtomicBooCheck && !BossDefeated[BossDefeatedIndex])
         {
           BossDefeated[BossDefeatedIndex] = true;
           BossScore += 10;
@@ -264,127 +182,187 @@ void Mod::LZRandoChallengeStuff()
       else
       {
         BossDefeated[BossDefeatedIndex] = false;
-        
-        // Turn off GSWF(2226) so that the player can refight the Atomic Boo
-        ttyd::swdrv::swClear(2226);
       }
       
-      // Check for Bonetail
       BossDefeatedIndex++;
-      if (ttyd::string::strcmp(NextMap, "jon_06") == 0)
+    }
+    
+    // Check for Grodus and Bowser & Kammy
+    for (int i = 9; i <= 10; i++)
+    {
+      if (JustDefeatedBoss == i)
       {
-        // Check GSWF(5085) - Check the 29 bit
-        bool BonetailCheck = ttyd::swdrv::swGet(5085);
-        
-        if (BonetailCheck && !BossDefeated[BossDefeatedIndex])
+        if (!BossDefeated[BossDefeatedIndex])
         {
           BossDefeated[BossDefeatedIndex] = true;
-          BossScore += 20;
+          BossScore += 6;
         }
       }
       else
       {
         BossDefeated[BossDefeatedIndex] = false;
-        
-        // Turn off GSWF(5084) and GSWF(5085) so that the player can refight Bonetail
-        ttyd::swdrv::swClear(5084);
-        ttyd::swdrv::swClear(5085);
       }
       
-      // Add 10 points for each boss defeated; 20 points for the Shadow Queen and Bonetail
-      MainScores[5] = BossScore;
-      
-      // Add 1 point for Mario's coin count divided by 100
-      int16_t CoinCount = *reinterpret_cast<int16_t *>(PouchPointer + 0x78);
-      MainScores[6] = CoinCount / 100;
-      
-      // Add additional point for 999 coins
-      if (CoinCount >= 999)
+      BossDefeatedIndex++;
+    }
+    
+    // Check for bosses based on Sequence
+    uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
+    uint16_t SequenceChecks[] = { 85, 200, 211, 260, 388 };
+    int32_t ArraySize = sizeof(SequenceChecks) / sizeof(SequenceChecks[0]);
+    
+    for (int i = 0; i < ArraySize; i++)
+    {
+      if (SequencePosition == SequenceChecks[i])
       {
-        MainScores[6]++;
-      }
-      
-      // Check badge log
-      uint32_t BadgeLogAddressesStart = GSWAddresses + 0x188;
-      uint32_t BadgeLogCount = 0;
-      
-      // Check each bit in the bitfield
-      for (int i = 0; i < 3; i++)
-      {
-        uint32_t CurrentAddress = *reinterpret_cast<uint32_t *>(BadgeLogAddressesStart + (i * 0x4));
-        for (int x = 0; x < 32; x++)
+        if (!BossDefeated[BossDefeatedIndex])
         {
-          if (CurrentAddress & (1 << x))
-          {
-            // Add 1 to the count if the bit is on
-            BadgeLogCount++;
-          }
+          BossDefeated[BossDefeatedIndex] = true;
+          BossScore += 10;
         }
       }
-      
-      // Check for the 3 badges that were not checked in the previous code
-      uint32_t CurrentAddress = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x194);
-      for (int i = 0; i < 3; i++)
+      else
       {
-        if (CurrentAddress & (1 << i)) // Check the 0, 1, and 2 bits
+        BossDefeated[BossDefeatedIndex] = false;
+      }
+      
+      BossDefeatedIndex++;
+    }
+    
+    // Check for the Shadow Queen
+    if (SequencePosition == 401)
+    {
+      if (!BossDefeated[BossDefeatedIndex])
+      {
+        BossDefeated[BossDefeatedIndex] = true;
+        BossScore += 20;
+      }
+    }
+    else
+    {
+      BossDefeated[BossDefeatedIndex] = false;
+    }
+    
+    // Check for the Atomic Boo
+    BossDefeatedIndex++;
+    if (ttyd::string::strcmp(NextMap, "jin_00") == 0)
+    {
+      // Check GSWF(2226) - Check the 18 bit
+      bool AtomicBooCheck = ttyd::swdrv::swGet(2226);
+      
+      if (AtomicBooCheck && !BossDefeated[BossDefeatedIndex])
+      {
+        BossDefeated[BossDefeatedIndex] = true;
+        BossScore += 10;
+      }
+    }
+    else
+    {
+      BossDefeated[BossDefeatedIndex] = false;
+      
+      // Turn off GSWF(2226) so that the player can refight the Atomic Boo
+      ttyd::swdrv::swClear(2226);
+    }
+    
+    // Check for Bonetail
+    BossDefeatedIndex++;
+    if (ttyd::string::strcmp(NextMap, "jon_06") == 0)
+    {
+      // Check GSWF(5085) - Check the 29 bit
+      bool BonetailCheck = ttyd::swdrv::swGet(5085);
+      
+      if (BonetailCheck && !BossDefeated[BossDefeatedIndex])
+      {
+        BossDefeated[BossDefeatedIndex] = true;
+        BossScore += 20;
+      }
+    }
+    else
+    {
+      BossDefeated[BossDefeatedIndex] = false;
+      
+      // Turn off GSWF(5084) and GSWF(5085) so that the player can refight Bonetail
+      ttyd::swdrv::swClear(5084);
+      ttyd::swdrv::swClear(5085);
+    }
+    
+    // Add 10 points for each boss defeated; 20 points for the Shadow Queen and Bonetail
+    MainScores[5] = BossScore;
+    
+    // Add 1 point for Mario's coin count divided by 100
+    int16_t CoinCount = ttyd::mario_pouch::pouchGetCoin();
+    MainScores[6] = CoinCount / 100;
+    
+    // Add additional point for 999 coins
+    if (CoinCount >= 999)
+    {
+      MainScores[6]++;
+    }
+    
+    // Check badge log
+    uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
+    uint32_t BadgeLogAddressesStart = GSWAddresses + 0x188;
+    uint32_t BadgeLogCount = 0;
+    
+    // Check each bit in the bitfield
+    for (int i = 0; i < 3; i++)
+    {
+      uint32_t CurrentAddress = *reinterpret_cast<uint32_t *>(BadgeLogAddressesStart + (i * 0x4));
+      for (int x = 0; x < 32; x++)
+      {
+        if (CurrentAddress & (1 << x))
         {
           // Add 1 to the count if the bit is on
           BadgeLogCount++;
         }
       }
-      
-      // Add 1 point for the badge log count divided by 10
-      MainScores[7] = BadgeLogCount / 10;
-      
-      // Add 5 points for each partner upgrade
-      for (int i = 1; i <= 7; i++)
+    }
+    
+    // Check for the 3 badges that were not checked in the previous code
+    uint32_t CurrentAddress = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x194);
+    for (int i = 0; i < 3; i++)
+    {
+      if (CurrentAddress & (1 << i)) // Check the 0, 1, and 2 bits
       {
-        MainScores[8] += ttyd::mario_pouch::pouchGetPartyAttackLv(i) * 5;
-      }
-      
-      // Check for Game Over
-      if (!InGameOver && (NextSeq == GameOver))
-      {
-        InGameOver = true;
-        GameOverCount++;
-      }
-      else if (NextSeq != GameOver)
-      {
-        InGameOver = false;
-      }
-      
-      // Subtract 5 points for each Game Over
-      MainScores[9] -= GameOverCount * 5;
-      
-      // Get total score
-      for (int i = 0; i < 10; i++)
-      {
-        Score += MainScores[i];
+        // Add 1 to the count if the bit is on
+        BadgeLogCount++;
       }
     }
     
-    if (TimesUpCounter == 2)
+    // Add 1 point for the badge log count divided by 10
+    MainScores[7] = BadgeLogCount / 10;
+    
+    // Add 5 points for each partner upgrade
+    for (int i = 1; i <= 7; i++)
     {
-      // Display final score
-      Score = FinalScore;
-      
-      // Update where each point came from for the final score
-      for (int i = 0; i < 10; i++)
-      {
-        MainScores[i] = DisplayScores[i];
-      }
+      MainScores[8] += ttyd::mario_pouch::pouchGetPartyAttackLv(i) * 5;
     }
-    else if (TimesUpCounter == 1)
+    
+    // Check for Game Over
+    if (!InGameOver && (NextSeq == GameOver))
+    {
+      InGameOver = true;
+      GameOverCount++;
+    }
+    else if (NextSeq != GameOver)
+    {
+      InGameOver = false;
+    }
+    
+    // Subtract 5 points for each Game Over
+    MainScores[9] -= GameOverCount * 5;
+    
+    // Get total score
+    for (int i = 0; i < 10; i++)
+    {
+      Score += MainScores[i];
+    }
+    
+    if (TimesUpCounter == 1)
     {
       // Update final score
       TimesUpCounter = 2;
       FinalScore = Score;
-      
-      // Update where each point came from for the final score
-      for (int i = 0; i < 10; i++)
-      {
-        DisplayScores[i] = MainScores[i];
-      }
     }
     
     // Display Score
@@ -398,11 +376,28 @@ void Mod::LZRandoChallengeStuff()
       
     drawStringSingleLine(PosX, PosY, color, Scale);
     
+    // Display the Final Score if time is up
+    if (TimesUpCounter > 0)
+    {
+      PosY = -80;
+      
+      sprintf(DisplayBuffer,
+        "Final Score: %ld",
+        FinalScore);
+      
+      drawStringSingleLine(PosX, PosY, color, Scale);
+    }
+    
     // Display where the points came from
     if (ShowScoreSources)
     {
-      PosX = -232;
       PosY = -80;
+      
+      // Move the display up if the Final Score is being displayed
+      if (TimesUpCounter > 0)
+      {
+        PosY += 20;
+      }
       
       sprintf(DisplayBuffer,
         "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld",
@@ -513,10 +508,11 @@ void Mod::LZRandoChallengeStuff()
       }
       else if ((Seq >= Game) && Seq <= GameOver)
       {
-        // Prevent score from updating
+        // Update Final Score
         if (TimesUpCounter == 0)
         {
           TimesUpCounter = 1;
+          ShowScoreSources = true;
         }
         
         uint32_t SystemLevel = ttyd::mariost::marioStGetSystemLevel();
@@ -565,8 +561,9 @@ void Mod::LZRandoChallengeStuff()
           
           if ((ButtonInputTrg & PAD_Y) == PAD_Y)
           {
-            // Continue playing without the timer
-            TimerDisabled = true;
+            // Reset the timer to continue playing
+            TimerCount = 216000; // 1 hour
+            ShowScoreSources = false;
             DisablePlayerControl = false;
             ttyd::mariost::marioStSystemLevel(0);
             
@@ -632,7 +629,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.17",
-    "Loading Zone Randomizer Beta - v0.5.42");
+    "Loading Zone Randomizer Beta - v0.5.43");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
   
@@ -645,7 +642,7 @@ void Mod::titleScreenStuff()
   #endif
   
   sprintf(DisplayBuffer,
-    "v1.1.45");
+    "v1.1.46");
   
   drawStringSingleLine(PosX, PosY, color, Scale);
 }
