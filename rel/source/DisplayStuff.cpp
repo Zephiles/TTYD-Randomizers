@@ -24,7 +24,7 @@ extern char *NextBero;
 extern uint8_t TimesUpCounter;
 extern uint32_t GSWAddressesStart;
 extern uint8_t JustDefeatedBoss;
-extern bool BossDefeated[18];
+extern bool BossDefeated[19];
 extern uint32_t BossScore;
 extern bool InGameOver;
 extern uint16_t GameOverCount;
@@ -169,7 +169,7 @@ void Mod::LZRandoChallengeStuff()
     uint32_t BossDefeatedIndex = 0;
     
     // Check for bosses based on current textbox
-    for (int i = 1; i <= 8; i++)
+    for (int i = 1; i <= 9; i++)
     {
       if (JustDefeatedBoss == i)
       {
@@ -188,7 +188,7 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Check for Grodus and Bowser & Kammy
-    for (int i = 9; i <= 10; i++)
+    for (int i = 10; i <= 11; i++)
     {
       if (JustDefeatedBoss == i)
       {
@@ -629,7 +629,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizers - v1.2.17",
-    "Loading Zone Randomizer Beta - v0.5.43");
+    "Loading Zone Randomizer Beta - v0.5.44");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
   
@@ -642,7 +642,7 @@ void Mod::titleScreenStuff()
   #endif
   
   sprintf(DisplayBuffer,
-    "v1.1.46");
+    "v1.1.47");
   
   drawStringSingleLine(PosX, PosY, color, Scale);
 }

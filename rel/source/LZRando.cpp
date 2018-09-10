@@ -609,6 +609,25 @@ void getRandomWarp()
       // Change the loading zone to prevent spawning on the stone or enemy
       ttyd::string::strcpy(NextBero, "e_bero");
     }
+    else if (ttyd::string::strcmp(NextMap, "hei_10") == 0)
+    {
+      if (CheckChallengeModeTimerCutoff())
+      {
+        if (SequencePosition <= 31)
+        {
+          // Check if the player has gotten the Sun Stone
+          if (ttyd::swdrv::swGet(1774))
+          {
+            // Check if the player has gotten the Moon Stone
+            if (ttyd::swdrv::swGet(1775))
+            {
+              // Prevent being able to fight the Gold Fuzzy if the Sequence is set for it and the player has both stones
+              continue;
+            }
+          }
+        }
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "hei_12") == 0)
     {
       // Change the loading zone to prevent spawning on the stone or enemy
@@ -1797,6 +1816,21 @@ void reloadScreen()
         return;
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "hei_10") == 0)
+    {
+      if (SequencePosition <= 31)
+      {
+        // Check if the player has gotten the Sun Stone
+        if (ttyd::swdrv::swGet(1774))
+        {
+          // Check if the player has gotten the Moon Stone
+          if (ttyd::swdrv::swGet(1775))
+          {
+            return;
+          }
+        }
+      }
+    }
     else if (ttyd::string::strncmp(NextMap, "jon_00", 3) == 0)
     {
       // Prevent the player from constantly reloading floors to kill high level enemies
@@ -2155,45 +2189,50 @@ char *checkCurrentTextbox(char *currentText)
       // Just defeated Blooper
       JustDefeatedBoss = 1;
     }
+    else if (ttyd::string::strcmp(currentText, "stg1_hei_44") == 0)
+    {
+      // Just defeated the Gold Fuzzy
+      JustDefeatedBoss = 2;
+    }
     else if (ttyd::string::strcmp(currentText, "stg1_gon_33_03") == 0)
     {
       // Just defeated Hooktail
-      JustDefeatedBoss = 2;
+      JustDefeatedBoss = 3;
     }
     else if (ttyd::string::strcmp(currentText, "stg2_mri_e25_00_00") == 0)
     {
       // Just defeated Magnus 1.0
-      JustDefeatedBoss = 3;
+      JustDefeatedBoss = 4;
     }
     else if (ttyd::string::strcmp(currentText, "stg3_tou_473") == 0)
     {
       // Just defeated Grubba
-      JustDefeatedBoss = 4;
+      JustDefeatedBoss = 5;
     }
     else if (ttyd::string::strcmp(currentText, "stg5_dou_25") == 0)
     {
       // Just defeated Cortez
-      JustDefeatedBoss = 5;
+      JustDefeatedBoss = 6;
     }
     else if (ttyd::string::strcmp(currentText, "stg6_rsh_247") == 0)
     {
       // Just defeated Smorg
-      JustDefeatedBoss = 6;
+      JustDefeatedBoss = 7;
     }
     else if (ttyd::string::strcmp(currentText, "stg7_aji_42") == 0)
     {
       // Just defeated Magnus 2.0
-      JustDefeatedBoss = 7;
+      JustDefeatedBoss = 8;
     }
     else if (ttyd::string::strcmp(currentText, "stg8_las_24") == 0)
     {
       // Just defeated the Shadow Sirens (Chapter 8)
-      JustDefeatedBoss = 8;
+      JustDefeatedBoss = 9;
     }
     else if (ttyd::string::strcmp(currentText, "stg8_las_70") == 0)
     {
       // Just defeated Grodus
-      JustDefeatedBoss = 9;
+      JustDefeatedBoss = 10;
       
       // Skip most of the Grodus dialogue by warping to the Bowser part
       ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "las_28", "koopa_evt");
@@ -2201,7 +2240,7 @@ char *checkCurrentTextbox(char *currentText)
     else if (ttyd::string::strcmp(currentText, "stg8_las_101") == 0)
     {
       // Just defeated Bowser & Kammy
-      JustDefeatedBoss = 10;
+      JustDefeatedBoss = 11;
     }
     else if (ttyd::string::strcmp(currentText, "stg8_las_139") == 0)
     {
@@ -2217,9 +2256,9 @@ char *checkCurrentTextbox(char *currentText)
 extern "C" {
 const char *replaceJumpFallAnim(char *jumpFallString)
 {
-  if (ttyd::string::strcmp(jumpFallString, "M_J_1C") == 0)
+  if (MarioFreeze)
   {
-    if (MarioFreeze)
+    if (ttyd::string::strncmp(jumpFallString, "M_J_", 4) == 0)
     {
       // Return an arbitrary string
       return "w_bero";

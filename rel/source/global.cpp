@@ -77,7 +77,7 @@ char *LZRandoText = new char[4]; // 3 bytes for LZRandoText, 1 byte for NULL
 // LZ Rando Challenge
 uint8_t TimesUpCounter = 0;
 uint8_t JustDefeatedBoss = 0;
-bool BossDefeated[18] = { false };
+bool BossDefeated[19] = { false };
 uint32_t BossScore = 0;
 bool InGameOver = false;
 uint16_t GameOverCount = 0;
