@@ -46,6 +46,7 @@ extern uint8_t JustDefeatedBoss;
 // extern uint32_t NPCAddressesStart;
 extern char *NewBero;
 extern char *NewMap;
+extern uint32_t wp_fadedrv_Address;
 
 extern "C" {
   void StartGetRandomWarp();
@@ -1621,13 +1622,13 @@ void specificMapEdits()
   }
   if (ttyd::string::strcmp(NextMap, "gor_01") == 0)
   {
-    ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
-    
     if (MarioFreeze)
     {
       uint32_t RopeAddress = *reinterpret_cast<uint32_t *>(_mapEntAddress);
       RopeAddress= *reinterpret_cast<uint32_t *>(RopeAddress + 0x154);
       float RopePosZ = *reinterpret_cast<float *>(RopeAddress + 0x8B4);
+      
+      ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
       
       player->flags1 |= (1 << 1); // Turn on the 1 bit
       player->wJumpVelocityY = 0;
@@ -1644,20 +1645,6 @@ void specificMapEdits()
         player->unk_1a0 = 180;
         player->unk_1b0 = 180;
       #endif
-    }
-    else
-    {
-      // Should use evt_sub_check_intersect instead
-      if ((player->playerPosition[0] >= -10) && (player->playerPosition[0] <= 10))
-      {
-        if ((player->playerPosition[2] >= 250) && (player->playerPosition[2] <= 267))
-        {
-          if (player->playerPosition[1] >= 58)
-          {
-            MarioFreeze = true;
-          }
-        }
-      }
     }
   }
   else if (ttyd::string::strcmp(NextMap, "jin_04") == 0)
@@ -1916,6 +1903,10 @@ void reloadScreen()
     ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, NewMap, NewBero);
     ReloadCurrentScreen = true;
     MarioFreeze = false;
+    
+    // Reset the black screen fade effect set when loading into a room via a pipe
+    uint32_t fadedrvAddress = *reinterpret_cast<uint32_t *>(wp_fadedrv_Address);
+    *reinterpret_cast<uint16_t *>(fadedrvAddress) &= ~(1 << 15); // Turn off the 15 bit
     
     uint32_t SystemLevel = ttyd::mariost::marioStGetSystemLevel();
     if (SystemLevel == 0)
@@ -2256,12 +2247,34 @@ char *checkCurrentTextbox(char *currentText)
 extern "C" {
 const char *replaceJumpFallAnim(char *jumpFallString)
 {
-  if (MarioFreeze)
+  if (ttyd::string::strncmp(jumpFallString, "M_J_", 4) == 0)
   {
-    if (ttyd::string::strncmp(jumpFallString, "M_J_", 4) == 0)
+    if (ttyd::string::strcmp(NextMap, "gor_01") == 0)
     {
       // Return an arbitrary string
-      return "w_bero";
+      const char *newString = "w_bero";
+      
+      if (MarioFreeze)
+      {
+        return newString;
+      }
+      else
+      {
+        ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
+      
+        // Should use evt_sub_check_intersect instead
+        if ((player->playerPosition[0] >= -10) && (player->playerPosition[0] <= 10))
+        {
+          if ((player->playerPosition[2] >= 250) && (player->playerPosition[2] <= 267))
+          {
+            if (player->playerPosition[1] >= 58)
+            {
+              MarioFreeze = true;
+              return newString;
+            }
+          }
+        }
+      }
     }
   }
   

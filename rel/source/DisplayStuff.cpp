@@ -40,10 +40,11 @@ extern bool DisablePlayerControl;
 extern bool GameOverFlag;
 extern uint32_t seqMainAddress;
 extern bool LZRando;
+extern char *ItemRandoText;
 extern char *LZRandoText;
 extern bool LZRandoChallenge;
 extern char *LZRandoChallengeText;
-extern bool ItemRandoV2;
+extern bool RandomizeCoins;
 
 namespace mod {
 
@@ -628,8 +629,8 @@ void Mod::titleScreenStuff()
   
   sprintf(DisplayBuffer,
     "%s\n%s",
-    "Item Randomizers - v1.2.17",
-    "Loading Zone Randomizer Beta - v0.5.44");
+    "Item Randomizer - v1.2.18",
+    "Loading Zone Randomizer Beta - v0.5.45");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
   
@@ -642,7 +643,7 @@ void Mod::titleScreenStuff()
   #endif
   
   sprintf(DisplayBuffer,
-    "v1.1.47");
+    "v1.1.48");
   
   drawStringSingleLine(PosX, PosY, color, Scale);
 }
@@ -670,11 +671,21 @@ void Mod::gameModes()
   sprintf(DisplayBuffer,
     "%s\n%s\n%s\n%s",
     "Hold L and press the following to toggle modes:",
-    "Y = Item Randomizer v1/v2",
+    "Y = Randomize Coins",
     "X = Loading Zone Randomizer Beta",
     "Z = Loading Zone Randomizer - 1 Hour Challenge");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
+  
+  // Set ItemRandoText to the appropriate value
+  if (RandomizeCoins)
+  {
+    ttyd::string::strcpy(ItemRandoText, "On");
+  }
+  else
+  {
+    ttyd::string::strcpy(ItemRandoText, "Off");
+  }
   
   // Set LZRandoText to the appropriate value
   if (LZRando)
@@ -691,8 +702,8 @@ void Mod::gameModes()
   {
     ttyd::string::strcpy(LZRandoChallengeText, "On");
     
-    // Set the Item Randomizer to v1 if it's not already
-    ItemRandoV2 = false;
+    // Don't randomize coins when using the challenge mode
+    RandomizeCoins = false;
   }
   else
   {
@@ -704,9 +715,9 @@ void Mod::gameModes()
   
   // Display current modes
   sprintf(DisplayBuffer,
-    "%s%ld\n%s%s\n%s%s",
-    "Item Randomizer: v",
-    static_cast<uint32_t>(ItemRandoV2) + 1,
+    "%s%s\n%s%s\n%s%s",
+    "Randomize Coins: ",
+    ItemRandoText,
     "Loading Zone Randomizer: ",
     LZRandoText,
     "Loading Zone Randomizer - 1 Hour Challenge: ",
@@ -724,7 +735,7 @@ void Mod::gameModes()
   {
     if (!DenyInput)
     {
-      ItemRandoV2 = !ItemRandoV2;
+      RandomizeCoins = !RandomizeCoins;
     }
     DenyInput = true;
   }

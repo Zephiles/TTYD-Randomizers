@@ -25,7 +25,7 @@ extern bool EmeraldStarAlreadyChanged;
 extern uint16_t CrystalStarNewItem;
 extern bool MarioRunAwayCoinDrop;
 extern bool EnemyHeldItemArrayInUse;
-extern bool ItemRandoV2;
+extern bool RandomizeCoins;
 extern int8_t EnemyHeldItemArrayCounter;
 extern bool RanAwayFromBattle;
 extern uint16_t EnemyHeldItemArray[8][8];
@@ -261,8 +261,8 @@ uint32_t randomizeItemWithChecks(uint32_t currentItemId)
     uint32_t SystemLevel = ttyd::mariost::marioStGetSystemLevel();
     if (SystemLevel != 15)
     {
-      bool ItemRandoV2Coin = ItemRandoV2 && (currentItemId == Coin);
-      if (ItemRandoV2Coin || ((currentItemId >= StarPiece) && (currentItemId <= SuperChargeP)))
+      bool CheckRandomizeCoins = RandomizeCoins && (currentItemId == Coin);
+      if (CheckRandomizeCoins || ((currentItemId >= StarPiece) && (currentItemId <= SuperChargeP)))
       {
         return randomizeItem();
       }
