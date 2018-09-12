@@ -894,8 +894,8 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t itemDataTable = 0x803108A8;
     uint16_t KoopaCurseIcon = 390;
     uint16_t DebugBadgeIcon = 526;
-    uint16_t ArtAttackBadgeIcon = 527;
-    uint16_t RunMeterBadgeIcon = 503;
+    uint16_t ArtAttackBadgeIcon = 420;
+    uint16_t RunMeterBadgeIcon = 158;
     
     uint32_t SweetFeastAddress = 0x803559A8;
     uint32_t ShowstopperAddress = 0x80355BE8;
@@ -904,6 +904,10 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t MegaSmashFPAddress = 0x803549E8;
     
     uint32_t ShineSpriteAddress = 0x800D51FC;
+    
+    uint32_t ZubastarIconAddress1 = 0x80233F04;
+    uint32_t ZubastarIconAddress2 = 0x80233F6C;
+    uint8_t ZubastarIconValue = 0xA3; // 419
   #elif defined TTYD_JP
     uint32_t CrystalStarPointer = 0x800AC284;
     
@@ -968,8 +972,8 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t itemDataTable = 0x8030EE58;
     uint16_t KoopaCurseIcon = 382;
     uint16_t DebugBadgeIcon = 523;
-    uint16_t ArtAttackBadgeIcon = 524;
-    uint16_t RunMeterBadgeIcon = 495;
+    uint16_t ArtAttackBadgeIcon = 412;
+    uint16_t RunMeterBadgeIcon = 150;
     
     uint32_t SweetFeastAddress = 0x803532D0;
     uint32_t ShowstopperAddress = 0x80353510;
@@ -978,6 +982,10 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t MegaSmashFPAddress = 0x80352310;
     
     uint32_t ShineSpriteAddress = 0x800D0FDC;
+    
+    uint32_t ZubastarIconAddress1 = 0x8022E854;
+    uint32_t ZubastarIconAddress2 = 0x8022E8BC;
+    uint8_t ZubastarIconValue = 0x9B; // 411
   #elif defined TTYD_EU
     uint32_t CrystalStarPointer = 0x800AF38C;
     
@@ -1042,8 +1050,8 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t itemDataTable = 0x8031C638;
     uint16_t KoopaCurseIcon = 390;
     uint16_t DebugBadgeIcon = 526;
-    uint16_t ArtAttackBadgeIcon = 527;
-    uint16_t RunMeterBadgeIcon = 503;
+    uint16_t ArtAttackBadgeIcon = 420;
+    uint16_t RunMeterBadgeIcon = 158;
     
     uint32_t SweetFeastAddress = 0x80361858;
     uint32_t ShowstopperAddress = 0x80361A98;
@@ -1052,6 +1060,10 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t MegaSmashFPAddress = 0x80360898;
     
     uint32_t ShineSpriteAddress = 0x800D6004;
+    
+    uint32_t ZubastarIconAddress1 = 0x80237994;
+    uint32_t ZubastarIconAddress2 = 0x802379FC;
+    uint8_t ZubastarIconValue = 0xA3; // 419
   #endif
   
   // Write Crystal Star pointer
@@ -1175,6 +1187,10 @@ void Mod::writeItemRandoAssemblyPatches()
   *reinterpret_cast<uint16_t *>(itemDataTable + (DebugBadge * 0x28) + 0x20) = DebugBadgeIcon;
   *reinterpret_cast<uint16_t *>(itemDataTable + (InvalidItemBadgeNoKnownEffect * 0x28) + 0x20) = ArtAttackBadgeIcon;
   *reinterpret_cast<uint16_t *>(itemDataTable + (InvalidItemBadgePNoKnownEffect * 0x28) + 0x20) = RunMeterBadgeIcon;
+  
+  // Change the icon for the small Supernova star from the Sapphire star to the Crystal star
+  *reinterpret_cast<uint8_t *>(ZubastarIconAddress1 + 0x3) = ZubastarIconValue;
+  *reinterpret_cast<uint8_t *>(ZubastarIconAddress2 + 0x3) = ZubastarIconValue;
   
   // Change sell price for Trade Off
   *reinterpret_cast<uint16_t *>((itemDataTable + (TradeOff * 0x28)) + 0x1A) = 10;

@@ -313,6 +313,24 @@
 80070AE0:marioStMain
 80070D18:marioStInit
 
+// imgdrv.o
+// 80071F34:imgShadowDisp
+// 80072580:imgSetShadow
+80072588:imgRelease
+// 80072644:imgClearVirtualPoint
+// 80072654:imgSetVirtualPoint
+// 8007267C:imgFreeCapture
+// 800726F4:imgNameToPtr
+// 8007277C:imgMain
+// 80072964:imgEntry
+// 80072AE4:imgAutoRelease
+// 80072BCC:imgInit
+// 80072C28:imgCapture
+// 80072CDC:imgCapture_Prim
+// 800731DC:imgDisp_ProjPlane
+// 80073470:imgDisp
+// 80073C1C:zFill
+
 // fontmgr.o
 // unused:JUTFont_Draw
 // unused:JUTFont_DrawPos

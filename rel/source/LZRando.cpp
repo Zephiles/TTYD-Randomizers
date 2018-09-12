@@ -14,6 +14,7 @@
 #include <ttyd/OSCache.h>
 #include <ttyd/seqdrv.h>
 #include <ttyd/mario.h>
+#include <ttyd/imgdrv.h>
 #include <ttyd/mariost.h>
 #include <ttyd/camdrv.h>
 #include <ttyd/pmario_sound.h>
@@ -41,6 +42,7 @@ extern uint32_t seqMainAddress;
 extern bool ClearCacheFlag;
 extern bool SQWarpAway;
 extern uint8_t JustDefeatedBoss;
+extern uint32_t imgEntryAddress;
 // extern uint32_t AreaObjectsAddressesStart;
 // extern uint32_t AreaLZsAddressesStart;
 // extern uint32_t NPCAddressesStart;
@@ -1601,6 +1603,24 @@ void specificMapEdits()
   // Reset JustDefeatedBoss, so that it can be used for other bosses
   JustDefeatedBoss = 0;
   
+  // Clear chapter end head pictures if the next loading zone is a pipe
+  if (ttyd::string::strncmp(NextBero, "dokan", 5) == 0)
+  {
+    uint32_t fbatModeAddress = reinterpret_cast<uint32_t>(ttyd::npcdrv::fbatGetPointer());
+    int16_t fbatMode = *reinterpret_cast<int16_t *>(fbatModeAddress);
+    
+    // Only run if the fbat mode is set to 1, otherwise it will conflict with other code
+    if (fbatMode == 1)
+    {
+      // Get the proper pointer to pass into imgRelease
+      uint32_t HeadImageAddress = *reinterpret_cast<uint32_t *>(imgEntryAddress);
+      HeadImageAddress = *reinterpret_cast<uint32_t *>(HeadImageAddress + 0x4);
+      
+      // imgRelease automatically searches for and clears any images within the specified area
+      ttyd::imgdrv::imgRelease(reinterpret_cast<void *>(HeadImageAddress));
+    }
+  }
+  
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   uint32_t PartnerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId()));
   // uint32_t AreaObjectAddresses = *reinterpret_cast<uint32_t *>(AreaObjectsAddressesStart + 0x4);
@@ -1907,6 +1927,11 @@ void reloadScreen()
     // Reset the black screen fade effect set when loading into a room via a pipe
     uint32_t fadedrvAddress = *reinterpret_cast<uint32_t *>(wp_fadedrv_Address);
     *reinterpret_cast<uint16_t *>(fadedrvAddress) &= ~(1 << 15); // Turn off the 15 bit
+    
+    // Clear chapter end head pictures if any are currently present
+    uint32_t HeadImageAddress = *reinterpret_cast<uint32_t *>(imgEntryAddress);
+    HeadImageAddress = *reinterpret_cast<uint32_t *>(HeadImageAddress + 0x4);
+    ttyd::imgdrv::imgRelease(reinterpret_cast<void *>(HeadImageAddress));
     
     uint32_t SystemLevel = ttyd::mariost::marioStGetSystemLevel();
     if (SystemLevel == 0)
