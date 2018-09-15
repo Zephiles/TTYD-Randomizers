@@ -12,4 +12,3 @@ https://github.com/Zephiles/TTYD-Randomizers/tree/master/relloader-ttyd/REL_Load
 https://github.com/Zephiles/TTYD-Randomizers/tree/master/relloader-ttyd/REL_Loader/Gecko  
 
 ## Known Issues
-The timer does not work properly with 50Hz mode in PAL.
