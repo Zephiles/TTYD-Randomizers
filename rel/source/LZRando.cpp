@@ -4,40 +4,39 @@
 #include "buttons.h"
 #include "patch.h"
 
-#include <ttyd/string.h>
-#include <ttyd/swdrv.h>
-#include <ttyd/mario_pouch.h>
 #include <ttyd/system.h>
+#include <ttyd/swdrv.h>
+#include <ttyd/string.h>
+#include <ttyd/mario_pouch.h>
 #include <ttyd/npcdrv.h>
 #include <ttyd/mario_party.h>
 #include <ttyd/evt_pouch.h>
-#include <ttyd/OSCache.h>
-#include <ttyd/seqdrv.h>
 #include <ttyd/mario.h>
+#include <ttyd/seqdrv.h>
 #include <ttyd/imgdrv.h>
 #include <ttyd/mariost.h>
 #include <ttyd/camdrv.h>
 #include <ttyd/pmario_sound.h>
 #include <ttyd/mario_cam.h>
+#include <ttyd/OSCache.h>
 
 #include <cstdio>
 
 extern bool LZRandoChallenge;
 extern uint32_t TimerCount;
 extern bool LZRando;
-extern uint32_t GSWAddressesStart;
 extern bool ReloadCurrentScreen;
 extern char *NextMap;
 extern bool GameOverFlag;
 extern char *NextBero;
 extern char *NextArea;
 extern bool NewFile;
-extern bool MarioFreeze;
-extern uint32_t _mapEntAddress;
 extern uint32_t PossibleChallengeMaps[];
 extern uint16_t ChallengeMapArraySize;
 extern uint32_t PossibleLZMaps[];
 extern uint16_t LZMapArraySize;
+extern bool MarioFreeze;
+extern uint32_t GSWAddressesStart;
 extern uint32_t seqMainAddress;
 extern bool ClearCacheFlag;
 extern bool SQWarpAway;
@@ -46,6 +45,7 @@ extern uint32_t imgEntryAddress;
 // extern uint32_t AreaObjectsAddressesStart;
 // extern uint32_t AreaLZsAddressesStart;
 // extern uint32_t NPCAddressesStart;
+extern uint32_t _mapEntAddress;
 extern char *NewBero;
 extern char *NewMap;
 extern uint32_t wp_fadedrv_Address;
@@ -77,7 +77,7 @@ namespace mod {
 
 bool CheckChallengeModeTimerCutoff()
 {
-  uint32_t TimerCountCutoff = 144000; // 40 Minutes
+  uint32_t TimerCountCutoff = ttyd::system::sysMsec2Frame(2400000); // 40 minutes
   if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
   {
     return true;
@@ -764,7 +764,7 @@ void getRandomWarp()
     else if (ttyd::string::strcmp(NextMap, "jon_00") == 0)
     {
       // Prevent warping to the Pit if 10 minutes have not passed
-      uint32_t TimerCountCutoff = 180000; // 50 Minutes
+      uint32_t TimerCountCutoff = ttyd::system::sysMsec2Frame(3000000); // 50 minutes
       if (TimerCount >= TimerCountCutoff)
       {
         continue;

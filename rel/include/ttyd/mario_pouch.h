@@ -35,8 +35,8 @@ uint32_t pouchGetHammerLv();
 // pouchGetJumpLv
 // pouchSetAudienceNum
 // pouchGetAudienceNum
-// pouchGetMaxAP
-// pouchSetAP
+int16_t pouchGetMaxAP();
+void pouchSetAP(int16_t sp);
 // pouchAddAP
 // pouchGetAP
 // pouchSetMaxFP

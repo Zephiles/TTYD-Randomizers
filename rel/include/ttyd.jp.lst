@@ -567,8 +567,8 @@
 // 800CF9D4:pouchGetJumpLv
 // 800CFA54:pouchSetAudienceNum
 // 800CFA60:pouchGetAudienceNum
-// 800CFA6C:pouchGetMaxAP
-// 800CFA78:pouchSetAP
+800CFA6C:pouchGetMaxAP
+800CFA78:pouchSetAP
 // 800CFAB4:pouchAddAP
 // 800CFAF8:pouchGetAP
 // 800CFB04:pouchSetMaxFP

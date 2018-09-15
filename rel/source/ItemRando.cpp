@@ -9,7 +9,6 @@
 #include <ttyd/seqdrv.h>
 #include <ttyd/mariost.h>
 #include <ttyd/__mem.h>
-#include <ttyd/battle.h>
 #include <ttyd/OSCache.h>
 
 #include <cstdio>
@@ -31,7 +30,6 @@ extern bool RanAwayFromBattle;
 extern uint16_t EnemyHeldItemArray[8][8];
 extern uint32_t CrystalStarPointerAddress;
 extern bool RandomizeGivenItem;
-extern uint32_t BattleAddressesStart;
 
 extern "C" {
   void StartCrystalStarPointerWrite();
@@ -97,7 +95,7 @@ uint32_t randomizeItem()
       // Prevent the Magical Map or crystal stars from spawning within the first 5 minutes
       if ((NewItem == MagicalMapBigger) || ((NewItem >= DiamondStar) && (NewItem <= CrystalStar)))
       {
-        uint32_t TimerCountCutoff = 198000; // 55 Minutes
+        uint32_t TimerCountCutoff = ttyd::system::sysMsec2Frame(3300000); // 55 minutes
         if (TimerCount >= TimerCountCutoff)
         {
           continue;
@@ -348,7 +346,8 @@ uint32_t getEnemyItemDrop()
   uint32_t ItemsInArray = 0;
   
   // Get total number of current held items
-  for (int i = 0; i < 8; i++)
+  int32_t ArraySize = sizeof(EnemyHeldItemArray[0]) / sizeof(EnemyHeldItemArray[0][0]); // Total column size
+  for (int i = 0; i < ArraySize; i++)
   {
     uint16_t tempitem = EnemyHeldItemArray[EnemyHeldItemArrayCounter][i];
     if (tempitem != 0)
@@ -380,7 +379,8 @@ void randomizeShopRewards()
   // Set up array with new items to use (10 items in the array)
   uint16_t NewItem[10] = { 0 };
   
-  for (int i = 0; i < 10; i++)
+  int32_t ArraySize = sizeof(NewItem) / sizeof(NewItem[0]);
+  for (int i = 0; i < ArraySize; i++)
   {
     bool GetNewItem = true;
     while (GetNewItem)
@@ -394,7 +394,7 @@ void randomizeShopRewards()
       
       // Make sure NewItem isn't already in the array
       bool FoundItem = false;
-      for (int x = 0; x < 10; x++)
+      for (int x = 0; x < ArraySize; x++)
       {
         // Prevent index comparing against itself
         if (i == x)
@@ -425,7 +425,7 @@ void randomizeShopRewards()
   #endif
   
   // Replace items in the array with the items in the new array (10 items in the array)
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < ArraySize; i++)
   {
     *reinterpret_cast<uint32_t *>(ShopRewardsArrayStart + 0x4) = NewItem[i];
     
@@ -565,17 +565,17 @@ void adjustSPForNewCrystalStar(uint32_t CurrentItem)
   
   // Get new Max SP
   uint16_t NewMaxSP = (Multiplier + 1) * 100;
-  uint16_t CurrentMaxSP = *reinterpret_cast<uint16_t *>(PouchPointer + 0x7C);
+  uint16_t CurrentMaxSP = ttyd::mario_pouch::pouchGetMaxAP();
   
   // Check if new Max SP is higher than current Max SP
   if (NewMaxSP > CurrentMaxSP)
   {
-    *reinterpret_cast<uint16_t *>(PouchPointer + 0x7C) = NewMaxSP;
-    *reinterpret_cast<uint16_t *>(PouchPointer + 0x7A) = NewMaxSP; // Current SP
+    *reinterpret_cast<int16_t *>(PouchPointer + 0x7C) = NewMaxSP;
+    ttyd::mario_pouch::pouchSetAP(NewMaxSP);
   }
   else
   {
-    *reinterpret_cast<uint16_t *>(PouchPointer + 0x7A) = CurrentMaxSP; // Current SP
+    ttyd::mario_pouch::pouchSetAP(CurrentMaxSP);
   }
 }
 }

@@ -21,15 +21,14 @@
 extern char *DisplayBuffer;
 extern char *NextMap;
 extern char *NextBero;
-extern uint8_t TimesUpCounter;
-extern uint32_t GSWAddressesStart;
 extern uint8_t JustDefeatedBoss;
 extern bool BossDefeated[19];
 extern uint32_t BossScore;
+extern uint32_t GSWAddressesStart;
 extern bool InGameOver;
 extern uint16_t GameOverCount;
+extern uint8_t TimesUpCounter;
 extern int32_t FinalScore;
-extern int32_t DisplayScores[10];
 extern bool ShowScoreSources;
 extern bool DenyInput;
 extern bool NewFile;
@@ -39,12 +38,12 @@ extern bool TimerActive;
 extern bool DisablePlayerControl;
 extern bool GameOverFlag;
 extern uint32_t seqMainAddress;
-extern bool LZRando;
+extern bool RandomizeCoins;
 extern char *ItemRandoText;
+extern bool LZRando;
 extern char *LZRandoText;
 extern bool LZRandoChallenge;
 extern char *LZRandoChallengeText;
-extern bool RandomizeCoins;
 
 namespace mod {
 
@@ -210,8 +209,8 @@ void Mod::LZRandoChallengeStuff()
     // Check for bosses based on Sequence
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
     uint16_t SequenceChecks[] = { 85, 200, 211, 260, 388 };
-    int32_t ArraySize = sizeof(SequenceChecks) / sizeof(SequenceChecks[0]);
     
+    int32_t ArraySize = sizeof(SequenceChecks) / sizeof(SequenceChecks[0]);
     for (int i = 0; i < ArraySize; i++)
     {
       if (SequencePosition == SequenceChecks[i])
@@ -354,7 +353,8 @@ void Mod::LZRandoChallengeStuff()
     MainScores[9] -= GameOverCount * 5;
     
     // Get total score
-    for (int i = 0; i < 10; i++)
+    int32_t MainScoresArraySize = sizeof(MainScores) / sizeof(MainScores[0]);
+    for (int i = 0; i < MainScoresArraySize; i++)
     {
       Score += MainScores[i];
     }
@@ -380,7 +380,9 @@ void Mod::LZRandoChallengeStuff()
     // Display the Final Score if time is up
     if (TimesUpCounter > 0)
     {
+      // PosX = -232;
       PosY = -80;
+      // Scale = 0.75;
       
       sprintf(DisplayBuffer,
         "Final Score: %ld",
@@ -392,7 +394,9 @@ void Mod::LZRandoChallengeStuff()
     // Display where the points came from
     if (ShowScoreSources)
     {
+      // PosX = -232;
       PosY = -80;
+      // Scale = 0.75;
       
       // Move the display up if the Final Score is being displayed
       if (TimesUpCounter > 0)
@@ -438,7 +442,7 @@ void Mod::LZRandoChallengeStuff()
   // Reset values if starting a new file
   if (NewFile)
   {
-    TimerCount = 216000; // 1 hour
+    TimerCount = ttyd::system::sysMsec2Frame(3600000); // 1 hour
     ShowScoreSources = false;
     TimerDisabled = false;
     TimerActive = false;
@@ -485,17 +489,21 @@ void Mod::LZRandoChallengeStuff()
         Scale += 0.05;
       #endif
       
-      uint32_t modframe = TimerCount % 60;
-      uint32_t second = (TimerCount / 60) % 60;
-      uint32_t minute = (TimerCount / (60 * 60)) % 60;
-      uint32_t hour = TimerCount / (60 * 60 * 60);
+      // Get the proper FPS for the timer
+      uint32_t FPS = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
+      FPS = *reinterpret_cast<uint32_t *>(FPS + 0x4);
+      
+      uint32_t hour = TimerCount / 3600 / FPS;
+      uint32_t minute = (TimerCount / 60 / FPS) % 60;
+      uint32_t second = (TimerCount / FPS) % 60;
+      uint32_t frame = TimerCount % FPS;
       
       sprintf(DisplayBuffer,
         "%.2ld:%.2ld:%.2ld.%.2ld",
         hour,
         minute,
         second,
-        modframe);
+        frame);
       
       drawStringSingleLine(FontDrawX, FontDrawY, color, Scale);
     }
@@ -563,7 +571,7 @@ void Mod::LZRandoChallengeStuff()
           if ((ButtonInputTrg & PAD_Y) == PAD_Y)
           {
             // Reset the timer to continue playing
-            TimerCount = 216000; // 1 hour
+            TimerCount = ttyd::system::sysMsec2Frame(3600000); // 1 hour
             ShowScoreSources = false;
             DisablePlayerControl = false;
             ttyd::mariost::marioStSystemLevel(0);
@@ -629,21 +637,22 @@ void Mod::titleScreenStuff()
   
   sprintf(DisplayBuffer,
     "%s\n%s",
-    "Item Randomizer - v1.2.19",
-    "Loading Zone Randomizer Beta - v0.5.46");
+    "Item Randomizer - v1.2.20",
+    "Loading Zone Randomizer Beta - v0.5.47");
   
   drawStringMultipleLines(PosX, PosY, color, Scale);
   
   // Display overall version
-  PosX = -245;
+  // PosX = -245;
   PosY = -160;
+  // Scale = 0.9;
   
   #ifdef TTYD_JP
     PosY += 10;
   #endif
   
   sprintf(DisplayBuffer,
-    "v1.1.49");
+    "v1.1.50");
   
   drawStringSingleLine(PosX, PosY, color, Scale);
 }
@@ -711,7 +720,9 @@ void Mod::gameModes()
   }
   
   // Move the text down
+  // PosX = -255;
   PosY -= 120;
+  // Scale = 0.75;
   
   // Display current modes
   sprintf(DisplayBuffer,
