@@ -77,8 +77,13 @@ namespace mod {
 
 bool CheckChallengeModeTimerCutoff()
 {
+  if (!LZRandoChallenge)
+  {
+    return false;
+  }
+  
   uint32_t TimerCountCutoff = ttyd::system::sysMsec2Frame(2400000); // 40 minutes
-  if (LZRandoChallenge && (TimerCount >= TimerCountCutoff))
+  if (TimerCount >= TimerCountCutoff)
   {
     return true;
   }

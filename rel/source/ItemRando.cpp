@@ -70,6 +70,8 @@ extern "C" {
   void BranchBackPreventBlooperCrash2();
   void StartFillRunAwayMeter();
   void BranchBackFillRunAwayMeter();
+  void StartPreventTextboxOptions();
+  void BranchBackPreventTextboxOptions();
 }
 
 namespace mod {
@@ -785,6 +787,39 @@ uint32_t preventBlooperCrash1(uint32_t unkValue, void *BattleUnitPointer)
 }
 }
 
+extern "C" {
+void preventTextboxOptions(char *currentText, void *storeAddress, int32_t selectedOption)
+{
+  int32_t NewOption;
+  // First Option = 0
+  // Second Option = 1
+  
+  if (ttyd::string::strcmp(currentText, "mac_0_084_02_yesno") == 0)
+  {
+    // Prevent the second option from being selected if currently being asked to do the Action Commands tutorial
+    NewOption = 0;
+  }
+  else if (ttyd::string::strcmp(currentText, "mac_0_084_03_yesno") == 0)
+  {
+    // Prevent the first option from being selected if currently being asked to do the Action Commands tutorial
+    NewOption = 1;
+  }
+  else if (ttyd::string::strcmp(currentText, "mac_0_103_03_yesno") == 0)
+  {
+    // Prevent the first option from being selected if currently being asked to do the Special Moves tutorial
+    NewOption = 1;
+  }
+  else
+  {
+    // Store the original value
+    NewOption = selectedOption;
+  }
+  
+  uint32_t Address = reinterpret_cast<uint32_t>(storeAddress);
+  *reinterpret_cast<int32_t *>(Address + 0x9C) = NewOption;
+}
+}
+
 void enableArtAttackHitboxes()
 {
   #ifdef TTYD_US
@@ -908,6 +943,8 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t ZubastarIconAddress1 = 0x80233F04;
     uint32_t ZubastarIconAddress2 = 0x80233F6C;
     uint8_t ZubastarIconValue = 0xA3; // 419
+    
+    uint32_t PreventTextbox = 0x800D214C;
   #elif defined TTYD_JP
     uint32_t CrystalStarPointer = 0x800AC284;
     
@@ -986,6 +1023,8 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t ZubastarIconAddress1 = 0x8022E854;
     uint32_t ZubastarIconAddress2 = 0x8022E8BC;
     uint8_t ZubastarIconValue = 0x9B; // 411
+    
+    uint32_t PreventTextbox = 0x800CE01C;
   #elif defined TTYD_EU
     uint32_t CrystalStarPointer = 0x800AF38C;
     
@@ -1064,6 +1103,8 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t ZubastarIconAddress1 = 0x80237994;
     uint32_t ZubastarIconAddress2 = 0x802379FC;
     uint8_t ZubastarIconValue = 0xA3; // 419
+    
+    uint32_t PreventTextbox = 0x800D2F44;
   #endif
   
   // Write Crystal Star pointer
@@ -1249,6 +1290,10 @@ void Mod::writeItemRandoAssemblyPatches()
   // Change BP cost of badge 336 from 2 to 1
   uint32_t InvalidItemBadgePNoKnownEffectAddress = itemDataTable + (InvalidItemBadgePNoKnownEffect * 0x28);
   *reinterpret_cast<uint8_t *>(InvalidItemBadgePNoKnownEffectAddress + 0x1C) = 1; // BP cost
+  
+  // Prevent certain textbox options from being selected
+  patch::writeBranch(reinterpret_cast<void *>(PreventTextbox), reinterpret_cast<void *>(StartPreventTextboxOptions));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackPreventTextboxOptions), reinterpret_cast<void *>(PreventTextbox + 0x4));
   
   // Enable Art Attack hitboxes if a specific badge is equipped
   enableArtAttackHitboxes();
