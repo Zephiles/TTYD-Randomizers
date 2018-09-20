@@ -18,6 +18,7 @@ private:
   
   // Display Stuff
   void displayStuff();
+  void helpMenu();
   void LZRandoDisplayStuff();
   void LZRandoChallengeStuff();
   void titleScreenStuff();

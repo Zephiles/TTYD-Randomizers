@@ -51,6 +51,8 @@ bool TimerDisabled = false;
 bool TimerActive = false;
 uint32_t TimerCount = 0;
 bool DisablePlayerControl = false;
+uint8_t HelpMenuCounter = 0;
+uint8_t PreviousHelpMenuCounterValue = 0;
 
 // Item Rando
 bool RandomizeCoins = false;
