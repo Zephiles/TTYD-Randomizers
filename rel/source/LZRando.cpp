@@ -1376,8 +1376,8 @@ void setUpNewFile()
   MarioFreeze = false;
   
   // Set up stuff for new file
-  // Set Sequence to be just past getting Goombella
-  ttyd::swdrv::swByteSet(0, 7);
+  // Set Sequence to be just past the Bandit stealing Mario's coins
+  ttyd::swdrv::swByteSet(0, 8);
   
   // Add all partners
   for (int i = 1; i <= 7; i++)

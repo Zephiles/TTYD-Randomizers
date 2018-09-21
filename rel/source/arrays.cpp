@@ -22,7 +22,7 @@ const char *HelpMenuArray[] = {
   "This menu displays information about the following:\n\n1. Item Randomizer\n   Pages 2-9\n\n2. Loading Zone Randomizer Beta\n   Pages 10-18\n\n3. Loading Zone Randomizer - 1 Hour Challenge\n   Pages 19-24\n\nPress D-Pad Left/Right to change pages\nPress L + Start to close the menu",
   
   // Page 2
-  "The following will be randomized:\n\n1. Items/Badges that spawn in the field upon entering\n   a screen\n\n2. Items/Badges from chests and blocks\n\n3. Single Coin Blocks\n\n4. Star Pieces in floor panels\n\n5. Coins from the overworld (only when the Randomize\n   Coins option is On). The coins dropped when\n   running away from a battle are not randomized.",
+  "The following will be randomized:\n\n1. Items/Badges that spawn in the field\n\n2. Items/Badges from chests and blocks\n\n3. Single Coin Blocks\n\n4. Star Pieces in floor panels\n\n5. Coins from the overworld (only when the Randomize\n   Coins option is On). The coins dropped when\n   running away from a battle are not randomized.",
   
   // Page 3
   "6. Items held by enemies in battles. All enemies will\n   be holding a random item/badge, and one of these\n   will be dropped at random. Neither the Debug\n   Badge nor important items will ever be\n   held/dropped.\n\n7. Items held by the audience. Any item that spawns\n   in the audience will be randomized (even rocks,\n   bones, etc.), although you will still only get one of\n   the items/badges that is thrown.\n\n8. Standard Shop Items (the Contact Lens and\n   Luigi Books will still appear as normal)\n\n9. Shop Rewards (will never be randomized into the\n   Debug Badge nor important items)",
@@ -55,16 +55,16 @@ const char *HelpMenuArray[] = {
   "Several cheat codes have been added to this mode\nto avoid softlocks:\n\n1. Pressing the following changes the loading zone:\n\n  i.  L + D-Pad Up - changes it to North\n  ii.  L + D-Pad Down - changes it to South\n  iii. L + D-Pad Left - changes it to West\n  iv. L + D-Pad Right - changes it to East\n\n2. L + B reloads the room that you're currently in.\n   There are some instances where you will not be\n   able to reload the room, such as when fighting/\n   about to fight a boss, or being in a Pit room.\n   Reloading the room will also cause the items in the\n   room to respawn.\n\n",
   
   // Page 13
-  "3. L + Z will force Mario off of Yoshi\n\n4. The game will never allow Mario to be transformed\n   into Peach\n\n5. You are able to walk and jump on water. Spin\n   Jumping and going onto water with Yoshi will\n   still cause you to fall into it normally.\n\nWhen warping to a room that has a boss, the\nSequence will be automatically adjusted to allow you\nto fight that boss, assuming that the Sequence was\npreviously below or at the necessary value for that\nboss",
+  "3. L + Z will force Mario off of Yoshi\n\n4. The game will never allow Mario to be transformed\n   into Peach nor Bowser\n\n5. You are able to walk and jump on water. Spin\n   Jumping and going onto water with Yoshi will\n   still cause you to fall into it normally.\n\nWhen warping to a room that has a boss, the\nSequence will be automatically adjusted to allow you\nto fight that boss, assuming that the Sequence was\npreviously below or at the necessary value for that\nboss",
   
   // Page 14
   "The following Bosses are included:\n\n1. Blooper\n2. Gold Fuzzy\n3. Hooktail\n4. Shadow Sirens (Ch2)\n5. Magnus 1\n6. Grubba\n7. Atomic Boo\n8. Doopliss 1\n9. Doopliss 2\n10. Cortez\n11. Crump (Ch5)\n12. Smorg\n13. Magnus 2\n14. Gloomtail",
   
   // Page 15
-  "The Escape Timer will never appear in the rooms that\nuse it\n\nThe Sequence will be automatically adjusted to allow\nyou to get the Paper curses, regardless of what value\nit is currently at. The same is true for collecting\nthe Black Keys for them if necessary.\n\nWhen loading into the room with the Ultra Boots, the\nSequence will be automatically adjusted to allow you\nto get them if it's currently above the necessary\nlevel. Additionally, the loading zone will be\nautomatically set if you are currently able to obtain\nthem.",
+  "The Escape Timer will never appear in the rooms that\nuse it\n\nThe Sequence will be automatically adjusted to allow\nyou to get the Paper curses, regardless of what value\nit is currently at. The same is true for collecting\nthe Black Keys for them if necessary.\n\nWhen loading into the room with the Ultra Boots, the\nSequence will be automatically adjusted to allow you\nto get them if it's currently above the necessary\nlevel. Additionally, the loading zone will be\nautomatically set if you are currently able to obtain\nthem.\n\nThe Pianta Parlor minigames rooms are inaccessible",
   
   // Page 16
-  "The Cog is automatically inserted upon starting a new\nfile\n\nZess T. is now automatically blocking the west\nentrance upon starting a new file. The Contact Lens\nare also automatically ordered. The Sequence needs\nto be past 55 to be able to buy them, however.\n\nFor the US and EU versions of the game, the Power\nRush and Power Rush P icons will be randomized\nupon starting a new file. They will use the icons from\nthe other versions of the game.\n\nIn the event that you enter a battle with no partner\nout, Goombella will automatically be brought out. The\nexception to this is the Doopliss 2 fight.",
+  "The Cog is automatically inserted upon starting a new\nfile. It will still appear in the overworld, however.\n\nZess T. is now automatically blocking the west\nentrance upon starting a new file. The Contact Lens\nare also automatically ordered. The Sequence needs\nto be past 55 to be able to buy them, however.\n\nFor the US and EU versions of the game, the Power\nRush and Power Rush P icons will be randomized\nupon starting a new file. They will use the icons from\nthe other versions of the game.\n\nIn the event that you enter a battle with no partner\nout, Goombella will automatically be brought out. The\nexception to this is the Doopliss 2 fight.",
   
   // Page 17
   "When loading an existing file, Mario's coordinates are\nplaced at 0,0,0. This is to prevent spawning out of\nbounds on a map and not being able to get back in\nbounds.\n\nWhen going to fight Doopliss 2, Vivian is forced out\nboth before and after the fight. This is to prevent\nthe game from crashing.\n\nWhen warping to Glitzville, the Sequence will be\nautomatically adjusted for you to be able to get the\nSuper Hammer if you don't have it already. This\nhappens even if you have the Ultra Hammer already.\n\nYou will be warped to the credits after defeating\nthe Shadow Queen.",
@@ -90,5 +90,6 @@ const char *HelpMenuArray[] = {
   // Page 24
   "Defeating the Shadow Queen will warp you to a\ndifferent room\n\nWhen a boss that does not require a specific\nSequence (such as the Atomic Boo) is defeated, you\nmust go to a different room in order for them to\nrespawn. Warping to the same room will not respawn\nthem; you must warp to a different room first."
  };
+uint8_t HelpMenuArraySize = sizeof(HelpMenuArray) / sizeof(HelpMenuArray[0]);
 
 }

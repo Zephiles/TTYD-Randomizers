@@ -46,6 +46,7 @@ extern char *LZRandoChallengeText;
 extern uint8_t HelpMenuCounter;
 extern uint8_t PreviousHelpMenuCounterValue;
 extern const char *HelpMenuArray[];
+extern uint8_t HelpMenuArraySize;
 
 namespace mod {
 
@@ -635,7 +636,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.2.21",
-    "Loading Zone Randomizer Beta - v0.5.49");
+    "Loading Zone Randomizer Beta - v0.5.50");
   
   drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
   
@@ -648,7 +649,7 @@ void Mod::titleScreenStuff()
     PosY += 10;
   #endif
   
-  const char *VersionNumber = "v1.1.53";
+  const char *VersionNumber = "v1.1.54";
   drawStringSingleLine(PosX, PosY, color, VersionNumber, Scale);
 }
 
@@ -833,9 +834,6 @@ void Mod::helpMenu()
     return;
   }
   
-  // Set the total number of pages
-  uint8_t TotalPages = 24;
-  
   // Check for D-Pad inputs
   if ((ButtonInputTrg & PAD_DPAD_LEFT) == PAD_DPAD_LEFT)
   {
@@ -845,7 +843,7 @@ void Mod::helpMenu()
     if (HelpMenuCounter < 1)
     {
       // Loop around to the last page
-      HelpMenuCounter = TotalPages;
+      HelpMenuCounter = HelpMenuArraySize;
     }
   }
   else if ((ButtonInputTrg & PAD_DPAD_RIGHT) == PAD_DPAD_RIGHT)
@@ -853,7 +851,7 @@ void Mod::helpMenu()
     // Go to the next page
     HelpMenuCounter++;
     
-    if (HelpMenuCounter > TotalPages)
+    if (HelpMenuCounter > HelpMenuArraySize)
     {
       // Loop around to the first page
       HelpMenuCounter = 1;
@@ -879,7 +877,7 @@ void Mod::helpMenu()
   sprintf(DisplayBuffer,
     "%d/%d",
     HelpMenuCounter,
-    TotalPages);
+    HelpMenuArraySize);
     
   drawStringSingleLine(PosX, PosY, TextColor, DisplayBuffer, Scale);
   
