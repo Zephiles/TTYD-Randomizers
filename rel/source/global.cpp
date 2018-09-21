@@ -46,7 +46,6 @@ uint32_t imgEntryAddress = r13 - 0x6F18;
 // Display Stuff
 char *DisplayBuffer = new char[256];
 bool ShowScoreSources = false;
-bool DenyInput = false;
 bool TimerDisabled = false;
 bool TimerActive = false;
 uint32_t TimerCount = 0;

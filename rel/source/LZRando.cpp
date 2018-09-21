@@ -1020,6 +1020,15 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(NextMap, "mri_03") == 0)
+    {
+      // Skip the Dried Shroom cutscene with Petuni if using the challenge mode
+      if (LZRandoChallenge && (SequencePosition == 98))
+      {
+        // Set the Sequence to 100 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 100);
+      }
+    }
     else if (ttyd::string::strcmp(NextMap, "mri_12") == 0)
     {
       // Change the loading zone to prevent spawning next to enemies
