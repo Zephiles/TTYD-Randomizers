@@ -33,7 +33,7 @@ extern "C" {
 // psndBGMChkSilent
 // psndBGMChk
 // psndBGMOff_f_d
-// psndBGMOff
+bool psndBGMOff(uint32_t unk);
 // psndBGMOn_f_d
 // unk_JP_US_PAL_051
 // psndBGMOn

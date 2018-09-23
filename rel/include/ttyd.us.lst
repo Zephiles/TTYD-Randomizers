@@ -643,7 +643,7 @@
 // 800DAB44:psndBGMChkSilent
 // 800DAB84:psndBGMChk
 // 800DABAC:psndBGMOff_f_d
-// 800DAEFC:psndBGMOff
+800DAEFC:psndBGMOff
 // 800DAF24:psndBGMOn_f_d
 // 800DB778:unk_JP_US_PAL_051
 // 800DB7A0:psndBGMOn

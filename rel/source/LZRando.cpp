@@ -41,7 +41,6 @@ extern uint16_t GSWF_Array_Size;
 extern uint16_t GSWF_Array[];
 extern uint32_t seqMainAddress;
 extern bool ClearCacheFlag;
-extern bool RunImgClear;
 extern bool SQWarpAway;
 extern uint8_t JustDefeatedBoss;
 extern uint32_t imgEntryAddress;
@@ -126,6 +125,9 @@ void getRandomWarp()
         
           // Update the Sequence to what it would normally be after getting the curse
           ttyd::swdrv::swByteSet(0, 247);
+          
+          // Turn off the curse background music
+          ttyd::pmario_sound::psndBGMOff(0x201);
         }
       }
     }
@@ -143,6 +145,9 @@ void getRandomWarp()
         
           // Update the Sequence to what it would normally be after getting the curse
           ttyd::swdrv::swByteSet(0, 45);
+          
+          // Turn off the curse background music
+          ttyd::pmario_sound::psndBGMOff(0x201);
         }
       }
     }
@@ -160,6 +165,9 @@ void getRandomWarp()
         
           // Update the Sequence to what it would normally be after getting the curse
           ttyd::swdrv::swByteSet(0, 15);
+          
+          // Turn off the curse background music
+          ttyd::pmario_sound::psndBGMOff(0x201);
         }
       }
     }
@@ -177,6 +185,9 @@ void getRandomWarp()
         
           // Update the Sequence to what it would normally be after getting the curse
           ttyd::swdrv::swByteSet(0, 187);
+          
+          // Turn off the curse background music
+          ttyd::pmario_sound::psndBGMOff(0x201);
         }
       }
     }
@@ -1526,13 +1537,6 @@ void specificMapEdits()
 {
   ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
   ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
-  ttyd::seqdrv::SeqIndex MapChange = ttyd::seqdrv::SeqIndex::kMapChange;
-  
-  // Prevent running imgRelease more than once per screen
-  if (NextSeq == MapChange)
-  {
-    RunImgClear = false;
-  }
   
   if (NextSeq != Game)
   {
@@ -1545,25 +1549,15 @@ void specificMapEdits()
   // Reset JustDefeatedBoss, so that it can be used for other bosses
   JustDefeatedBoss = 0;
   
-  // Clear chapter end head pictures if the next loading zone is a pipe
-  if (ttyd::string::strncmp(NextBero, "dokan", 5) == 0)
+  // Clear chapter end head pictures
+  uint32_t HeadImageAddress = *reinterpret_cast<uint32_t *>(imgEntryAddress);
+  HeadImageAddress = *reinterpret_cast<uint32_t *>(HeadImageAddress + 0x4);
+  char *CurrentImage = reinterpret_cast<char *>(HeadImageAddress + 0xD4);
+  
+  // Only run if the current image displayed is fImg_peron
+  if (ttyd::string::strcmp(CurrentImage, "fImg_peron") == 0)
   {
-    // Only clear once per screen
-    if (!RunImgClear)
-    {
-      // Don't run on muj_00
-      if (ttyd::string::strcmp(NextMap, "muj_00") != 0)
-      {
-        RunImgClear = true;
-      
-        // Get the proper pointer to pass into imgRelease
-        uint32_t HeadImageAddress = *reinterpret_cast<uint32_t *>(imgEntryAddress);
-        HeadImageAddress = *reinterpret_cast<uint32_t *>(HeadImageAddress + 0x4);
-        
-        // imgRelease automatically searches for and clears any images within the specified area
-        ttyd::imgdrv::imgRelease(reinterpret_cast<void *>(HeadImageAddress));
-      }
-    }
+    ttyd::imgdrv::imgRelease(reinterpret_cast<void *>(HeadImageAddress));
   }
   
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
@@ -1630,6 +1624,11 @@ void specificMapEdits()
         // Force Vivian out
         ttyd::mario_party::marioPartyEntry(ttyd::party::PartyMembers::Vivian);
       }
+    }
+    else if (SequencePosition == 213)
+    {
+      // Set the Sequence ahead to 214 to skip the Shadow Sirens cutscene in Twilight Town
+      ttyd::swdrv::swByteSet(0, 214);
     }
   }
   else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
@@ -1872,11 +1871,6 @@ void reloadScreen()
     // Reset the black screen fade effect set when loading into a room via a pipe
     uint32_t fadedrvAddress = *reinterpret_cast<uint32_t *>(wp_fadedrv_Address);
     *reinterpret_cast<uint16_t *>(fadedrvAddress) &= ~(1 << 15); // Turn off the 15 bit
-    
-    // Clear chapter end head pictures if any are currently present
-    uint32_t HeadImageAddress = *reinterpret_cast<uint32_t *>(imgEntryAddress);
-    HeadImageAddress = *reinterpret_cast<uint32_t *>(HeadImageAddress + 0x4);
-    ttyd::imgdrv::imgRelease(reinterpret_cast<void *>(HeadImageAddress));
     
     uint32_t SystemLevel = ttyd::mariost::marioStGetSystemLevel();
     if (SystemLevel == 0)
