@@ -255,7 +255,7 @@ void Mod::LZRandoChallengeStuff()
     BossDefeatedIndex++;
     if (ttyd::string::strcmp(NextMap, "jin_00") == 0)
     {
-      // Check GSWF(2226) - Check the 18 bit
+      // Check GSWF(2226)
       bool AtomicBooCheck = ttyd::swdrv::swGet(2226);
       
       if (AtomicBooCheck && !BossDefeated[BossDefeatedIndex])
@@ -276,7 +276,7 @@ void Mod::LZRandoChallengeStuff()
     BossDefeatedIndex++;
     if (ttyd::string::strcmp(NextMap, "jon_06") == 0)
     {
-      // Check GSWF(5085) - Check the 29 bit
+      // Check GSWF(5085)
       bool BonetailCheck = ttyd::swdrv::swGet(5085);
       
       if (BonetailCheck && !BossDefeated[BossDefeatedIndex])
@@ -414,16 +414,16 @@ void Mod::LZRandoChallengeStuff()
       
       sprintf(DisplayBuffer,
         "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld",
-        MainScores[0],
-        MainScores[1],
-        MainScores[2],
-        MainScores[3],
-        MainScores[4],
-        MainScores[5],
-        MainScores[6],
-        MainScores[7],
-        MainScores[8],
-        MainScores[9]);
+        MainScores[0], // Crystal Stars/Magical Map
+        MainScores[1], // Curses
+        MainScores[2], // Important Items
+        MainScores[3], // Follower
+        MainScores[4], // Level Ups
+        MainScores[5], // Bosses
+        MainScores[6], // Coins
+        MainScores[7], // Badge Log
+        MainScores[8], // Partner Upgrades
+        MainScores[9]); // Game Overs
       
       drawStringSingleLine(PosX, PosY, color, DisplayBuffer, Scale);
     }
@@ -636,7 +636,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.2.21",
-    "Loading Zone Randomizer Beta - v0.5.50");
+    "Loading Zone Randomizer Beta - v0.5.51");
   
   drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
   
@@ -649,7 +649,7 @@ void Mod::titleScreenStuff()
     PosY += 10;
   #endif
   
-  const char *VersionNumber = "v1.1.54";
+  const char *VersionNumber = "v1.1.55";
   drawStringSingleLine(PosX, PosY, color, VersionNumber, Scale);
 }
 

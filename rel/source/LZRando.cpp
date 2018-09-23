@@ -31,14 +31,17 @@ extern bool GameOverFlag;
 extern char *NextBero;
 extern char *NextArea;
 extern bool NewFile;
-extern uint32_t PossibleChallengeMaps[];
 extern uint16_t ChallengeMapArraySize;
-extern uint32_t PossibleLZMaps[];
+extern uint32_t PossibleChallengeMaps[];
 extern uint16_t LZMapArraySize;
+extern uint32_t PossibleLZMaps[];
 extern bool MarioFreeze;
 extern uint32_t GSWAddressesStart;
+extern uint16_t GSWF_Array_Size;
+extern uint16_t GSWF_Array[];
 extern uint32_t seqMainAddress;
 extern bool ClearCacheFlag;
+extern bool RunImgClear;
 extern bool SQWarpAway;
 extern uint8_t JustDefeatedBoss;
 extern uint32_t imgEntryAddress;
@@ -1427,94 +1430,12 @@ void setUpNewFile()
   // Turn off a bit to enable loading zones
   *reinterpret_cast<uint32_t *>(GSWAddresses) &= ~(1 << 0); // Turn off the 0 bit
   
-  // Turn on GSWF(0) to skip shop tutorials
-  ttyd::swdrv::swSet(0);
-  
-  // Turn on GSWF(37) and GSWF(38) to prevent emails from being explained for the first time
-  ttyd::swdrv::swSet(37);
-  ttyd::swdrv::swSet(38);
-  
-  // Turn on GSWF(233) to skip save blocks from being explained for the first time
-  ttyd::swdrv::swSet(233);
-  
-  // Turn on GSWF(234) to skip recovery blocks from being explained for the first time
-  ttyd::swdrv::swSet(234);
-  
-  // Turn on GSWF(235) to skip items from being explained for the first time
-  ttyd::swdrv::swSet(235);
-  
-  // Turn on GSWF(1187) to set Zess T. to be blocking the west entrance
-  ttyd::swdrv::swSet(1187);
-  
-  // Turn on GSWF(1189) to have the Contact Lens ordered already
-  ttyd::swdrv::swSet(1189);
-  
-  // Turn on GSWF(1197) to skip Zess T. explaining that he will cook stuff for the player now
-  ttyd::swdrv::swSet(1197);
-  
-  // Turn on GSWF(1200) to prevent partners from explaining Save Blocks in central Rogueport
-  ttyd::swdrv::swSet(1200);
-  
-  // Turn on GSWF(1334) to have the entrances revealed already in tik_03
-  ttyd::swdrv::swSet(1334);
-  
-  // Turn on GSWF(1353) to skip having to talk to the Plane Mode curse chest for the first time
-  ttyd::swdrv::swSet(1353);
-  
-  // Turn on GSWF(1492) to skip having to talk to the Paper Mode curse chest for the first time
-  ttyd::swdrv::swSet(1492);
-  
-  // Turn on GSWF(1781) and GSWF(1782) to skip the Koopie Koo cutscene in Petal Meadows
-  ttyd::swdrv::swSet(1781);
-  ttyd::swdrv::swSet(1782);
-  
-  // Turn on GSWF(1805) to skip the cutscene of Goombella explaining her tattles on the bridge screen in Petal Meadows
-  ttyd::swdrv::swSet(1805);
-  
-  // Turn on GSWF(1932) to skip having to talk to the Tube Mode curse chest for the first time
-  ttyd::swdrv::swSet(1932);
-  
-  // Turn on GSWF(2075) to skip Vivian's textbox in Twilight Trail
-  ttyd::swdrv::swSet(2075);
-  
-  // Turn on GSWF(2228) to prevent the player from being able to use the Steeple Key
-  ttyd::swdrv::swSet(2228);
-  
-  // Turn on GSWF(2401) to skip the cutscene of entering Grubba's office through the grate for the first time
-  ttyd::swdrv::swSet(2401);
-  
-  // Turn on GSWF(2500) to skip the cutscene of re-signing up to be a fighter
-  ttyd::swdrv::swSet(2500);
-  
-  // Turn on GSWF(2867) to drain the water in the Great Tree
-  ttyd::swdrv::swSet(2867);
-  
-  // Turn on GSWF(2878) to prevent the player from being able to talk to Jabble
-  ttyd::swdrv::swSet(2878);
-  
-  // Turn on GSWF(2982), GSWF(2983), and GSWF(2984) to activate the blue switches in Pirate's Grotto
-  ttyd::swdrv::swSet(2982);
-  ttyd::swdrv::swSet(2983);
-  ttyd::swdrv::swSet(2984);
-  
-  // Turn on GSWF(3131) to skip the cutscene with Four-Eyes after Bobbery is taken by the Embers
-  ttyd::swdrv::swSet(3131);
-  
-  // Turn on GSWF(3574) to skip the cutscene of the bridge being shown when talking to the conductor at Riverside
-  ttyd::swdrv::swSet(3574);
-  
-  // Turn on GSWF(3884) to skip the cutscene on the first screen of the area leading to Fahr Outpost
-  ttyd::swdrv::swSet(3884);
-  
-  // Turn on GSWF(4196) and GSWF(4197) to allow the player to use the crane without needing to insert the Cog
-  ttyd::swdrv::swSet(4196);
-  ttyd::swdrv::swSet(4197);
-  
-  // Turn on GSWF(4218) to skip the crane game tutorial
-  ttyd::swdrv::swSet(4218);
-  
-  // Turn on GSWF(5374) to skip the Trouble Center tutorial
-  ttyd::swdrv::swSet(5374);
+  // Turn on all of the GSWFs in the array
+  uint16_t ArraySize = GSWF_Array_Size; // Prevent the compiled code from loading this variable more than once
+  for (int i = 0; i < ArraySize; i++)
+  {
+    ttyd::swdrv::swSet(GSWF_Array[i]);
+  }
 }
 
 void overwriteNewFileStrings()
@@ -1605,6 +1526,13 @@ void specificMapEdits()
 {
   ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
   ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
+  ttyd::seqdrv::SeqIndex MapChange = ttyd::seqdrv::SeqIndex::kMapChange;
+  
+  // Prevent running imgRelease more than once per screen
+  if (NextSeq == MapChange)
+  {
+    RunImgClear = false;
+  }
   
   if (NextSeq != Game)
   {
@@ -1620,18 +1548,21 @@ void specificMapEdits()
   // Clear chapter end head pictures if the next loading zone is a pipe
   if (ttyd::string::strncmp(NextBero, "dokan", 5) == 0)
   {
-    uint32_t fbatModeAddress = reinterpret_cast<uint32_t>(ttyd::npcdrv::fbatGetPointer());
-    int16_t fbatMode = *reinterpret_cast<int16_t *>(fbatModeAddress);
-    
-    // Only run if the fbat mode is set to 1, otherwise it will conflict with other code
-    if (fbatMode == 1)
+    // Only clear once per screen
+    if (!RunImgClear)
     {
-      // Get the proper pointer to pass into imgRelease
-      uint32_t HeadImageAddress = *reinterpret_cast<uint32_t *>(imgEntryAddress);
-      HeadImageAddress = *reinterpret_cast<uint32_t *>(HeadImageAddress + 0x4);
+      // Don't run on muj_00
+      if (ttyd::string::strcmp(NextMap, "muj_00") != 0)
+      {
+        RunImgClear = true;
       
-      // imgRelease automatically searches for and clears any images within the specified area
-      ttyd::imgdrv::imgRelease(reinterpret_cast<void *>(HeadImageAddress));
+        // Get the proper pointer to pass into imgRelease
+        uint32_t HeadImageAddress = *reinterpret_cast<uint32_t *>(imgEntryAddress);
+        HeadImageAddress = *reinterpret_cast<uint32_t *>(HeadImageAddress + 0x4);
+        
+        // imgRelease automatically searches for and clears any images within the specified area
+        ttyd::imgdrv::imgRelease(reinterpret_cast<void *>(HeadImageAddress));
+      }
     }
   }
   

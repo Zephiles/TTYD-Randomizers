@@ -17,7 +17,100 @@ uint16_t LZMapArraySize = sizeof(PossibleLZMaps) / sizeof(PossibleLZMaps[0]);
 uint32_t PossibleChallengeMaps[] = { aji_02, aji_03, aji_05, aji_07, aji_11, aji_12, aji_13, aji_14, bom_00, bom_01, bom_02, bom_03, bom_04, dou_00, dou_02, dou_04, dou_05, dou_06, dou_07, dou_09, dou_10, eki_00, eki_02, eki_03, eki_04, eki_05, eki_06, gon_01, gon_02, gon_03, gon_04, gon_05, gon_06, gon_07, gon_08, gon_09, gon_11, gon_12, gon_13, gor_00, gor_01, gor_02, gor_03, gor_04, gra_00, gra_01, gra_02, gra_03, gra_04, gra_05, gra_06, hei_00, hei_01, hei_02, hei_04, hei_06, hei_08, hei_10, hei_12, hei_13, hom_00, jin_00, jin_03, jin_04, jin_05, jin_06, jin_07, jin_08, jin_09, jin_10, jin_11, jon_00, las_01, las_02, las_03, las_04, las_06, las_07, las_09, las_11, las_12, las_13, las_14, las_15, las_16, las_17, las_18, las_19, las_20, las_22, las_24, las_25, las_26, las_28, las_29, las_30, moo_01, moo_02, moo_06, moo_07, mri_00, mri_01, mri_02, mri_03, mri_04, mri_05, mri_06, mri_07, mri_09, mri_10, mri_12, mri_13, mri_15, mri_16, mri_17, mri_19, mri_20, muj_00, muj_01, muj_02, muj_03, muj_04, muj_05, muj_12, nok_00, nok_01, pik_00, pik_01, pik_03, pik_04, rsh_00_c, rsh_02_c, rsh_03_c, rsh_04_c, rsh_05_a, rsh_06_a, tik_00, tik_01, tik_02, tik_03, tik_04, tik_05, tik_06, tik_07, tik_11, tik_12, tik_13, tik_15, tik_16, tik_17, tik_18, tik_19, tik_20, tik_21, tou_01, tou_02, tou_03, tou_04, tou_05, tou_06, tou_07, tou_08, tou_12, usu_00, usu_01, win_00, win_01, win_02, win_03, win_05 };
 uint16_t ChallengeMapArraySize = sizeof(PossibleChallengeMaps) / sizeof(PossibleChallengeMaps[0]);
 
-const char *HelpMenuArray[] = { 
+// Set up array for GSWFs to turn on upon starting a new file with the Loading Zone randomizer/Challenge Mode
+uint16_t GSWF_Array[] = {
+  // Turn on GSWF(0) to skip shop tutorials
+  0,
+  
+  // Turn on GSWF(37) and GSWF(38) to prevent emails from being explained for the first time
+  37,
+  38,
+  
+  // Turn on GSWF(233) to skip save blocks from being explained for the first time
+  233,
+  
+  // Turn on GSWF(234) to skip recovery blocks from being explained for the first time
+  234,
+
+  // Turn on GSWF(235) to skip items from being explained for the first time
+  235,
+  
+  // Turn on GSWF(1187) to set Zess T. to be blocking the west entrance
+  1187,
+  
+  // Turn on GSWF(1189) to have the Contact Lens ordered already
+  1189,
+  
+  // Turn on GSWF(1197) to skip Zess T. explaining that he will cook stuff for the player now
+  1197,
+  
+  // Turn on GSWF(1200) to prevent partners from explaining Save Blocks in central Rogueport
+  1200,
+  
+  // Turn on GSWF(1334) to have the entrances revealed already in tik_03
+  1334,
+  
+  // Turn on GSWF(1353) to skip having to talk to the Plane Mode curse chest for the first time
+  1353,
+  
+  // Turn on GSWF(1492) to skip having to talk to the Paper Mode curse chest for the first time
+  1492,
+  
+  // Turn on GSWF(1781) and GSWF(1782) to skip the Koopie Koo cutscene in Petal Meadows
+  1781,
+  1782,
+  
+  // Turn on GSWF(1805) to skip the cutscene of Goombella explaining her tattles on the bridge screen in Petal Meadows
+  1805,
+  
+  // Turn on GSWF(1932) to skip having to talk to the Tube Mode curse chest for the first time
+  1932,
+  
+  // Turn on GSWF(2075) to skip Vivian's textbox in Twilight Trail
+  2075,
+  
+  // Turn on GSWF(2228) to prevent the player from being able to use the Steeple Key
+  2228,
+  
+  // Turn on GSWF(2401) to skip the cutscene of entering Grubba's office through the grate for the first time
+  2401,
+  
+  // Turn on GSWF(2500) to skip the cutscene of re-signing up to be a fighter
+  2500,
+  
+  // Turn on GSWF(2867) to drain the water in the Great Tree
+  2867,
+  
+  // Turn on GSWF(2878) to prevent the player from being able to talk to Jabble
+  2878,
+  
+  // Turn on GSWF(2982), GSWF(2983), and GSWF(2984) to activate the blue switches in Pirate's Grotto
+  2982,
+  2983,
+  2984,
+  
+  // Turn on GSWF(3131) to skip the cutscene with Four-Eyes after Bobbery is taken by the Embers
+  3131,
+  
+  // Turn on GSWF(3574) to skip the cutscene of the bridge being shown when talking to the conductor at Riverside
+  3574,
+  
+  // Turn on GSWF(3884) to skip the cutscene on the first screen of the area leading to Fahr Outpost
+  3884,
+  
+  // Turn on GSWF(4196) and GSWF(4197) to allow the player to use the crane without needing to insert the Cog
+  4196,
+  4197,
+  
+  // Turn on GSWF(4218) to skip the crane game tutorial
+  4218,
+  
+  // Turn on GSWF(5374) to skip the Trouble Center tutorial
+  5374
+};
+uint16_t GSWF_Array_Size = sizeof(GSWF_Array) / sizeof(GSWF_Array[0]);
+
+const char *HelpMenuArray[] = {
   // Page 1
   "This menu displays information about the following:\n\n1. Item Randomizer\n   Pages 2-9\n\n2. Loading Zone Randomizer Beta\n   Pages 10-18\n\n3. Loading Zone Randomizer - 1 Hour Challenge\n   Pages 19-24\n\nPress D-Pad Left/Right to change pages\nPress L + Start to close the menu",
   
@@ -28,7 +121,7 @@ const char *HelpMenuArray[] = {
   "6. Items held by enemies in battles. All enemies will\n   be holding a random item/badge, and one of these\n   will be dropped at random. Neither the Debug\n   Badge nor important items will ever be\n   held/dropped.\n\n7. Items held by the audience. Any item that spawns\n   in the audience will be randomized (even rocks,\n   bones, etc.), although you will still only get one of\n   the items/badges that is thrown.\n\n8. Standard Shop Items (the Contact Lens and\n   Luigi Books will still appear as normal)\n\n9. Shop Rewards (will never be randomized into the\n   Debug Badge nor important items)",
   
   // Page 4
-  "10. Hot Dogs bought from Glitzville (will never be\n    randomized into the Debug Badge nor\n    important items)\n\nDue to story progression requirements, the door in\nWestside Goods leading to Don Pianta will always be\nunlocked.\n\nDue to story progression requirements, the Coconuts\nfrom the tree at Keelhaul Key will not be randomized\nduring the time that they are needed.",
+  "10. Hot Dogs bought from Glitzville (will never be\n    randomized into the Debug Badge nor\n    important items)\n\nTo avoid softlocks, the Action Commands and Special\nMoves tutorials are inaccessible\n\nDue to story progression requirements, the door in\nWestside Goods leading to Don Pianta will always be\nunlocked.\n\nDue to story progression requirements, the Coconuts\nfrom the tree at Keelhaul Key will not be randomized\nduring the time that they are needed.",
   
   // Page 5
   "In addition to the regular items and badges, the\nfollowing can be obtained:\n\n1. Strange Sack\n2. Crystal Stars (will not advance the Sequence, but\n   will still give you the special move)\n3. Magical Map (gives you Sweet Treat)\n\nWhen the game is about to spawn an item and the\nitem is an important item/upgrade, it first checks to\nsee if you already have that item, and picks a\ndifferent item if you do\n\nThe SP needed for Sweet Feast has been changed\nfrom 5 to 3",
@@ -89,7 +182,7 @@ const char *HelpMenuArray[] = {
   
   // Page 24
   "Defeating the Shadow Queen will warp you to a\ndifferent room\n\nWhen a boss that does not require a specific\nSequence (such as the Atomic Boo) is defeated, you\nmust go to a different room in order for them to\nrespawn. Warping to the same room will not respawn\nthem; you must warp to a different room first."
- };
+};
 uint8_t HelpMenuArraySize = sizeof(HelpMenuArray) / sizeof(HelpMenuArray[0]);
 
 }
