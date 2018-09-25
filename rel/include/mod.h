@@ -45,6 +45,8 @@ private:
   uint32_t (*mPFN_warpAwayFromSQ_trampoline)(void *) = nullptr;
   bool preventGetItemOnReload(uint32_t);
   bool (*mPFN_preventGetItemOnReload_trampoline)(uint32_t) = nullptr;
+  void preventMarioEndOfChapterHeads(int, int, uint8_t *);
+  void (*mPFN_preventMarioEndOfChapterHeads_trampoline)(int, int, uint8_t *) = nullptr;
   
 private:
   void (*mPFN_makeKey_trampoline)() = nullptr;

@@ -13,7 +13,6 @@
 #include <ttyd/evt_pouch.h>
 #include <ttyd/mario.h>
 #include <ttyd/seqdrv.h>
-#include <ttyd/imgdrv.h>
 #include <ttyd/mariost.h>
 #include <ttyd/camdrv.h>
 #include <ttyd/pmario_sound.h>
@@ -43,7 +42,6 @@ extern uint32_t seqMainAddress;
 extern bool ClearCacheFlag;
 extern bool SQWarpAway;
 extern uint8_t JustDefeatedBoss;
-extern uint32_t imgEntryAddress;
 // extern uint32_t AreaObjectsAddressesStart;
 // extern uint32_t AreaLZsAddressesStart;
 // extern uint32_t NPCAddressesStart;
@@ -1549,17 +1547,6 @@ void specificMapEdits()
   // Reset JustDefeatedBoss, so that it can be used for other bosses
   JustDefeatedBoss = 0;
   
-  // Clear chapter end head pictures
-  uint32_t HeadImageAddress = *reinterpret_cast<uint32_t *>(imgEntryAddress);
-  HeadImageAddress = *reinterpret_cast<uint32_t *>(HeadImageAddress + 0x4);
-  char *CurrentImage = reinterpret_cast<char *>(HeadImageAddress + 0xD4);
-  
-  // Only run if the current image displayed is fImg_peron
-  if (ttyd::string::strcmp(CurrentImage, "fImg_peron") == 0)
-  {
-    ttyd::imgdrv::imgRelease(reinterpret_cast<void *>(HeadImageAddress));
-  }
-  
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   uint32_t PartnerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId()));
   // uint32_t AreaObjectAddresses = *reinterpret_cast<uint32_t *>(AreaObjectsAddressesStart + 0x4);
@@ -1674,7 +1661,7 @@ void dismountYoshi()
     return;
   }
   
-  uint16_t CurrentlyUsingYoshi = 26;
+  const uint16_t CurrentlyUsingYoshi = 26;
   ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
   
   if (player->currentMotionId == CurrentlyUsingYoshi)
@@ -1699,9 +1686,9 @@ void resetMarioThroughLZ()
     return;
   }
   
-  uint16_t CurrentlyUsingTubeMode = 22;
-  uint16_t CurrentlyUsingBoatMode = 25;
-  uint16_t CurrentlyUsingYoshi = 26;
+  const uint16_t CurrentlyUsingTubeMode = 22;
+  const uint16_t CurrentlyUsingBoatMode = 25;
+  const uint16_t CurrentlyUsingYoshi = 26;
   
   ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
   
@@ -1721,7 +1708,7 @@ void reloadScreen()
   uint16_t ReloadScreenCombo = PAD_L | PAD_B;
   
   ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
-  uint16_t ReceivingItem = 15;
+  const uint16_t ReceivingItem = 15;
   
   ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
   ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
@@ -2072,7 +2059,7 @@ uint32_t spawnPartnerBattle(uint32_t PartnerValue)
   // Only force a partner out if the Loading Zone randomizer is in use
   if ((PartnerValue == 0) && LZRando)
   {
-    uint32_t Goombella = 224;
+    const uint32_t Goombella = 224;
     
     // Check if fighting Doopliss 2
     if (ttyd::string::strcmp(NextMap, "jin_04") == 0)
@@ -2333,6 +2320,37 @@ bool Mod::preventGetItemOnReload(uint32_t id)
     // Call original function
     return mPFN_preventGetItemOnReload_trampoline(id);
   }
+}
+
+void Mod::preventMarioEndOfChapterHeads(int type, int duration, uint8_t *color)
+{
+  // Only prevent from displaying if the Loading Zone randomizer is currently in use
+  if (LZRando)
+  {
+    const int MarioHeadFadeIn = 54;
+    const int MarioHeadFadeOut = 55;
+    const int BlackFadeIn = 9;
+    const int BlackFadeOut = 10;
+    
+    if (type == MarioHeadFadeIn)
+    {
+      // Change the Mario heads to a black screen
+      type = BlackFadeIn;
+      
+      // Change the duration to 0 so that the black screen goes away instantly
+      duration = 0;
+    }
+    else if (type == MarioHeadFadeOut)
+    {
+      // Clear the black screen
+      type = BlackFadeOut;
+      
+      // Change the duration to 0 to set the screen to black instantly
+      duration = 0;
+    }
+  }
+  
+  return mPFN_preventMarioEndOfChapterHeads_trampoline(type, duration, color);
 }
 
 void Mod::writeLZRandoAssemblyPatches()

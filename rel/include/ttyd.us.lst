@@ -99,6 +99,35 @@
 80010C64:dispReInit
 80010C70:dispInit
 
+// fadedrv.o
+// 80010CD4:fadeSetNarrowFast
+// 80010CE8:fadeGetTpl
+// 80010CF4:fadeReset
+// 80010D94:fadeIsFinish
+// 80010DC0:disp_dummy_black
+// 80010FB8:disp_tec
+// 800113BC:disp_maku
+// 800116F4:zFill
+// 8001198C:z
+// 80011A7C:disp_texture
+// 80012058:fadeMain
+// 80013220:fadeSetOffscreenCallback
+// 80013230:fadeSetAnimVirtualPos
+// 80013290:fadeSetAnimOfsPos
+// 800132A0:fadeSetSpotPos
+// 800132B0:fadeWhiteOutOff
+// 800132C4:fadeWhiteOutOn
+// 800132D8:fadeSoftFocusOff
+// 800132EC:fadeSoftFocusOn
+// 80013300:fadeTecSoftOff
+// 80013320:fadeTecSoftOn
+// 80013340:fadeTecOff
+// 80013354:fadeTecOn
+80013368:fadeEntry
+// 80013AA4:fadeTexSetup
+// 80013B90:fadeInit
+// 80013CA4:_callback
+
 // seqdrv.o
 8002E1E4:seqCheckSeq
 8002E200:seqGetNextSeq

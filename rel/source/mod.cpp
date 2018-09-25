@@ -8,6 +8,7 @@
 #include <ttyd/countdown.h>
 #include <ttyd/mot_ship.h>
 #include <ttyd/evt_seq.h>
+#include <ttyd/fadedrv.h>
 #include <ttyd/fontmgr.h>
 
 #include "patch.h"
@@ -82,6 +83,12 @@ void Mod::init()
   mPFN_preventGetItemOnReload_trampoline = patch::hookFunction(ttyd::mario_pouch::pouchGetItem, [](uint32_t id)
   {
     return gMod->preventGetItemOnReload(id);
+  });
+  
+  // Prevent the Mario heads from appearing at the end of chapters
+  mPFN_preventMarioEndOfChapterHeads_trampoline = patch::hookFunction(ttyd::fadedrv::fadeEntry, [](int type, int duration, uint8_t *color)
+  {
+    return gMod->preventMarioEndOfChapterHeads(type, duration, color);
   });
   
   // Make changes that are only done once

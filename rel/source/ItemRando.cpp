@@ -791,23 +791,23 @@ extern "C" {
 void preventTextboxOptions(char *currentText, void *storeAddress, int32_t selectedOption)
 {
   int32_t NewOption;
-  // First Option = 0
-  // Second Option = 1
+  const int32_t FirstOption = 0;
+  const int32_t SecondOption = 1;
   
   if (ttyd::string::strcmp(currentText, "mac_0_084_02_yesno") == 0)
   {
     // Prevent the second option from being selected if currently being asked to do the Action Commands tutorial
-    NewOption = 0;
+    NewOption = FirstOption;
   }
   else if (ttyd::string::strcmp(currentText, "mac_0_084_03_yesno") == 0)
   {
     // Prevent the first option from being selected if currently being asked to do the Action Commands tutorial
-    NewOption = 1;
+    NewOption = SecondOption;
   }
   else if (ttyd::string::strcmp(currentText, "mac_0_103_03_yesno") == 0)
   {
     // Prevent the first option from being selected if currently being asked to do the Special Moves tutorial
-    NewOption = 1;
+    NewOption = SecondOption;
   }
   else
   {
