@@ -2350,7 +2350,8 @@ void Mod::preventMarioEndOfChapterHeads(int type, int duration, uint8_t *color)
     }
   }
   
-  return mPFN_preventMarioEndOfChapterHeads_trampoline(type, duration, color);
+  // Call original function
+  mPFN_preventMarioEndOfChapterHeads_trampoline(type, duration, color);
 }
 
 void Mod::writeLZRandoAssemblyPatches()

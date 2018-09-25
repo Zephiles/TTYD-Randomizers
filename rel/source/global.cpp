@@ -59,6 +59,7 @@ bool CrystalStarIsInField = false;
 bool EmeraldStarAlreadyChanged = false;
 uint16_t CrystalStarNewItem = 1; // Have the Strange Sack used by default as a failsafe
 bool MarioRunAwayCoinDrop = false;
+bool HitMultiCoinBlock = false;
 bool EnemyHeldItemArrayInUse = false;
 int8_t EnemyHeldItemArrayCounter = 0;
 bool RanAwayFromBattle = false;

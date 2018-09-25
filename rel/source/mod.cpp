@@ -42,7 +42,7 @@ void Mod::init()
   // Item Rando
   mPFN_itemEntry_trampoline = patch::hookFunction(ttyd::itemdrv::itemEntry, [](const char *itemName, uint32_t itemId, uint32_t itemMode, int32_t wasCollectedExpr, void *itemPickupScript, float itemCoordinateX, float itemCoordinateY, float itemCoordinateZ)
   {
-    return gMod->getRandomItem(const_cast<char *>(itemName), itemId, itemMode, wasCollectedExpr, reinterpret_cast<uint32_t *>(itemPickupScript), itemCoordinateX, itemCoordinateY, itemCoordinateZ);
+    return gMod->getRandomItem(itemName, itemId, itemMode, wasCollectedExpr, itemPickupScript, itemCoordinateX, itemCoordinateY, itemCoordinateZ);
   });
   
   // Prevent Crystal Stars from bosses adjusting the max SP and giving special moves

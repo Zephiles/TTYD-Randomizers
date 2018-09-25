@@ -23,6 +23,7 @@ extern bool CrystalStarIsInField;
 extern bool EmeraldStarAlreadyChanged;
 extern uint16_t CrystalStarNewItem;
 extern bool MarioRunAwayCoinDrop;
+extern bool HitMultiCoinBlock;
 extern bool EnemyHeldItemArrayInUse;
 extern bool RandomizeCoins;
 extern int8_t EnemyHeldItemArrayCounter;
@@ -72,6 +73,7 @@ extern "C" {
   void BranchBackFillRunAwayMeter();
   void StartPreventTextboxOptions();
   void BranchBackPreventTextboxOptions();
+  void StartMultiCoinBlock();
 }
 
 namespace mod {
@@ -236,6 +238,13 @@ uint32_t randomizeItemWithChecks(uint32_t currentItemId)
     return currentItemId;
   }
   
+  // Don't randomize coins that appear when hitting a multi-coin block
+  if (HitMultiCoinBlock)
+  {
+    HitMultiCoinBlock = false;
+    return currentItemId;
+  }
+  
   // Don't randomize Coconuts during the time that they are needed in Chapter 5
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   if ((currentItemId == Coconut) && (SequencePosition >= 232) && (SequencePosition <= 236))
@@ -277,7 +286,7 @@ void *Mod::getRandomItem(const char *itemName, uint32_t itemId, uint32_t itemMod
   itemId = randomizeItemWithChecks(itemId);
   
   // Call original function
-  return mPFN_itemEntry_trampoline(const_cast<char *>(itemName), itemId, itemMode, wasCollectedExpr, reinterpret_cast<uint32_t *>(itemPickupScript), itemCoordinateX, itemCoordinateY, itemCoordinateZ);
+  return mPFN_itemEntry_trampoline(itemName, itemId, itemMode, wasCollectedExpr, itemPickupScript, itemCoordinateX, itemCoordinateY, itemCoordinateZ);
 }
 
 void manageEnemyHeldItemArray()
@@ -870,6 +879,9 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t RunAwayCoinDrop = 0x800AEAEC;
     
+    uint32_t MultiCoinBlock1 = 0x80065D9C;
+    uint32_t MultiCoinBlock2 = 0x80065E50;
+    
     uint32_t NewItemToInventory = 0x800F0E3C;
     
     uint32_t FixNewItemToInventory = 0x800D52E8;
@@ -950,6 +962,9 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t RunAwayCoinDrop = 0x800ACDB4;
     
+    uint32_t MultiCoinBlock1 = 0x80064E98;
+    uint32_t MultiCoinBlock2 = 0x80064F4C;
+    
     uint32_t NewItemToInventory = 0x800EC180;
     
     uint32_t FixNewItemToInventory = 0x800D10C8;
@@ -1029,6 +1044,9 @@ void Mod::writeItemRandoAssemblyPatches()
     uint32_t CrystalStarPointer = 0x800AF38C;
     
     uint32_t RunAwayCoinDrop = 0x800AFEBC;
+    
+    uint32_t MultiCoinBlock1 = 0x80066634;
+    uint32_t MultiCoinBlock2 = 0x800666E8;
     
     uint32_t NewItemToInventory = 0x800F1CA8;
     
@@ -1114,6 +1132,14 @@ void Mod::writeItemRandoAssemblyPatches()
   // Write run away coin drop
   patch::writeBranch(reinterpret_cast<void *>(RunAwayCoinDrop), reinterpret_cast<void *>(StartMarioRunAwayCoinDrop));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackMarioRunAwayCoinDrop), reinterpret_cast<void *>(RunAwayCoinDrop + 0x4));
+  
+  // Write multi-coin block
+  patch::writeBranch(reinterpret_cast<void *>(MultiCoinBlock1), reinterpret_cast<void *>(StartMultiCoinBlock));
+  patch::writeBranch(reinterpret_cast<void *>(MultiCoinBlock2), reinterpret_cast<void *>(StartMultiCoinBlock));
+  
+  // Adjust branches to be bl instead of b; should modify the patch function to allow for this instead
+  *reinterpret_cast<uint32_t *>(MultiCoinBlock1) += 0x1;
+  *reinterpret_cast<uint32_t *>(MultiCoinBlock2) += 0x1;
   
   // Write New Item to inventory
   patch::writeBranch(reinterpret_cast<void *>(NewItemToInventory), reinterpret_cast<void *>(StartNewItemsToInventory));
