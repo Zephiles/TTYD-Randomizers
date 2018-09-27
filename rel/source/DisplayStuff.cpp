@@ -70,6 +70,11 @@ void drawStringMultipleLines(int32_t PosX, int32_t PosY, uint32_t color, const c
   drawstring::drawStringMultiline(PosX, PosY, String);
 }
 
+void displayWindow(uint32_t color, int32_t x, int32_t y, int32_t width, int32_t height, int32_t curve)
+{
+  ttyd::windowdrv::windowDispGX_Waku_col(0, reinterpret_cast<uint8_t *>(&color), x, y, width, height, curve);
+}
+
 void Mod::LZRandoDisplayStuff()
 {
   ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
@@ -203,7 +208,7 @@ void Mod::LZRandoChallengeStuff()
         if (!BossDefeated[BossDefeatedIndex])
         {
           BossDefeated[BossDefeatedIndex] = true;
-          BossScore += 6;
+          BossScore += 8;
         }
       }
       else
@@ -243,7 +248,7 @@ void Mod::LZRandoChallengeStuff()
       if (!BossDefeated[BossDefeatedIndex])
       {
         BossDefeated[BossDefeatedIndex] = true;
-        BossScore += 20;
+        BossScore += 25;
       }
     }
     else
@@ -282,7 +287,7 @@ void Mod::LZRandoChallengeStuff()
       if (BonetailCheck && !BossDefeated[BossDefeatedIndex])
       {
         BossDefeated[BossDefeatedIndex] = true;
-        BossScore += 20;
+        BossScore += 30;
       }
     }
     else
@@ -294,10 +299,10 @@ void Mod::LZRandoChallengeStuff()
       ttyd::swdrv::swClear(5085);
     }
     
-    // Add 10 points for each boss defeated; 20 points for the Shadow Queen and Bonetail
+    // Add 10 points for each boss defeated; 25 points for the Shadow Queens and 30 points for Bonetail
     MainScores[5] = BossScore;
     
-    // Add 1 point for Mario's coin count divided by 100
+    // Add 1 point for every 100 coins that the player has
     int16_t CoinCount = ttyd::mario_pouch::pouchGetCoin();
     MainScores[6] = CoinCount / 100;
     
@@ -608,11 +613,11 @@ void Mod::titleScreenStuff()
   // Display Item Randomizer versions and Loading Zone Randomizer version
   // Draw window for the text to go in
   uint32_t color = 0x000000CC;
-  float CoordX = -260;
-  float CoordY = -25;
-  float Width = 532;
-  float Height = 65;
-  float Curve = 10;
+  int32_t CoordX = -260;
+  int32_t CoordY = -25;
+  int32_t Width = 532;
+  int32_t Height = 65;
+  int32_t Curve = 10;
   
   #ifdef TTYD_JP
     CoordX += 10;
@@ -620,7 +625,7 @@ void Mod::titleScreenStuff()
     Width -= 15;
   #endif
   
-  ttyd::windowdrv::windowDispGX_Waku_col(0, reinterpret_cast<uint8_t *>(&color), CoordX, CoordY, Width, Height, Curve);
+  displayWindow(color, CoordX, CoordY, Width, Height, Curve);
   
   // Display the text
   color = 0xFFFFFFFF;
@@ -636,7 +641,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.2.22",
-    "Loading Zone Randomizer Beta - v0.5.53");
+    "Loading Zone Randomizer Beta - v0.5.54");
   
   drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
   
@@ -649,7 +654,7 @@ void Mod::titleScreenStuff()
     PosY += 10;
   #endif
   
-  const char *VersionNumber = "v1.1.58";
+  const char *VersionNumber = "v1.1.59";
   drawStringSingleLine(PosX, PosY, color, VersionNumber, Scale);
 }
 
@@ -860,13 +865,13 @@ void Mod::helpMenu()
   
   // Display the window for the text to go in
   uint32_t MenuColor = 0x000000EE;
-  float CoordX = -245;
-  float CoordY = 190;
-  float Width = 490;
-  float Height = 375;
-  float Curve = 0;
+  int32_t CoordX = -245;
+  int32_t CoordY = 190;
+  int32_t Width = 490;
+  int32_t Height = 375;
+  int32_t Curve = 0;
   
-  ttyd::windowdrv::windowDispGX_Waku_col(0, reinterpret_cast<uint8_t *>(&MenuColor), CoordX, CoordY, Width, Height, Curve);
+  displayWindow(MenuColor, CoordX, CoordY, Width, Height, Curve);
   
   // Display the current page
   uint32_t TextColor = 0xFFFFFFFF;

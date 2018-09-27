@@ -1376,10 +1376,7 @@ void getRandomWarp()
 
 void setUpNewFile()
 {
-  uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-  bool Comparisons = (SequencePosition == 0) && NewFile;
-  
-  if (!Comparisons)
+  if (!NewFile)
   {
     return;
   }
