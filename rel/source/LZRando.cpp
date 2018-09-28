@@ -8,6 +8,7 @@
 #include <ttyd/swdrv.h>
 #include <ttyd/string.h>
 #include <ttyd/mario_pouch.h>
+#include <ttyd/pmario_sound.h>
 #include <ttyd/npcdrv.h>
 #include <ttyd/mario_party.h>
 #include <ttyd/evt_pouch.h>
@@ -15,7 +16,6 @@
 #include <ttyd/seqdrv.h>
 #include <ttyd/mariost.h>
 #include <ttyd/camdrv.h>
-#include <ttyd/pmario_sound.h>
 #include <ttyd/mario_cam.h>
 #include <ttyd/OSCache.h>
 
@@ -30,6 +30,7 @@ extern bool GameOverFlag;
 extern char *NextBero;
 extern char *NextArea;
 extern bool NewFile;
+extern bool GameOverChallengeMode;
 extern uint16_t ChallengeMapArraySize;
 extern uint32_t PossibleChallengeMaps[];
 extern uint16_t LZMapArraySize;
@@ -46,8 +47,6 @@ extern uint8_t JustDefeatedBoss;
 // extern uint32_t AreaLZsAddressesStart;
 // extern uint32_t NPCAddressesStart;
 extern uint32_t _mapEntAddress;
-extern char *NewBero;
-extern char *NewMap;
 extern uint32_t wp_fadedrv_Address;
 
 extern "C" {
@@ -287,6 +286,11 @@ void getRandomWarp()
   }
   
   GameOverFlag = false;
+  
+  if (LZRandoChallenge)
+  {
+    GameOverChallengeMode = false;
+  }
   
   // Get new map to warp to
   uint32_t *MapArray;
@@ -1546,6 +1550,7 @@ void specificMapEdits()
   
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   uint32_t PartnerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId()));
+  ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
   // uint32_t AreaObjectAddresses = *reinterpret_cast<uint32_t *>(AreaObjectsAddressesStart + 0x4);
   // uint32_t AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZsAddressesStart);
   // AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x4);
@@ -1570,8 +1575,6 @@ void specificMapEdits()
       uint32_t RopeAddress = *reinterpret_cast<uint32_t *>(_mapEntAddress);
       RopeAddress= *reinterpret_cast<uint32_t *>(RopeAddress + 0x154);
       float RopePosZ = *reinterpret_cast<float *>(RopeAddress + 0x8B4);
-      
-      ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
       
       player->flags1 |= (1 << 1); // Turn on the 1 bit
       player->wJumpVelocityY = 0;
@@ -1605,8 +1608,12 @@ void specificMapEdits()
       
       if (CurrentPartnerOut != static_cast<uint8_t>(ttyd::party::PartyMembers::Vivian))
       {
-        // Force Vivian out
-        ttyd::mario_party::marioPartyEntry(ttyd::party::PartyMembers::Vivian);
+        // Check if Mario's Y Coordinate is 670 and that he is currently not moving
+        if ((player->playerPosition[1] == 670) && (player->currentMotionId == 0))
+        {
+          // Force Vivian out
+          ttyd::mario_party::marioPartyEntry(ttyd::party::PartyMembers::Vivian);
+        }
       }
     }
     else if (SequencePosition == 213)
@@ -1845,6 +1852,8 @@ void reloadScreen()
     // Not in the pause menu
     // A separate address for NextBero is needed, as the original value will be cleared during the reloading process
     // The game will crash if NextMap is used directly in seqSetSeq, so a separate address must be used instead
+    char NewBero[32]; // 31 bytes for NextBero, 1 byte for NULL
+    char NewMap[9]; // 8 bytes for NextMap, 1 byte for NULL
     
     ttyd::string::strcpy(NewBero, NextBero);
     ttyd::string::strcpy(NewMap, NextMap);
@@ -1973,6 +1982,11 @@ void resetValuesOnGameOver()
   ReloadCurrentScreen = false;
   MarioFreeze = false;
   GameOverFlag = true;
+  
+  if (LZRandoChallenge)
+  {
+    GameOverChallengeMode = true;
+  }
 }
 
 void reloadCurrentScreenFlag()

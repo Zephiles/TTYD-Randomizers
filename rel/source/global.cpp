@@ -65,7 +65,6 @@ int8_t EnemyHeldItemArrayCounter = 0;
 bool RanAwayFromBattle = false;
 uint16_t EnemyHeldItemArray[8][8] = { 0 };
 bool RandomizeGivenItem = false;
-char *ItemRandoText = new char[4]; // 3 bytes for ItemRandoText, 1 byte for NULL
 
 // LZ Rando
 bool LZRando = false;
@@ -74,21 +73,22 @@ bool ReloadCurrentScreen = false;
 bool GameOverFlag = false;
 bool NewFile = false;
 bool MarioFreeze = false;
-char *NewBero = new char[32]; // 31 bytes for NextBero, 1 byte for NULL
-char *NewMap = new char[9]; // 8 bytes for NextMap, 1 byte for NULL
 bool ClearCacheFlag = false;
 bool SQWarpAway = false;
-char *LZRandoText = new char[4]; // 3 bytes for LZRandoText, 1 byte for NULL
 
 // LZ Rando Challenge
-uint8_t TimesUpCounter = 0;
+int32_t *AllFinalScoresArray = nullptr;
+uint32_t TotalFinalScoresCounter = 0;
+bool FinishedARun = false;
+uint8_t FinishedRunCounter = 0;
+int32_t FinalScore = 0;
+bool GameOverChallengeMode = false;
+uint32_t FinalScoresMenuCounter = 0;
 uint8_t JustDefeatedBoss = 0;
 bool BossDefeated[19] = { false };
 uint32_t BossScore = 0;
 bool InGameOver = false;
 uint16_t GameOverCount = 0;
-int32_t FinalScore = 0;
+uint8_t TimesUpCounter = 0;
 int32_t DisplayScores[10] = { 0 };
-char *LZRandoChallengeText = new char[4]; // 3 bytes for LZRandoChallengeText, 1 byte for NULL
-
 }

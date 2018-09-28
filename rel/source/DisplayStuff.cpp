@@ -4,23 +4,32 @@
 #include "buttons.h"
 
 #include <ttyd/fontmgr.h>
+#include <ttyd/windowdrv.h>
 #include <ttyd/seqdrv.h>
 #include <ttyd/string.h>
 #include <ttyd/swdrv.h>
+#include <ttyd/system.h>
 #include <ttyd/mario_pouch.h>
 #include <ttyd/mario_party.h>
-#include <ttyd/system.h>
 #include <ttyd/__mem.h>
 #include <ttyd/mariost.h>
 #include <ttyd/mario.h>
-#include <ttyd/windowdrv.h>
 #include <ttyd/dispdrv.h>
 
 #include <cstdio>
 
-extern char *DisplayBuffer;
 extern char *NextMap;
+extern char *DisplayBuffer;
 extern char *NextBero;
+extern int32_t *AllFinalScoresArray;
+extern uint32_t TotalFinalScoresCounter;
+extern bool FinishedARun;
+extern uint8_t FinishedRunCounter;
+extern int32_t FinalScore;
+extern bool NewFile;
+extern bool GameOverChallengeMode;
+extern uint32_t seqMainAddress;
+extern uint32_t FinalScoresMenuCounter;
 extern uint8_t JustDefeatedBoss;
 extern bool BossDefeated[19];
 extern uint32_t BossScore;
@@ -28,21 +37,15 @@ extern uint32_t GSWAddressesStart;
 extern bool InGameOver;
 extern uint16_t GameOverCount;
 extern uint8_t TimesUpCounter;
-extern int32_t FinalScore;
 extern bool ShowScoreSources;
-extern bool NewFile;
 extern uint32_t TimerCount;
 extern bool TimerDisabled;
 extern bool TimerActive;
 extern bool DisablePlayerControl;
 extern bool GameOverFlag;
-extern uint32_t seqMainAddress;
 extern bool RandomizeCoins;
-extern char *ItemRandoText;
 extern bool LZRando;
-extern char *LZRandoText;
 extern bool LZRandoChallenge;
-extern char *LZRandoChallengeText;
 extern uint8_t HelpMenuCounter;
 extern uint8_t PreviousHelpMenuCounterValue;
 extern const char *HelpMenuArray[];
@@ -103,6 +106,240 @@ void Mod::LZRandoDisplayStuff()
     NextMap);
     
   drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
+}
+
+void adjustAllFinalScoresArray()
+{
+  // Initialize array if not already initialized
+  if (AllFinalScoresArray == nullptr)
+  {
+    AllFinalScoresArray = new int32_t[1];
+  }
+  else
+  {
+    // Create new array with a new spot for the newewst Final Score
+    uint32_t Size = TotalFinalScoresCounter;
+    int32_t *tempFinalScoresArray = new int32_t[Size + 1];
+    
+    // Copy the contents of the old array to the new array
+    ttyd::system::memcpy_as4(tempFinalScoresArray, AllFinalScoresArray, (Size * sizeof(int32_t)));
+    
+    // Delete the old array
+    delete[] (AllFinalScoresArray);
+    
+    // Set the new array as the current array
+    AllFinalScoresArray = tempFinalScoresArray;
+  }
+  
+  TotalFinalScoresCounter++;
+}
+
+void displayAllFinalScores()
+{
+  if (FinishedARun)
+  {
+    // Add the newest Final Score to the array
+    FinishedARun = false;
+    
+    if (FinishedRunCounter != 2)
+    {
+      adjustAllFinalScoresArray();
+      AllFinalScoresArray[TotalFinalScoresCounter - 1] = FinalScore;
+    }
+    
+    // Prevent new scores from being added if the player chose to continue playing instead of warping back to the title screen
+    if (FinishedRunCounter == 1)
+    {
+      FinishedRunCounter = 2;
+    }
+  }
+  else if (NewFile && GameOverChallengeMode)
+  {
+    // The current run was reset, so write 0x80000000
+    adjustAllFinalScoresArray();
+    AllFinalScoresArray[TotalFinalScoresCounter - 1] = 0x80000000;
+  }
+  
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Load = ttyd::seqdrv::SeqIndex::kLoad;
+  uint32_t seqMainCheck = *reinterpret_cast<uint32_t *>(seqMainAddress + 0x4);
+  
+  bool Comparisons = (NextSeq == Load) && (seqMainCheck == 4);
+  
+  // Only run on the file select screen
+  if (!Comparisons)
+  {
+    // Turn the menu off it's still on
+    FinalScoresMenuCounter = 0;
+    
+    return;
+  }
+  
+  // Get input from the player
+  uint32_t ButtonInput = ttyd::system::keyGetButton(0);
+  uint32_t ButtonInputTrg = ttyd::system::keyGetButtonTrg(0);
+  uint16_t OpenFinalScoreListCombo = PAD_L | PAD_Y;
+  
+  // Display/Remove the menu
+  if ((ButtonInput & OpenFinalScoreListCombo) == OpenFinalScoreListCombo)
+  {
+    if (ButtonInputTrg & OpenFinalScoreListCombo)
+    {
+      if (FinalScoresMenuCounter == 0)
+      {
+        // Turn the menu on and set it to the first page
+        FinalScoresMenuCounter = 1;
+      }
+      else
+      {
+        // Turn the menu off
+        FinalScoresMenuCounter = 0;
+      }
+    }
+  }
+  
+  // Only run if the menu should be displayed
+  if (FinalScoresMenuCounter == 0)
+  {
+    // Menu is not displayed, so exit
+    return;
+  }
+  
+  // Set total amount of scores to display in one column
+  uint32_t TotalInColumn = 16;
+  
+  // Set the total amount of columns on one page
+  uint32_t TotalColumns = 4;
+  
+  // Set total amount of scores to display on one page
+  uint32_t TotalOnPage = TotalColumns * TotalInColumn;
+  
+  // Prevent TotalFinalScoresCounter from being loaded multiple times
+  uint32_t FinalScoresCounter = TotalFinalScoresCounter;
+  
+  // Get the total amount of pages
+  uint32_t TotalPages;
+  if (FinalScoresCounter > 0)
+  {
+    TotalPages = 1 + ((FinalScoresCounter - 1) / TotalOnPage); // Round up
+  }
+  else
+  {
+    TotalPages = 1;
+  }
+  
+  // Check for D-Pad inputs
+  if ((ButtonInputTrg & PAD_DPAD_LEFT) == PAD_DPAD_LEFT)
+  {
+    // Go to the previous page
+    FinalScoresMenuCounter--;
+    
+    if (FinalScoresMenuCounter < 1)
+    {
+      // Loop around to the last page
+      FinalScoresMenuCounter = TotalPages;
+    }
+  }
+  else if ((ButtonInputTrg & PAD_DPAD_RIGHT) == PAD_DPAD_RIGHT)
+  {
+    // Go to the next page
+    FinalScoresMenuCounter++;
+    
+    if (FinalScoresMenuCounter > TotalPages)
+    {
+      // Loop around to the first page
+      FinalScoresMenuCounter = 1;
+    }
+  }
+  
+  // Display the window for the text to go in
+  uint32_t MenuColor = 0x000000F4;
+  int32_t CoordX = -245;
+  int32_t CoordY = 190;
+  int32_t Width = 490;
+  int32_t Height = 375;
+  int32_t Curve = 0;
+  
+  displayWindow(MenuColor, CoordX, CoordY, Width, Height, Curve);
+  
+  // Display the current page
+  uint32_t TextColor = 0xFFFFFFFF;
+  int32_t PosX = 185;
+  int32_t PosY = 180;
+  float Scale = 0.6;
+
+  sprintf(DisplayBuffer,
+    "%ld/%ld",
+    FinalScoresMenuCounter,
+    TotalPages);
+    
+  drawStringSingleLine(PosX, PosY, TextColor, DisplayBuffer, Scale);
+  
+  // Draw the page title
+  PosX = -80;
+  PosY = 180;
+  // Scale = 0.6;
+  
+  const char *TitleText = "Final Scores List";
+  drawStringSingleLine(PosX, PosY, TextColor, TitleText, Scale);
+  
+  // Don't draw anything else if there are no scores in the array
+  if (AllFinalScoresArray == nullptr)
+  {
+    // Array is empty, so exit
+    return;
+  }
+  
+  // Draw the main page text
+  PosX = -232;
+  PosY = 150;
+  // Scale = 0.6;
+  
+  // Get the starting index
+  uint32_t StartingIndex = (FinalScoresMenuCounter - 1) * TotalOnPage;
+  
+  // Draw the current page
+  for (uint32_t j = 0; j < TotalColumns; j++)
+  {
+    // Draw the current column
+    uint32_t CurrentStartingIndex = StartingIndex + (j * TotalInColumn);
+    for (uint32_t i = CurrentStartingIndex; i < (CurrentStartingIndex + TotalInColumn); i++)
+    {
+      // Stop drawing if at the end of the array
+      if (i >= FinalScoresCounter)
+      {
+        // No other code has to run, so exit
+        return;
+      }
+      
+      // Get the current line to draw
+      if (AllFinalScoresArray[i] != static_cast<int32_t>(0x80000000))
+      {
+        // The player did not reset this run
+        sprintf(DisplayBuffer,
+          "%ld. %ld",
+          i + 1,
+          AllFinalScoresArray[i]);
+      }
+      else
+      {
+        // The player reset this run
+        sprintf(DisplayBuffer,
+          "%ld. Reset",
+          i + 1);
+      }
+      
+      // Draw the current line
+      drawStringSingleLine(PosX, PosY, TextColor, DisplayBuffer, Scale);
+      
+      // Implement a new line
+      PosY -= 20;
+    }
+    
+    // Implement the next column
+    PosX += 115;
+    PosY = 150;
+  }
 }
 
 void Mod::LZRandoChallengeStuff()
@@ -457,6 +694,7 @@ void Mod::LZRandoChallengeStuff()
     TimesUpCounter = 0;
     BossScore = 0;
     GameOverCount = 0;
+    FinishedRunCounter = 0;
     ttyd::__mem::memset(BossDefeated, false, sizeof(BossDefeated));
   }
   
@@ -578,6 +816,12 @@ void Mod::LZRandoChallengeStuff()
             ShowScoreSources = false;
             DisablePlayerControl = false;
             ttyd::mariost::marioStSystemLevel(0);
+            FinishedARun = true;
+            
+            if (FinishedRunCounter == 0)
+            {
+              FinishedRunCounter = 1;
+            }
             
             // Only turn the key on if it's not already on
             if (ttyd::mario::marioKeyOffChk() != 0)
@@ -588,8 +832,10 @@ void Mod::LZRandoChallengeStuff()
           else if ((ButtonInputTrg & PAD_X) == PAD_X)
           {
             // Return to the title screen
+            FinishedARun = true;
             TimerDisabled = true;
             GameOverFlag = false;
+            GameOverChallengeMode = false;
             ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "title", nullptr);
             ttyd::mariost::marioStSystemLevel(0);
           }
@@ -597,6 +843,9 @@ void Mod::LZRandoChallengeStuff()
       }
     }
   }
+  
+  // Handle the menu for all of the final scores
+  displayAllFinalScores();
 }
 
 void Mod::titleScreenStuff()
@@ -641,7 +890,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.2.22",
-    "Loading Zone Randomizer Beta - v0.5.54");
+    "Loading Zone Randomizer Beta - v0.5.55");
   
   drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
   
@@ -654,7 +903,7 @@ void Mod::titleScreenStuff()
     PosY += 10;
   #endif
   
-  const char *VersionNumber = "v1.1.59";
+  const char *VersionNumber = "v1.1.60";
   drawStringSingleLine(PosX, PosY, color, VersionNumber, Scale);
 }
 
@@ -695,7 +944,8 @@ void Mod::gameModes()
   
   drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
   
-  // Set ItemRandoText to the appropriate value
+  // Display the Item Randomizer setting as On or Off
+  char ItemRandoText[4]; // 3 bytes for ItemRandoText, 1 byte for NULL
   if (RandomizeCoins)
   {
     ttyd::string::strcpy(ItemRandoText, "On");
@@ -705,7 +955,8 @@ void Mod::gameModes()
     ttyd::string::strcpy(ItemRandoText, "Off");
   }
   
-  // Set LZRandoText to the appropriate value
+  // Display the Loading Zone Randomizer setting as On or Off
+  char LZRandoText[4]; // 3 bytes for LZRandoText, 1 byte for NULL
   if (LZRando)
   {
     ttyd::string::strcpy(LZRandoText, "On");
@@ -715,7 +966,8 @@ void Mod::gameModes()
     ttyd::string::strcpy(LZRandoText, "Off");
   }
   
-  // Set LZRandoChallengeText to the appropriate value
+  // Display the Challenge Mode setting as On or Off
+  char LZRandoChallengeText[4]; // 3 bytes for LZRandoChallengeText, 1 byte for NULL
   if (LZRandoChallenge)
   {
     ttyd::string::strcpy(LZRandoChallengeText, "On");
@@ -864,7 +1116,7 @@ void Mod::helpMenu()
   }
   
   // Display the window for the text to go in
-  uint32_t MenuColor = 0x000000EE;
+  uint32_t MenuColor = 0x000000F4;
   int32_t CoordX = -245;
   int32_t CoordY = 190;
   int32_t Width = 490;
@@ -899,9 +1151,9 @@ void Mod::helpMenu()
   uint32_t ItemRandoStartingPage = 2;
   uint32_t ItemRandoTotalPages = 8;
   uint32_t LZRandoStartingPage = ItemRandoStartingPage + ItemRandoTotalPages;
-  uint32_t LZRandoTotalPages = 9;
+  uint32_t LZRandoTotalPages = 10;
   uint32_t ChallengeModeStartingPage = LZRandoStartingPage + LZRandoTotalPages;
-  uint32_t ChallengeModeTotalPages = 6;
+  uint32_t ChallengeModeTotalPages = 7;
   
   if ((HelpMenuCounter >= ItemRandoStartingPage) && (HelpMenuCounter <= (ItemRandoStartingPage + ItemRandoTotalPages - 1)))
   {
@@ -930,7 +1182,7 @@ void Mod::helpMenu()
     }
     
     // Draw the Loading Zone Randomizer page title
-    PosX = -125;
+    PosX = -130;
     PosY = 180;
     // Scale = 0.6;
     
