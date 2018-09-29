@@ -73,6 +73,8 @@ bool ReloadCurrentScreen = false;
 bool GameOverFlag = false;
 bool NewFile = false;
 bool MarioFreeze = false;
+char *NewBero = new char[32]; // 31 bytes for NextBero, 1 byte for NULL
+char *NewMap = new char[9]; // 8 bytes for NextMap, 1 byte for NULL
 bool ClearCacheFlag = false;
 bool SQWarpAway = false;
 

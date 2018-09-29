@@ -47,6 +47,8 @@ extern uint8_t JustDefeatedBoss;
 // extern uint32_t AreaLZsAddressesStart;
 // extern uint32_t NPCAddressesStart;
 extern uint32_t _mapEntAddress;
+extern char *NewBero;
+extern char *NewMap;
 extern uint32_t wp_fadedrv_Address;
 
 extern "C" {
@@ -287,17 +289,13 @@ void getRandomWarp()
   
   GameOverFlag = false;
   
-  if (LZRandoChallenge)
-  {
-    GameOverChallengeMode = false;
-  }
-  
   // Get new map to warp to
   uint32_t *MapArray;
   uint16_t MapArraySize;
   
   if (LZRandoChallenge)
   {
+    GameOverChallengeMode = false;
     MapArray = PossibleChallengeMaps;
     MapArraySize = ChallengeMapArraySize;
   }
@@ -1852,8 +1850,7 @@ void reloadScreen()
     // Not in the pause menu
     // A separate address for NextBero is needed, as the original value will be cleared during the reloading process
     // The game will crash if NextMap is used directly in seqSetSeq, so a separate address must be used instead
-    char NewBero[32]; // 31 bytes for NextBero, 1 byte for NULL
-    char NewMap[9]; // 8 bytes for NextMap, 1 byte for NULL
+    // NewBero and NewMap need to be global variables
     
     ttyd::string::strcpy(NewBero, NextBero);
     ttyd::string::strcpy(NewMap, NextMap);
