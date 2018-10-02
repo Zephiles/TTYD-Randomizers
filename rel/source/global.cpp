@@ -67,16 +67,18 @@ uint16_t EnemyHeldItemArray[8][8] = { 0 };
 bool RandomizeGivenItem = false;
 
 // LZ Rando
-bool LZRando = false;
 bool LZRandoChallenge = false;
+bool LZRando = false;
 bool ReloadCurrentScreen = false;
+bool ChangedLZ = false;
 bool GameOverFlag = false;
 bool NewFile = false;
+bool TransformIntoShip = false;
 bool MarioFreeze = false;
-char *NewBero = new char[32]; // 31 bytes for NextBero, 1 byte for NULL
-char *NewMap = new char[9]; // 8 bytes for NextMap, 1 byte for NULL
 bool ClearCacheFlag = false;
 bool SQWarpAway = false;
+char *NewBero = new char[32]; // 31 bytes for NextBero, 1 byte for NULL
+char *NewMap = new char[9]; // 8 bytes for NextMap, 1 byte for NULL
 
 // LZ Rando Challenge
 int32_t *AllFinalScoresArray = nullptr;

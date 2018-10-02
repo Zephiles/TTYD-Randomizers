@@ -18,7 +18,6 @@ uint32_t marioGetPartyId();
 int32_t marioPartyGoodbye();
 int32_t marioPartyHello(party::PartyMembers id);
 int32_t marioPartyEntry(party::PartyMembers id);
-// unk_JP_US_PAL_062
 // marioUseParty
 
 }

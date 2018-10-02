@@ -150,8 +150,8 @@
 8002FEAC:_mapFree
 8002FF48:_mapAllocTail
 80030040:_mapAlloc
-// 80030130:unk_US_PAL_01
-// 80030160:unk_US_PAL_02
+// 80030130:battleMapFree
+// 80030160:battleMapAlloc
 800301AC:__memFree
 800301D8:__memAlloc
 8003023C:memClear
@@ -184,7 +184,7 @@
 // 80037898:evtmgrReInit
 // 80037904:evtmgrInit
 // 80037A1C:make_pri_table
-// 80037B48:evtGetWork
+80037B48:evtGetWork
 
 // npcdrv.o
 // 80043020:fbatPreventMarioEventChk
@@ -283,7 +283,7 @@
 80058EBC:marioChgPose
 800590D4:toDotMarioPose
 8005925C:marioChgEvtPose
-// 800592EC:unk_JP_US_PAL_005
+// 800592EC:unk_JP_US_PAL_001
 80059534:marioAnimeId
 80059564:marioChkPushAnime
 800595E0:marioMoveMain
@@ -312,11 +312,11 @@
 8005C434:marioCtrlOffChk
 8005C444:marioFBattlePost
 8005C504:marioFBattlePrepare
-// 8005C570:unk_JP_US_PAL_006
+// 8005C570:unk_JP_US_PAL_002
 8005C59C:marioChkCtrl
 8005C5B4:marioChkKey
 8005C6F0:marioCheckMenuDisable
-// 8005CB64:unk_JP_US_PAL_007
+// 8005CB64:unk_JP_US_PAL_003
 8005CB90:marioCaseEventValidChk
 8005CBD0:marioItemGetOk
 8005CBE4:marioItemGetChk
@@ -406,6 +406,60 @@
 80078E98:fontmgrTexSetup
 80078EC4:fontmgrInit
 
+// evt_bero.o
+// 80079D30:evt_camera_change_event_from_road
+// 80079ED8:evt_bero_1stcheck
+// 80079F4C:evt_bero_mario_go_wait
+// 80079F68:evt_bero_mario_go
+// 80079F78:evt_bero_mario_go_init
+// 80079F88:evt_bero_cam_shift_init
+// 80079FB0:evt_bero_cam3d_change
+// 8007A0C4:evt_bero_overwrite
+// 8007A1A4:evt_bero_move_mario_speed
+// 8007A454:evt_bero_disppos_load
+// 8007A4A8:evt_bero_disppos_save
+// 8007A4EC:evt_bero_case_id_load
+// 8007A548:evt_bero_case_id_save
+// 8007A5A8:evt_bero_get_number
+// 8007A668:evt_bero_switch_off
+// 8007A76C:evt_bero_switch_on
+// 8007A870:bero_set_disp_position_pipe
+// 8007A940:bero_get_position_pipe2
+// 8007AA8C:bero_get_position_pipe_pure
+// 8007AB74:bero_get_position_pipe_sub
+// 8007AE30:bero_get_position_normal
+// 8007B140:evt_bero_get_info_num
+// 8007B344:evt_bero_id_filter
+// 8007B410:evt_bero_read_mario_pera
+// 8007B4D0:evt_bero_get_into_info
+8007B7C8:evt_bero_get_info
+// 8007B8C8:evt_bero_get_now_number
+// 8007B8F8:evt_bero_set_now_number
+// 8007B928:evt_bero_get_info_nextarea
+// 8007B9A0:evt_bero_get_info_kinddir
+// 8007BA28:evt_bero_get_info_length
+// 8007BB1C:evt_bero_get_info_anime
+// 8007BBB4:evt_bero_get_end_position
+// 8007BC18:evt_bero_get_start_position
+// 8007BC7C:evt_bero_exec_wait
+// 8007BCC0:evt_bero_exec_get
+// 8007BCF0:evt_bero_exec_onoff
+// 8007BD58:evt_bero_get_entername
+// 8007BD8C:evt_bero_mapchange
+// 8007BE00:bero_id_filter
+// 8007BEA4:bero_clear_Offset
+// 8007BEB8:bero_get_ptr
+// 8007BEC4:bero_get_BeroEZ
+// 8007BECC:bero_get_BeroEY
+// 8007BED4:bero_get_BeroEX
+// 8007BEDC:bero_get_BeroSZ
+// 8007BEE4:bero_get_BeroSY
+// 8007BEEC:bero_get_BeroSX
+// 8007BEF4:bero_get_BeroNUM
+// 8007BEFC:bero_get_BeroEXEC
+// 8007BF04:unk_JP_US_PAL_06
+// 8007BF38:unk_JP_US_PAL_07
+
 // windowdrv.o
 // 8007BFEC:getWakuTexObj
 // 8007BFFC:windowGetPointer
@@ -422,7 +476,7 @@
 // 80080DC8:windowEntry
 // 80080E50:windowReInit
 // 80080E94:windowTexSetup
-// 80080FAC:unk_JP_US_PAL_012
+// 80080FAC:unk_JP_US_PAL_008
 // 80081040:windowInit
 
 // swdrv.o
@@ -456,7 +510,7 @@
 // 800A35DC:marioShipChgFall
 // 800A3630:mot_ship
 // 800A50D4:mot_ship_post
-// 800A51D0:marioReInit_ship
+800A51D0:marioReInit_ship
 // 800A53A4:marioForceShipAnime
 // 800A5410:marioChkShipPlace
 // 800A5440:marioShipSetDispDir
@@ -464,7 +518,7 @@
 // 800A5500:marioChkSwirlPower
 // 800A5538:marioSetSwirlPower
 // 800A55AC:marioShipChanging
-// 800A5638:unk_JP_US_PAL_020
+// 800A5638:unk_JP_US_PAL_015
 
 // itemdrv.o
 // 800AB8CC:itemPickUp
@@ -491,7 +545,7 @@
 800AEBC0:itemEntry
 // 800AF3A0:itemModeChange
 // 800AF3B0:itemMain
-// 800AFA4C:unk_JP_US_PAL_023
+// 800AFA4C:itemPickUpFromFieldCheck
 // 800AFAAC:itemGetNokoCheck
 // 800AFC40:itemGetCheck
 // 800AFE7C:itemCoinDrop
@@ -518,7 +572,7 @@
 // 800BA620:partyRideChk
 // 800BA65C:allPartyRideOff2
 // 800BA720:allPartyRideOff
-// 800BA7E4:unk_JP_US_PAL_029
+// 800BA7E4:allPartyRideOn
 // 800BA860:allPartyForceRideOn
 // 800BA934:getRidePos
 // 800BABB4:allPartyRideShip
@@ -533,9 +587,9 @@
 // 800BCB10:partyDoWork
 // 800BCBB8:driveParty
 // 800BD2A8:partyMain
-// 800BD394:unk_JP_US_PAL_030
-// 800BD7E4:unk_JP_US_PAL_031
-// 800BD860:unk_JP_US_PAL_032
+// 800BD394:unk_JP_US_PAL_022
+// 800BD7E4:_partyForceChgRunMode
+// 800BD860:_partyChgRunMode
 // 800BD8CC:partyChgRunMode
 // 800BDC68:partyUsePost
 // 800BDCC4:partyReInit
@@ -625,7 +679,7 @@
 // 800D5374:comp_aiueo_r
 // 800D53E8:comp_kind
 // 800D5430:comp_aiueo
-// 800D54A4:unk_JP_US_PAL_050
+// 800D54A4:unk_JP_US_PAL_035
 // 800D577C:pouchRemoveItemIndex
 // 800D5A40:pouchRemoveItem
 800D5CDC:pouchCheckItem
@@ -674,11 +728,11 @@
 // 800DB9A8:psndBGMOff_f_d
 800DBCF8:psndBGMOff
 // 800DBD20:psndBGMOn_f_d
-// 800DC574:unk_JP_US_PAL_051
+// 800DC574:unk_JP_US_PAL_036
 // 800DC59C:psndBGMOn
 // 800DC5C8:psndBGMMain
 // 800DCA5C:psndBGM_rate
-// 800DCAC0:unk_JP_US_PAL_052
+// 800DCAC0:psndBGM_stop
 // 800DCBEC:psndSFXAllOff
 // 800DCD34:psndMapChange
 // 800DCEE4:psndGetFlag
@@ -960,7 +1014,7 @@
 80142CEC:marioPartyGoodbye
 80142D34:marioPartyHello
 80142DE4:marioPartyEntry
-// 80142EF4:unk_JP_US_PAL_062
+// 80142EF4:unk_JP_US_PAL_046
 // 80142F88:marioUseParty
 
 // win_party.o

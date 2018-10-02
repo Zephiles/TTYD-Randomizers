@@ -862,48 +862,49 @@ void Mod::titleScreenStuff()
   // Display Item Randomizer versions and Loading Zone Randomizer version
   // Draw window for the text to go in
   uint32_t color = 0x000000CC;
-  int32_t CoordX = -260;
+  int32_t CoordX = -214;
   int32_t CoordY = -25;
-  int32_t Width = 532;
+  int32_t Width = 424;
   int32_t Height = 65;
   int32_t Curve = 10;
   
   #ifdef TTYD_JP
-    CoordX += 10;
+    CoordX += 7;
     CoordY += 30;
-    Width -= 15;
+    Width -= 12;
   #endif
   
   displayWindow(color, CoordX, CoordY, Width, Height, Curve);
   
   // Display the text
   color = 0xFFFFFFFF;
-  int32_t PosX = -245;
+  int32_t PosX = -198;
   int32_t PosY = -35;
   float Scale = 0.9;
   
   #ifdef TTYD_JP
-    PosX += 10;
+    PosX += 5;
     PosY += 30;
   #endif
   
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.2.22",
-    "Loading Zone Randomizer Beta - v0.5.56");
+    "Loading Zone Randomizer - v1.0");
   
   drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
   
   // Display overall version
-  // PosX = -245;
-  PosY = -160;
+  PosX = -220;
+  PosY = -170;
   // Scale = 0.9;
   
   #ifdef TTYD_JP
-    PosY += 10;
+    PosX += 20;
+    PosY += 20;
   #endif
   
-  const char *VersionNumber = "v1.1.61";
+  const char *VersionNumber = "v2.0";
   drawStringSingleLine(PosX, PosY, color, VersionNumber, Scale);
 }
 
@@ -939,7 +940,7 @@ void Mod::gameModes()
     "%s\n%s\n%s\n%s",
     "Hold L and press the following to toggle modes:",
     "Y = Randomize Coins",
-    "X = Loading Zone Randomizer Beta",
+    "X = Loading Zone Randomizer",
     "Z = Loading Zone Randomizer - 1 Hour Challenge");
   
   drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
@@ -1151,9 +1152,9 @@ void Mod::helpMenu()
   uint32_t ItemRandoStartingPage = 2;
   uint32_t ItemRandoTotalPages = 8;
   uint32_t LZRandoStartingPage = ItemRandoStartingPage + ItemRandoTotalPages;
-  uint32_t LZRandoTotalPages = 10;
+  uint32_t LZRandoTotalPages = 9;
   uint32_t ChallengeModeStartingPage = LZRandoStartingPage + LZRandoTotalPages;
-  uint32_t ChallengeModeTotalPages = 7;
+  uint32_t ChallengeModeTotalPages = 9;
   
   if ((HelpMenuCounter >= ItemRandoStartingPage) && (HelpMenuCounter <= (ItemRandoStartingPage + ItemRandoTotalPages - 1)))
   {
@@ -1169,16 +1170,27 @@ void Mod::helpMenu()
   }
   else if ((HelpMenuCounter >= LZRandoStartingPage) && (HelpMenuCounter <= (LZRandoStartingPage + LZRandoTotalPages - 1)))
   {
-    // Check if currently on page 5 of the Loading Zone Randomizer section
     if (HelpMenuCounter == (LZRandoStartingPage + 4))
     {
-      // Draw second column of Loading Zone Randomizer page 5
+      // Check if currently on page 5 of the Loading Zone Randomizer section
       PosX = 0;
       PosY = 110;
       // Scale = 0.6;
       
+      // Draw second column of Loading Zone Randomizer page 5
       const char *BossesText = "15. Shadow Sirens (Ch8)\n16. Grodus\n17. Bowser & Kammy\n18. Shadow Queen\n19. Bonetail";
       drawStringMultipleLines(PosX, PosY, TextColor, BossesText, Scale);
+    }
+    else if (HelpMenuCounter == (LZRandoStartingPage + 8))
+    {
+      // Check if currently on page 9 of the Loading Zone Randomizer section
+      PosX = -90;
+      PosY = -90;
+      // Scale = 0.6;
+      
+      // Draw second column of Loading Zone Randomizer page 9
+      const char *FollowersText = "4. Frankly\n5. Gus";
+      drawStringMultipleLines(PosX, PosY, TextColor, FollowersText, Scale);
     }
     
     // Draw the Loading Zone Randomizer page title

@@ -28,7 +28,7 @@ extern "C" {
 void *itemEntry(const char *name, uint32_t id, uint32_t mode, int32_t wasCollectedExpr, void *pickupScript, float coordinateX, float coordinateY, float coordinateZ);
 // itemModeChange
 // itemMain
-// unk_JP_US_PAL_023
+// itemPickUpFromFieldCheck
 // itemGetNokoCheck
 // itemGetCheck
 // itemCoinDrop

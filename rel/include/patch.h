@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ttyd/OSCache.h>
+#include "clearcache.h"
 
 #include <cstdint>
 
@@ -17,8 +17,7 @@ Func hookFunction(Func function, Dest destination)
   
   // Original instruction
   trampoline[0] = instructions[0];
-  ttyd::OSCache::DCFlushRange(&trampoline[0], sizeof(uint32_t));
-  ttyd::OSCache::ICInvalidateRange(&trampoline[0], sizeof(uint32_t));
+  clearcache::clear_DC_IC_Cache(&trampoline[0], sizeof(uint32_t));
   
   // Branch to original function past hook
   writeBranch(&trampoline[1], &instructions[1]);

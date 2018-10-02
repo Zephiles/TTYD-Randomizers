@@ -9,6 +9,7 @@
 #include <ttyd/mot_ship.h>
 #include <ttyd/evt_seq.h>
 #include <ttyd/fadedrv.h>
+#include <ttyd/evt_bero.h>
 #include <ttyd/fontmgr.h>
 
 #include "patch.h"
@@ -89,6 +90,12 @@ void Mod::init()
   mPFN_preventMarioEndOfChapterHeads_trampoline = patch::hookFunction(ttyd::fadedrv::fadeEntry, [](int type, int duration, uint8_t *color)
   {
     return gMod->preventMarioEndOfChapterHeads(type, duration, color);
+  });
+  
+  // Randomize the loading zone
+  mPFN_getRandomLZ_trampoline = patch::hookFunction(ttyd::evt_bero::evt_bero_get_info, [](void *scriptContext, uint32_t waitMode)
+  {
+    return gMod->getRandomLZ(scriptContext, waitMode);
   });
   
   // Make changes that are only done once

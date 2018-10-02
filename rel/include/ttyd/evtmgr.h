@@ -30,7 +30,7 @@ uint32_t evtEntryType(void *script, uint32_t unk1, uint32_t unk2, uint32_t unk3)
 // evtmgrReInit
 // evtmgrInit
 // make_pri_table
-// evtGetWork
+void *evtGetWork();
 
 }
 

@@ -35,11 +35,10 @@ extern "C" {
 // psndBGMOff_f_d
 bool psndBGMOff(uint32_t unk);
 // psndBGMOn_f_d
-// unk_JP_US_PAL_051
 // psndBGMOn
 // psndBGMMain
 // psndBGM_rate
-// unk_JP_US_PAL_052
+// psndBGM_stop
 // psndSFXAllOff
 // psndMapChange
 // psndGetFlag

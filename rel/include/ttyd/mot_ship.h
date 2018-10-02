@@ -10,7 +10,7 @@ extern "C" {
 // marioShipChgFall
 // mot_ship
 // mot_ship_post
-// marioReInit_ship
+void marioReInit_ship();
 // marioForceShipAnime
 // marioChkShipPlace
 // marioShipSetDispDir
@@ -18,7 +18,6 @@ void *marioShipForceStop();
 // marioChkSwirlPower
 // marioSetSwirlPower
 // marioShipChanging
-// unk_JP_US_PAL_020
 
 }
 

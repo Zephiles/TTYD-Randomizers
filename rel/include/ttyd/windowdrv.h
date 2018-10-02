@@ -21,7 +21,6 @@ void windowDispGX_Waku_col(uint16_t GXTexMapID, uint8_t color[4], float x, float
 // windowEntry
 // windowReInit
 // windowTexSetup
-// unk_JP_US_PAL_012
 // windowInit
 
 }

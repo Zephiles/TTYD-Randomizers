@@ -62,7 +62,6 @@ int16_t pouchGetCoin();
 // comp_aiueo_r
 // comp_kind
 // comp_aiueo
-// unk_JP_US_PAL_050
 // pouchRemoveItemIndex
 // pouchRemoveItem
 uint32_t pouchCheckItem(uint32_t id);
