@@ -864,7 +864,7 @@ void Mod::titleScreenStuff()
   uint32_t color = 0x000000CC;
   int32_t CoordX = -219;
   int32_t CoordY = -25;
-  int32_t Width = 439;
+  int32_t Width = 442;
   int32_t Height = 65;
   int32_t Curve = 10;
   
@@ -890,7 +890,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.2.22",
-    "Loading Zone Randomizer - v1.0.1");
+    "Loading Zone Randomizer - v1.0.2");
   
   drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
   
@@ -904,7 +904,7 @@ void Mod::titleScreenStuff()
     PosY += 20;
   #endif
   
-  const char *VersionNumber = "v2.0.1";
+  const char *VersionNumber = "v2.0.2";
   drawStringSingleLine(PosX, PosY, color, VersionNumber, Scale);
 }
 

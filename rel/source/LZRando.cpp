@@ -2133,6 +2133,7 @@ uint32_t enablePaperTubeModes(uint32_t pouchCheckItem)
 {
   const char *CheckMapArray[] = {
     "aji_13",
+    "usu_01",
     "jin_05",
     "jin_07",
     "eki_05" };
