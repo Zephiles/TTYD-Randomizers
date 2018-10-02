@@ -862,23 +862,23 @@ void Mod::titleScreenStuff()
   // Display Item Randomizer versions and Loading Zone Randomizer version
   // Draw window for the text to go in
   uint32_t color = 0x000000CC;
-  int32_t CoordX = -214;
+  int32_t CoordX = -219;
   int32_t CoordY = -25;
-  int32_t Width = 424;
+  int32_t Width = 439;
   int32_t Height = 65;
   int32_t Curve = 10;
   
   #ifdef TTYD_JP
     CoordX += 7;
     CoordY += 30;
-    Width -= 12;
+    Width -= 11;
   #endif
   
   displayWindow(color, CoordX, CoordY, Width, Height, Curve);
   
   // Display the text
   color = 0xFFFFFFFF;
-  int32_t PosX = -198;
+  int32_t PosX = -203;
   int32_t PosY = -35;
   float Scale = 0.9;
   
@@ -890,21 +890,21 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.2.22",
-    "Loading Zone Randomizer - v1.0");
+    "Loading Zone Randomizer - v1.0.1");
   
   drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
   
   // Display overall version
-  PosX = -220;
+  PosX = -225;
   PosY = -170;
   // Scale = 0.9;
   
   #ifdef TTYD_JP
-    PosX += 20;
+    PosX += 15;
     PosY += 20;
   #endif
   
-  const char *VersionNumber = "v2.0";
+  const char *VersionNumber = "v2.0.1";
   drawStringSingleLine(PosX, PosY, color, VersionNumber, Scale);
 }
 

@@ -2134,7 +2134,8 @@ uint32_t enablePaperTubeModes(uint32_t pouchCheckItem)
   const char *CheckMapArray[] = {
     "aji_13",
     "jin_05",
-    "jin_07" };
+    "jin_07",
+    "eki_05" };
   uint32_t ArraySize = sizeof(CheckMapArray) / sizeof(CheckMapArray[0]);  
   
   return getCurseReturnValue(pouchCheckItem, CheckMapArray, ArraySize);
