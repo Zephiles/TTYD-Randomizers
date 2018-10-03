@@ -1002,6 +1002,10 @@ void getRandomWarp()
           // Allow Grubba to be fought if the Sequence is before or at 163
           // Set the Sequence to 163 so that Grubba can be fought
           ttyd::swdrv::swByteSet(0, 163);
+          ttyd::string::strcpy(NextBero, "w_bero");
+          
+          // Prevent the loading zone from being changed
+          ChangedLZ = true;
           
           // Turn off GSWF(2388) to clear any currently-registered fights
           ttyd::swdrv::swClear(2388);
