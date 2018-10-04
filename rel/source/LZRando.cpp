@@ -12,6 +12,7 @@
 #include <ttyd/evtmgr.h>
 #include <ttyd/npcdrv.h>
 #include <ttyd/mot_ship.h>
+#include <ttyd/fadedrv.h>
 #include <ttyd/mario_party.h>
 #include <ttyd/evt_pouch.h>
 #include <ttyd/mario.h>
@@ -40,8 +41,8 @@ extern uint32_t PossibleLZMaps[];
 extern uint16_t LZMapArraySize;
 extern uint32_t GSWAddressesStart;
 extern bool TransformIntoShip;
+extern bool CloseCurtainFlag;
 extern bool MarioFreeze;
-extern bool ResetSystemFlag;
 extern uint16_t GSWF_Array_Size;
 extern uint16_t GSWF_Array[];
 extern uint32_t seqMainAddress;
@@ -55,6 +56,7 @@ extern uint32_t _mapEntAddress;
 extern char *NewBero;
 extern char *NewMap;
 extern uint32_t wp_fadedrv_Address;
+extern bool ResetSystemFlag;
 
 extern "C" {
   void StartGetRandomWarp();
@@ -1466,6 +1468,32 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
         ttyd::mot_ship::marioReInit_ship();
       }
     }
+    
+    // Check if the curtain needs to be cleared when loading a file
+    if (CloseCurtainFlag)
+    {
+      CloseCurtainFlag = false;
+      
+      // Only close the curtain if coming out of a pipe
+      if (ttyd::string::strncmp(NextBero, "dokan_6", 5) == 0)
+      {
+        // Only close the curtain if the Sequence is not 404, because it'll close automatically if it's at 404
+        uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
+        if (SequencePosition != 404)
+        {
+          uint32_t color = 0x000000FF;
+          int duration = 0;
+          
+          // Close the curtain
+          const int CloseCurtain = 28;
+          ttyd::fadedrv::fadeEntry(CloseCurtain, duration, reinterpret_cast<uint8_t *>(&color));
+          
+          // Set the screen to black
+          const int BlackFadeOut = 10;
+          ttyd::fadedrv::fadeEntry(BlackFadeOut, duration, reinterpret_cast<uint8_t *>(&color));
+        }
+      }
+    }
   }
   
   // Call original function
@@ -1530,9 +1558,6 @@ void setUpNewFile()
   uint32_t LotteryAddress = GSWAddresses + 0xE0;
   *reinterpret_cast<uint32_t *>(LotteryAddress) = 0;
   *reinterpret_cast<uint32_t *>(LotteryAddress + 0x4) = 0;
-  
-  // Don't reset the System Flag, as it will cause Mario to spawn at the center of the room
-  ResetSystemFlag = false;
   
   // Turn on all of the GSWFs in the array
   uint16_t ArraySize = GSWF_Array_Size; // Prevent the compiled code from loading this variable more than once
@@ -2389,8 +2414,15 @@ uint32_t randomizeBeroOnFileLoad(uint32_t swByteGetCheck, void *GSWAddress, uint
   {
     NewSystemFlagValue &= ~(1 << 0); // Turn off the 0 bit
     
-    // Set a flag to have the system flag reset later
+    // Set a flag to reset the System Flag later
     ResetSystemFlag = true;
+    
+    // Set a flag to manually close the curtain upon loading a file, if Mario comes out of a pipe
+    CloseCurtainFlag = true;
+    
+    // Clear a flag to allow the player to interact with stuff
+    uint32_t GSW = reinterpret_cast<uint32_t>(GSWAddress);
+    *reinterpret_cast<uint32_t *>(GSW + 0x18) = 0;
   }
   
   // Store the new value
@@ -2410,10 +2442,15 @@ bool resetSystemFlag(void *GSWAddress)
   {
     ResetSystemFlag = false;
     
-    NewSystemFlagValue |= (1 << 0); // Turn on the 0 bit
-    
-    // Store the new value
-    *reinterpret_cast<uint32_t *>(GSWAddress) = NewSystemFlagValue;
+    // Only reset if the Sequence is at 404
+    uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
+    if (SequencePosition == 404)
+    {
+      NewSystemFlagValue |= (1 << 0); // Turn on the 0 bit
+      
+      // Store the new value
+      *reinterpret_cast<uint32_t *>(GSWAddress) = NewSystemFlagValue;
+    }
   }
   
   return (NewSystemFlagValue & (1 << 0)); // Check if the 0 bit is on

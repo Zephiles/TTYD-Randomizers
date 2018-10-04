@@ -890,7 +890,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.2.22",
-    "Loading Zone Randomizer - v1.0.4");
+    "Loading Zone Randomizer - v1.0.5");
   
   drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
   
@@ -904,7 +904,7 @@ void Mod::titleScreenStuff()
     PosY += 20;
   #endif
   
-  const char *VersionNumber = "v2.0.4";
+  const char *VersionNumber = "v2.0.5";
   drawStringSingleLine(PosX, PosY, color, VersionNumber, Scale);
 }
 
