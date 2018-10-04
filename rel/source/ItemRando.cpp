@@ -168,11 +168,13 @@ uint32_t randomizeItem()
 
 uint32_t randomizeItemWithChecks(uint32_t currentItemId)
 {
+  char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
+  
   // Check if the current item is a Shine Sprite, as it will appear twice in the field, but the first one shouldn't be randomized
   if (currentItemId == ShineSprite)
   {
     // Randomize if currently receiving from Bub
-    if (ttyd::string::strncmp(NextMap, "rsh_04", 6) == 0)
+    if (ttyd::string::strncmp(tempNextMap, "rsh_04", 6) == 0)
     {
       return randomizeItem();
     }
@@ -210,7 +212,7 @@ uint32_t randomizeItemWithChecks(uint32_t currentItemId)
     CrystalStarIsInField = true;
     
     // Check if current item is the Emerald Star, and if the player is currently in Magnus 1.0's room
-    if ((currentItemId == EmeraldStar) && (ttyd::string::strcmp(NextMap, "mri_01") == 0))
+    if ((currentItemId == EmeraldStar) && (ttyd::string::strcmp(tempNextMap, "mri_01") == 0))
     {
       if (!EmeraldStarAlreadyChanged)
       {

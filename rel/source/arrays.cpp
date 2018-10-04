@@ -81,6 +81,9 @@ uint16_t GSWF_Array[] = {
   // Turn on GSWF(2867) to drain the water in the Great Tree
   2867,
   
+  // Turn on GSWF(2872) to skip the cutscene on the bottom floor of mri_17
+  2872,
+  
   // Turn on GSWF(2878) to prevent the player from being able to talk to Jabble
   2878,
   

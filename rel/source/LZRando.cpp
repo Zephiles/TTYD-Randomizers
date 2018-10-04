@@ -28,11 +28,11 @@ extern char *NextMap;
 extern bool LZRandoChallenge;
 extern uint32_t TimerCount;
 extern bool LZRando;
+extern char *NextBero;
+extern char *NextArea;
 extern bool ReloadCurrentScreen;
 extern bool ChangedLZ;
-extern char *NextBero;
 extern bool GameOverFlag;
-extern char *NextArea;
 extern bool NewFile;
 extern bool GameOverChallengeMode;
 extern uint32_t PossibleChallengeMaps[];
@@ -89,8 +89,10 @@ namespace mod {
 
 void CheckMapForReloadChanges()
 {
+  char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
+  
   // If reloading the room with a Curse chest, make sure the chest is closed if the player has the Curse from it
-  if (ttyd::string::strcmp(NextMap, "dou_07") == 0)
+  if (ttyd::string::strcmp(tempNextMap, "dou_07") == 0)
   {
     // Check if the Curse chest is open or not
     // Check if GSWF(2980) is off
@@ -110,7 +112,7 @@ void CheckMapForReloadChanges()
       }
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "gon_06") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "gon_06") == 0)
   {
     // Check if the Curse chest is open or not
     // Check if GSWF(1493) is off
@@ -130,7 +132,7 @@ void CheckMapForReloadChanges()
       }
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "tik_19") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "tik_19") == 0)
   {
     // Check if the Curse chest is open or not
     // Check if GSWF(1352) is off
@@ -150,7 +152,7 @@ void CheckMapForReloadChanges()
       }
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "usu_01") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "usu_01") == 0)
   {
     // Check if the Curse chest is open or not
     // Check if GSWF(1931) is off
@@ -170,7 +172,7 @@ void CheckMapForReloadChanges()
       }
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "mri_09") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "mri_09") == 0)
   {
     // Check if the Blue Key chest is open or not
     // Check if GSWF(2852) is off
@@ -187,7 +189,7 @@ void CheckMapForReloadChanges()
       }
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "tou_01") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "tou_01") == 0)
   {
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
 
@@ -202,12 +204,12 @@ void CheckMapForReloadChanges()
       }
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "tou_08") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "tou_08") == 0)
   {
     // Turn off GSWF(2388) to clear any currently-registered fights
     ttyd::swdrv::swClear(2388);
   }
-  else if (ttyd::string::strcmp(NextMap, "tou_10") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "tou_10") == 0)
   {
     // Turn off GSWF(2388) to clear any currently-registered fights
     ttyd::swdrv::swClear(2388);
@@ -242,13 +244,17 @@ void getRandomWarp()
     return;
   }
   
+  char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
+  char *tempNextBero = NextBero; // Prevent NextBero from being loaded in multiple times
+  char *tempNextArea = NextArea; // Prevent NextArea from being loaded in multiple times
+  
   // Don't run if currently reloading the current screen
   if (ReloadCurrentScreen)
   {
     if (!ChangedLZ)
     {
       // Write a temporary string into NextBero to tell the player that the new loading zone hasn't been chosen yet
-      ttyd::string::strcpy(NextBero, "Pending");
+      ttyd::string::strcpy(tempNextBero, "Pending");
     }
     
     CheckMapForReloadChanges();
@@ -256,14 +262,14 @@ void getRandomWarp()
   }
   
   // Don't run on the title screen
-  if (ttyd::string::strcmp(NextMap, "title") == 0)
+  if (ttyd::string::strcmp(tempNextMap, "title") == 0)
   {
     return;
   }
   
   // Don't run if transitioning to the intro
   // However, it should still run under these conditions if the Game Over flag is set
-  if (ttyd::string::strcmp(NextMap, "dmo_00") == 0)
+  if (ttyd::string::strcmp(tempNextMap, "dmo_00") == 0)
   {
     if (!GameOverFlag)
     {
@@ -272,11 +278,11 @@ void getRandomWarp()
   }
   
   // Warp back to Magnus 2.0's room if the player just beat him
-  if (ttyd::string::strcmp(NextBero, "evt_aji_14") == 0)
+  if (ttyd::string::strcmp(tempNextBero, "evt_aji_14") == 0)
   {
-    ttyd::string::strcpy(NextBero, "tuzuki");
-    ttyd::string::strcpy(NextMap, "aji_14");
-    ttyd::string::strncpy(NextArea, "aji_14", 3);
+    ttyd::string::strcpy(tempNextBero, "tuzuki");
+    ttyd::string::strcpy(tempNextMap, "aji_14");
+    ttyd::string::strncpy(tempNextArea, "aji_14", 3);
     
     // Prevent the loading zone from being changed
     ChangedLZ = true;
@@ -284,16 +290,16 @@ void getRandomWarp()
   }
   
   // Warp back to Grodus' room if the player just beat him
-  if (ttyd::string::strcmp(NextBero, "koopa_evt") == 0)
+  if (ttyd::string::strcmp(tempNextBero, "koopa_evt") == 0)
   {
     return;
   }
   
   // Warp back to the Shadow Queen room if currently in that Sequence
-  if (ttyd::string::strcmp(NextBero, "minnnanokoe") == 0)
+  if (ttyd::string::strcmp(tempNextBero, "minnnanokoe") == 0)
   {
-    ttyd::string::strcpy(NextMap, "las_29");
-    ttyd::string::strncpy(NextArea, "las_29", 3);
+    ttyd::string::strcpy(tempNextMap, "las_29");
+    ttyd::string::strncpy(tempNextArea, "las_29", 3);
     
     // Prevent the loading zone from being changed
     ChangedLZ = true;
@@ -301,13 +307,13 @@ void getRandomWarp()
   }
   
   // Don't run on the credits screen
-  if (ttyd::string::strcmp(NextMap, "end_00") == 0)
+  if (ttyd::string::strcmp(tempNextMap, "end_00") == 0)
   {
     return;
   }
   
   // Write a temporary string into NextBero to tell the player that the new loading zone hasn't been chosen yet
-  ttyd::string::strcpy(NextBero, "Pending");
+  ttyd::string::strcpy(tempNextBero, "Pending");
   
   ChangedLZ = false;
   
@@ -343,10 +349,10 @@ void getRandomWarp()
   while (!ConfirmNewMap)
   {
     char *NewRandomMap = reinterpret_cast<char *>(MapArray[ttyd::system::irand(MapArraySize)]);
-    ttyd::string::strcpy(NextMap, NewRandomMap);
-    ttyd::string::strncpy(NextArea, NewRandomMap, 3);
+    ttyd::string::strcpy(tempNextMap, NewRandomMap);
+    ttyd::string::strncpy(tempNextArea, NewRandomMap, 3);
     
-    if (ttyd::string::strcmp(NextMap, "aji_00") == 0)
+    if (ttyd::string::strcmp(tempNextMap, "aji_00") == 0)
     {
       // Skip the cutscenes and fight
       // Need to skip this cutscene and fight to prevent a crash
@@ -356,33 +362,33 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 361);
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "aji_07") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "aji_07") == 0)
     {
       // Set the Loading Zone to be able to get the Cog if the player doesn't have it already
       // Check if GSWF(4194) is off
       if (!(ttyd::swdrv::swGet(4194)))
       {
-        ttyd::string::strcpy(NextBero, "tenjo");
+        ttyd::string::strcpy(tempNextBero, "tenjo");
         
         // Prevent the loading zone from being changed
         ChangedLZ = true;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "aji_08") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "aji_08") == 0)
     {
       // Force the loading zone to s_bero_1, as the other possible loading zones are invalid
-      ttyd::string::strcpy(NextBero, "s_bero_1");
+      ttyd::string::strcpy(tempNextBero, "s_bero_1");
         
       // Prevent the loading zone from being changed
       ChangedLZ = true;
     }
-    else if (ttyd::string::strcmp(NextMap, "aji_13") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "aji_13") == 0)
     {
       // Manually turn off GW(11) to prevent the game from crashing because of the conveyor belt
       uint32_t EvtWork = reinterpret_cast<uint32_t>(ttyd::evtmgr::evtGetWork());
       *reinterpret_cast<uint32_t *>(EvtWork + 0x30) = 0;
     }
-    else if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "aji_14") == 0)
     {
       // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 373
       if ((SequencePosition < 373) && CheckChallengeModeTimerCutoff())
@@ -390,7 +396,7 @@ void getRandomWarp()
         continue;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "eki_05") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "eki_05") == 0)
     {
       // Change the loading zone used if the player has not opened the Ultra Boots chest yet
       // Check if GSWF(3728) is off
@@ -404,13 +410,13 @@ void getRandomWarp()
         }
         
         // Set the correct loading zone for the player to be able to get the Ultra Boots
-        ttyd::string::strcpy(NextBero, "w_bero_1");
+        ttyd::string::strcpy(tempNextBero, "w_bero_1");
         
         // Prevent the loading zone from being changed
         ChangedLZ = true;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "gon_01") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "gon_01") == 0)
     {
       if (LZRandoChallenge)
       {
@@ -422,7 +428,7 @@ void getRandomWarp()
         }
       }      
     }
-    else if (ttyd::string::strcmp(NextMap, "gon_03") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "gon_03") == 0)
     {
       if (LZRandoChallenge)
       {
@@ -434,7 +440,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "gon_06") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "gon_06") == 0)
     {
       // Adjust the Sequence and GSWF(1493) if the player hasn't gotten the Paper Curse yet
       if (ttyd::mario_pouch::pouchCheckItem(PaperModeCurse) == 0)
@@ -453,7 +459,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "gon_07") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "gon_07") == 0)
     {
       // Adjust the Sequence and GSWF(1494) if the player hasn't gotten the Paper Curse yet
       if (ttyd::mario_pouch::pouchCheckItem(PaperModeCurse) == 0)
@@ -472,7 +478,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "gon_11") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "gon_11") == 0)
     {
       // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 56
       if ((SequencePosition < 56) && CheckChallengeModeTimerCutoff())
@@ -480,7 +486,7 @@ void getRandomWarp()
         continue;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "gon_12") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "gon_12") == 0)
     {
       if (LZRandoChallenge)
       {
@@ -492,12 +498,12 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "gor_02") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "gor_02") == 0)
     {
       // Reset GSWF(1207) to allow the player to get the follower again
       ttyd::swdrv::swClear(1207);
     }
-    else if (ttyd::string::strcmp(NextMap, "gra_06") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "gra_06") == 0)
     {
       if (LZRandoChallenge)
       {
@@ -509,7 +515,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "hei_00") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "hei_00") == 0)
     {
       if (LZRandoChallenge)
       {
@@ -521,7 +527,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "hei_10") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "hei_10") == 0)
     {
       if (CheckChallengeModeTimerCutoff())
       {
@@ -540,7 +546,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "hom_00") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "hom_00") == 0)
     {
       if (LZRandoChallenge)
       {
@@ -552,7 +558,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "jin_00") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "jin_00") == 0)
     {
       if (CheckChallengeModeTimerCutoff())
       {
@@ -570,7 +576,7 @@ void getRandomWarp()
             // Only change the loading zone if using the challenge mode
             if (LZRandoChallenge)
             {
-              ttyd::string::strcpy(NextBero, "e_bero_3");
+              ttyd::string::strcpy(tempNextBero, "e_bero_3");
               
               // Prevent the loading zone from being changed
               ChangedLZ = true;
@@ -599,7 +605,7 @@ void getRandomWarp()
           // Only change the loading zone if using the challenge mode
           if (LZRandoChallenge)
           {
-            ttyd::string::strcpy(NextBero, "e_bero_3");
+            ttyd::string::strcpy(tempNextBero, "e_bero_3");
             
             // Prevent the loading zone from being changed
             ChangedLZ = true;
@@ -619,7 +625,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "jin_04") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "jin_04") == 0)
     { 
       // Check if the sequence is before or at Doopliss 2
       if (SequencePosition <= 210)
@@ -664,7 +670,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "jon_00") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "jon_00") == 0)
     {
       // Prevent warping to the Pit if 10 minutes have not passed
       uint32_t TimerCountCutoff = ttyd::system::sysMsec2Frame(3000000); // 50 minutes
@@ -726,9 +732,9 @@ void getRandomWarp()
       ttyd::swdrv::swByteSet(1321, NewPitFloor); // GSW(1321)
       
       // Reset NextMap to proper Pit map
-      ttyd::string::strcpy(NextMap, reinterpret_cast<char *>(NewPitMap));
+      ttyd::string::strcpy(tempNextMap, reinterpret_cast<char *>(NewPitMap));
     }
-    else if (ttyd::string::strcmp(NextMap, "las_09") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "las_09") == 0)
     {
       if (SequencePosition <= 390)
       {
@@ -742,17 +748,17 @@ void getRandomWarp()
           // Allow the Shadow Sirens to be fought if the Sequence is before or at 390
           // Set the Sequence to 390 so that the Shadow Sirens can be fought
           ttyd::swdrv::swByteSet(0, 390);
-          ttyd::string::strcpy(NextBero, "e_bero");
+          ttyd::string::strcpy(tempNextBero, "e_bero");
           
           // Prevent the loading zone from being changed
           ChangedLZ = true;
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "las_26") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "las_26") == 0)
     {
       // Force the loading zone to w_bero, since s_bero is a possible random choice but is invalid
-      ttyd::string::strcpy(NextBero, "w_bero");
+      ttyd::string::strcpy(tempNextBero, "w_bero");
       
       // Prevent the loading zone from being changed
       ChangedLZ = true;
@@ -780,7 +786,7 @@ void getRandomWarp()
         continue;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "las_28") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "las_28") == 0)
     {
       if (SequencePosition <= 399)
       {
@@ -794,14 +800,14 @@ void getRandomWarp()
           // Allow Grodus and Bowser & Kammy to be fought if the Sequence is before or at 399
           // Set the Sequence to 399 so that Grodus and Bowser & Kammy can be fought
           ttyd::swdrv::swByteSet(0, 399);
-          ttyd::string::strcpy(NextBero, "w_bero");
+          ttyd::string::strcpy(tempNextBero, "w_bero");
           
           // Prevent the loading zone from being changed
           ChangedLZ = true;
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "las_29") == 0)
     {
       if (SequencePosition <= 400)
       {
@@ -815,14 +821,14 @@ void getRandomWarp()
           // Allow the Shadow Queen to be fought if the Sequence is before or at 400
           // Set the Sequence to 400 so that the Shadow Queen can be fought
           ttyd::swdrv::swByteSet(0, 400);
-          ttyd::string::strcpy(NextBero, "sekai_yami2");
+          ttyd::string::strcpy(tempNextBero, "sekai_yami2");
           
           // Prevent the loading zone from being changed
           ChangedLZ = true;
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "moo_00") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "moo_00") == 0)
     {
       // Skip the intro cutscene
       // Need to skip this cutscene to prevent a crash
@@ -832,12 +838,12 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 358);
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "mri_00") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "mri_00") == 0)
     {
       // Reset GSWF(2826) to allow the player to get the follower again
       ttyd::swdrv::swClear(2826);
     }
-    else if (ttyd::string::strcmp(NextMap, "mri_01") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "mri_01") == 0)
     {
       if (SequencePosition <= 110)
       {
@@ -854,7 +860,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "mri_03") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "mri_03") == 0)
     {
       // Skip the Dried Shroom cutscene with Petuni if using the challenge mode
       if (LZRandoChallenge && (SequencePosition == 98))
@@ -863,7 +869,7 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 100);
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "muj_00") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "muj_00") == 0)
     {
       if (SequencePosition <= 259)
       {
@@ -883,7 +889,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "muj_12") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "muj_12") == 0)
     {
       if (SequencePosition <= 252)
       {
@@ -900,7 +906,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "nok_00") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "nok_00") == 0)
     {
       if (SequencePosition < 26)
       {
@@ -918,7 +924,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "pik_01") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "pik_01") == 0)
     {
       // Prevent warping to this room if the Sequence is set for the Bowser section
       // Only prevent if currently using the challenge mode
@@ -931,7 +937,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "rsh_05_a") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "rsh_05_a") == 0)
     {
       // The game will crash if the player enters this room with the Sequence being greater than 338
       if (SequencePosition > 338)
@@ -940,7 +946,7 @@ void getRandomWarp()
         continue;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "rsh_06_a") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "rsh_06_a") == 0)
     {
       if (SequencePosition < 332)
       {
@@ -951,7 +957,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "tik_02") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "tik_02") == 0)
     {
       if (SequencePosition <= 20)
       {
@@ -971,7 +977,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "tou_01") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "tou_01") == 0)
     {
       // Adjust the Sequence to allow the player to get the Super Hammer if they don't have it already
       if (ttyd::mario_pouch::pouchCheckItem(SuperHammer) == 0)
@@ -993,7 +999,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "tou_03") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "tou_03") == 0)
     {
       if (SequencePosition <= 163)
       {
@@ -1007,7 +1013,7 @@ void getRandomWarp()
           // Allow Grubba to be fought if the Sequence is before or at 163
           // Set the Sequence to 163 so that Grubba can be fought
           ttyd::swdrv::swByteSet(0, 163);
-          ttyd::string::strcpy(NextBero, "w_bero");
+          ttyd::string::strcpy(tempNextBero, "w_bero");
           
           // Prevent the loading zone from being changed
           ChangedLZ = true;
@@ -1022,7 +1028,7 @@ void getRandomWarp()
         ttyd::swdrv::swClear(2388);
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "tou_05") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "tou_05") == 0)
     {
       if (LZRandoChallenge)
       {
@@ -1034,7 +1040,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "tou_06") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "tou_06") == 0)
     {
       if (LZRandoChallenge)
       {
@@ -1046,17 +1052,17 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "tou_08") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "tou_08") == 0)
     {
       // Turn off GSWF(2388) to clear any currently-registered fights
       ttyd::swdrv::swClear(2388);
     }
-    else if (ttyd::string::strcmp(NextMap, "tou_10") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "tou_10") == 0)
     {
       // Turn off GSWF(2388) to clear any currently-registered fights
       ttyd::swdrv::swClear(2388);
     }
-    else if (ttyd::string::strcmp(NextMap, "usu_00") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "usu_00") == 0)
     {
       if (LZRandoChallenge)
       {
@@ -1068,7 +1074,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "usu_01") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "usu_01") == 0)
     {
       // Check if the player has the Curse or not
       if (ttyd::mario_pouch::pouchCheckItem(TubeModeCurse) == 0)
@@ -1084,7 +1090,7 @@ void getRandomWarp()
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "win_00") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "win_00") == 0)
     {
       if (SequencePosition <= 84)
       {
@@ -1108,14 +1114,14 @@ void getRandomWarp()
           // Allow the Shadow Sirens to be fought if the Sequence is before or at 84
           // Set the Sequence to 84 so that the Shadow Sirens can be fought
           ttyd::swdrv::swByteSet(0, 84);
-          ttyd::string::strcpy(NextBero, "w_bero");
+          ttyd::string::strcpy(tempNextBero, "w_bero");
           
           // Prevent the loading zone from being changed
           ChangedLZ = true;
         }
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "win_01") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "win_01") == 0)
     {
       if (LZRandoChallenge)
       {
@@ -1149,8 +1155,9 @@ bool CheckLoadingZones(const char *CurrentBero, const char *LoadingZones[], uint
 bool CheckIfValidLoadingZone(const char *CurrentBero)
 {
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
+  char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
   
-  if (ttyd::string::strcmp(NextMap, "aji_13") == 0)
+  if (ttyd::string::strcmp(tempNextMap, "aji_13") == 0)
   {
     const char *LoadingZones[] = {
       "dokan_6",
@@ -1165,7 +1172,7 @@ bool CheckIfValidLoadingZone(const char *CurrentBero)
       return false;
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "gor_03") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "gor_03") == 0)
   {
     const char *LoadingZones[] = {
       "s_bero",
@@ -1177,7 +1184,7 @@ bool CheckIfValidLoadingZone(const char *CurrentBero)
       return false;
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "gra_04") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "gra_04") == 0)
   {
     const char *LoadingZones[] = {
       "w_bero_1",
@@ -1189,7 +1196,7 @@ bool CheckIfValidLoadingZone(const char *CurrentBero)
       return false;
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "gra_05") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "gra_05") == 0)
   {
     const char *LoadingZones[] = {
       "ana_1",
@@ -1203,7 +1210,7 @@ bool CheckIfValidLoadingZone(const char *CurrentBero)
       return false;
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "las_19") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "las_19") == 0)
   {
     if (SequencePosition < 390)
     {
@@ -1219,7 +1226,7 @@ bool CheckIfValidLoadingZone(const char *CurrentBero)
       }
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "las_21") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "las_21") == 0)
   {
     if (SequencePosition < 390)
     {
@@ -1235,7 +1242,7 @@ bool CheckIfValidLoadingZone(const char *CurrentBero)
       }
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "las_23") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "las_23") == 0)
   {
     if (SequencePosition < 390)
     {
@@ -1252,7 +1259,7 @@ bool CheckIfValidLoadingZone(const char *CurrentBero)
       }
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "las_25") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "las_25") == 0)
   {
     if (SequencePosition < 390)
     {
@@ -1268,14 +1275,14 @@ bool CheckIfValidLoadingZone(const char *CurrentBero)
       }
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "tik_00") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "tik_00") == 0)
   {
     if (ttyd::string::strcmp(CurrentBero, "tensou") == 0)
     {
       return false;
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "win_02") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "win_02") == 0)
   {
     if (ttyd::string::strcmp(CurrentBero, "dokan1") == 0)
     {
@@ -1291,6 +1298,8 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
   // Only run if using the Loading Zone randomizer
   if (LZRando)
   {
+    char *tempNextBero = NextBero; // Prevent NextBero from being loaded in multiple times
+    
     // Only randomize if the loading zone was not manually changed
     if (!ChangedLZ)
     {
@@ -1329,21 +1338,23 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
         uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
         char *NextBeroGSW = reinterpret_cast<char *>(GSWAddresses + 0x11C);
         ttyd::string::strcpy(NextBeroGSW, NewLoadingZone);
-        ttyd::string::strcpy(NextBero, NewLoadingZone);
+        ttyd::string::strcpy(tempNextBero, NewLoadingZone);
       }
     }
     
     // If not using the challenge mode, check for loading zones where Boat Mode should be used
     if (!LZRandoChallenge)
     {
-      if (ttyd::string::strcmp(NextMap, "dou_02") == 0)
+      char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
+      
+      if (ttyd::string::strcmp(tempNextMap, "dou_02") == 0)
       {
-        if (ttyd::string::strcmp(NextBero, "e_bero_1") == 0)
+        if (ttyd::string::strcmp(tempNextBero, "e_bero_1") == 0)
         {
           TransformIntoShip = true;
         }
       }
-      else if (ttyd::string::strcmp(NextMap, "dou_03") == 0)
+      else if (ttyd::string::strcmp(tempNextMap, "dou_03") == 0)
       {
         const char *LoadingZones[] = {
           "w_bero_1",
@@ -1351,112 +1362,112 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
           "s_bero" };
         uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
         
-        if (CheckLoadingZones(NextBero, LoadingZones, LoadingZoneArraySize))
+        if (CheckLoadingZones(tempNextBero, LoadingZones, LoadingZoneArraySize))
         {
           TransformIntoShip = true;
         }
       }
-      else if (ttyd::string::strcmp(NextMap, "dou_05") == 0)
+      else if (ttyd::string::strcmp(tempNextMap, "dou_05") == 0)
       {
-        if (ttyd::string::strcmp(NextBero, "w_bero_2") == 0)
+        if (ttyd::string::strcmp(tempNextBero, "w_bero_2") == 0)
         {
           TransformIntoShip = true;
         }
       }
-      else if (ttyd::string::strcmp(NextMap, "dou_09") == 0)
+      else if (ttyd::string::strcmp(tempNextMap, "dou_09") == 0)
       {
         const char *LoadingZones[] = {
           "e_bero_1",
           "n_bero" };
         uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
         
-        if (CheckLoadingZones(NextBero, LoadingZones, LoadingZoneArraySize))
+        if (CheckLoadingZones(tempNextBero, LoadingZones, LoadingZoneArraySize))
         {
           TransformIntoShip = true;
         }
       }
-      else if (ttyd::string::strcmp(NextMap, "dou_10") == 0)
+      else if (ttyd::string::strcmp(tempNextMap, "dou_10") == 0)
       {
         const char *LoadingZones[] = {
           "w_bero_1",
           "e_bero" };
         uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
         
-        if (CheckLoadingZones(NextBero, LoadingZones, LoadingZoneArraySize))
+        if (CheckLoadingZones(tempNextBero, LoadingZones, LoadingZoneArraySize))
         {
           TransformIntoShip = true;
         }
       }
-      else if (ttyd::string::strcmp(NextMap, "dou_11") == 0)
+      else if (ttyd::string::strcmp(tempNextMap, "dou_11") == 0)
       {
-        if (ttyd::string::strcmp(NextBero, "w_bero") == 0)
+        if (ttyd::string::strcmp(tempNextBero, "w_bero") == 0)
         {
           TransformIntoShip = true;
         }
       }
-      else if (ttyd::string::strcmp(NextMap, "dou_12") == 0)
+      else if (ttyd::string::strcmp(tempNextMap, "dou_12") == 0)
       {
         const char *LoadingZones[] = {
           "w_bero_1",
           "e_bero_1" };
         uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
         
-        if (CheckLoadingZones(NextBero, LoadingZones, LoadingZoneArraySize))
+        if (CheckLoadingZones(tempNextBero, LoadingZones, LoadingZoneArraySize))
         {
           TransformIntoShip = true;
         }
       }
-      else if (ttyd::string::strcmp(NextMap, "muj_00") == 0)
+      else if (ttyd::string::strcmp(tempNextMap, "muj_00") == 0)
       {
-        if (ttyd::string::strcmp(NextBero, "n_bero") == 0)
+        if (ttyd::string::strcmp(tempNextBero, "n_bero") == 0)
         {
           TransformIntoShip = true;
         }
       }
-      else if (ttyd::string::strcmp(NextMap, "tik_15") == 0)
+      else if (ttyd::string::strcmp(tempNextMap, "tik_15") == 0)
       {
         const char *LoadingZones[] = {
           "w_bero_1",
           "e_bero" };
         uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
         
-        if (CheckLoadingZones(NextBero, LoadingZones, LoadingZoneArraySize))
+        if (CheckLoadingZones(tempNextBero, LoadingZones, LoadingZoneArraySize))
         {
           TransformIntoShip = true;
         }
       }
-      else if (ttyd::string::strcmp(NextMap, "tik_16") == 0)
+      else if (ttyd::string::strcmp(tempNextMap, "tik_16") == 0)
       {
         const char *LoadingZones[] = {
           "w_bero_1",
           "e_bero_1" };
         uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
         
-        if (CheckLoadingZones(NextBero, LoadingZones, LoadingZoneArraySize))
+        if (CheckLoadingZones(tempNextBero, LoadingZones, LoadingZoneArraySize))
         {
           TransformIntoShip = true;
         }
       }
-      else if (ttyd::string::strcmp(NextMap, "tik_17") == 0)
+      else if (ttyd::string::strcmp(tempNextMap, "tik_17") == 0)
       {
         const char *LoadingZones[] = {
           "w_bero_1",
           "e_bero_1" };
         uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
         
-        if (CheckLoadingZones(NextBero, LoadingZones, LoadingZoneArraySize))
+        if (CheckLoadingZones(tempNextBero, LoadingZones, LoadingZoneArraySize))
         {
           TransformIntoShip = true;
         }
       }
-      else if (ttyd::string::strcmp(NextMap, "tik_18") == 0)
+      else if (ttyd::string::strcmp(tempNextMap, "tik_18") == 0)
       {
-        if (ttyd::string::strcmp(NextBero, "e_bero_1") == 0)
+        if (ttyd::string::strcmp(tempNextBero, "e_bero_1") == 0)
         {
           TransformIntoShip = true;
         }
       }
-      else if (ttyd::string::strcmp(NextMap, "tik_20") == 0)
+      else if (ttyd::string::strcmp(tempNextMap, "tik_20") == 0)
       {
         TransformIntoShip = true;
       }
@@ -1475,11 +1486,11 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
       CloseCurtainFlag = false;
       
       // Only close the curtain if coming out of a pipe
-      if (ttyd::string::strncmp(NextBero, "dokan_6", 5) == 0)
+      if (ttyd::string::strncmp(tempNextBero, "dokan_6", 5) == 0)
       {
-        // Only close the curtain if the Sequence is not 404, because it'll close automatically if it's at 404
-        uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-        if (SequencePosition != 404)
+        // Only close the curtain if GSW(4) is not 21, as this is the value used when loading a file that has just saved after the credits
+        uint32_t GSW_4 = ttyd::swdrv::swByteGet(4);
+        if (GSW_4 != 21)
         {
           uint32_t color = 0x000000FF;
           int duration = 0;
@@ -1674,7 +1685,8 @@ void specificMapEdits()
   // uint32_t AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZsAddressesStart);
   // AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x4);
   
-  if (ttyd::string::strcmp(NextMap, "gon_12") == 0)
+  char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
+  if (ttyd::string::strcmp(tempNextMap, "gon_12") == 0)
   {
     if (SequencePosition < 50)
     {
@@ -1687,7 +1699,7 @@ void specificMapEdits()
       }
     }
   }
-  if (ttyd::string::strcmp(NextMap, "gor_01") == 0)
+  if (ttyd::string::strcmp(tempNextMap, "gor_01") == 0)
   {
     if (MarioFreeze)
     {
@@ -1712,7 +1724,7 @@ void specificMapEdits()
       #endif
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "jin_04") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "jin_04") == 0)
   {
     if (SequencePosition == 200)
     {
@@ -1741,7 +1753,7 @@ void specificMapEdits()
       ttyd::swdrv::swByteSet(0, 214);
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "las_29") == 0)
   {
     // Make sure a partner is out for the Shadow Queen cutscene
     if (!PartnerPointer)
@@ -1871,21 +1883,23 @@ void reloadScreen()
     
     // Prevent reloading the room if the player is currently in a room with a boss. This prevents the player from repeatedly killing the boss for SP and/or points.
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-    if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
+    char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
+    
+    if (ttyd::string::strcmp(tempNextMap, "aji_14") == 0)
     {
       if (SequencePosition <= 373)
       {
         return;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "gon_11") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "gon_11") == 0)
     {
       if (SequencePosition < 55)
       {
         return;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "hei_10") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "hei_10") == 0)
     {
       if (SequencePosition <= 31)
       {
@@ -1900,75 +1914,75 @@ void reloadScreen()
         }
       }
     }
-    else if (ttyd::string::strncmp(NextMap, "jon_00", 3) == 0)
+    else if (ttyd::string::strncmp(tempNextMap, "jon_00", 3) == 0)
     {
       // Prevent the player from constantly reloading floors to kill high level enemies
       return;
     }
-    else if (ttyd::string::strcmp(NextMap, "las_09") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "las_09") == 0)
     {
       if (SequencePosition == 390)
       {
         return;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "las_26") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "las_26") == 0)
     {
       if (SequencePosition == 387)
       {
         return;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "las_28") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "las_28") == 0)
     {
       if (SequencePosition == 399)
       {
         return;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "las_29") == 0)
     {
       if (SequencePosition == 400)
       {
         return;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "mri_01") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "mri_01") == 0)
     {
       if ((SequencePosition == 110) || (SequencePosition == 111))
       {
         return;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "muj_00") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "muj_00") == 0)
     {
       if (SequencePosition == 259)
       {
         return;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "muj_12") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "muj_12") == 0)
     {
       if (SequencePosition == 252)
       {
         return;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "rsh_06_a") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "rsh_06_a") == 0)
     {
       if (SequencePosition < 332)
       {
         return;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "tik_02") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "tik_02") == 0)
     {
       if (SequencePosition == 20)
       {
         return;
       }
     }
-    else if (ttyd::string::strcmp(NextMap, "tou_03") == 0)
+    else if (ttyd::string::strcmp(tempNextMap, "tou_03") == 0)
     {
       if (SequencePosition == 163)
       {
@@ -1982,7 +1996,7 @@ void reloadScreen()
     // NewBero and NewMap need to be global variables
     
     ttyd::string::strcpy(NewBero, NextBero);
-    ttyd::string::strcpy(NewMap, NextMap);
+    ttyd::string::strcpy(NewMap, tempNextMap);
     ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, NewMap, NewBero);
     ReloadCurrentScreen = true;
     MarioFreeze = false;
@@ -2034,22 +2048,24 @@ void setNextBero()
     return;
   }
   
+  char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
+  
   // Prevent changing the loading zone if currently in a room where using it would result in a softlock
-  if (ttyd::string::strcmp(NextMap, "eki_03") == 0)
+  if (ttyd::string::strcmp(tempNextMap, "eki_03") == 0)
   {
     return;
   }
   
   // Prevent changing the loading zone for rooms that need it to be set to a specific value
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-  if (ttyd::string::strcmp(NextMap, "aji_14") == 0)
+  if (ttyd::string::strcmp(tempNextMap, "aji_14") == 0)
   {
     if (SequencePosition < 373)
     {
       return;
     }
   }
-  else if (ttyd::string::strcmp(NextMap, "las_29") == 0)
+  else if (ttyd::string::strcmp(tempNextMap, "las_29") == 0)
   {
     if (SequencePosition == 400)
     {
@@ -2063,30 +2079,31 @@ void setNextBero()
   uint16_t WBeroCombo = PAD_L | PAD_DPAD_LEFT;
   uint16_t EBeroCombo = PAD_L | PAD_DPAD_RIGHT;
   
+  char *tempNextBero = NextBero; // Prevent NextMap from being loaded in multiple times
   if ((ButtonInput & NBeroCombo) == NBeroCombo)
   {
-    ttyd::string::strcpy(NextBero, "n_bero");
+    ttyd::string::strcpy(tempNextBero, "n_bero");
     
     // Prevent the loading zone from being changed
     ChangedLZ = true;
   }
   else if ((ButtonInput & SBeroCombo) == SBeroCombo)
   {
-    ttyd::string::strcpy(NextBero, "s_bero");
+    ttyd::string::strcpy(tempNextBero, "s_bero");
     
     // Prevent the loading zone from being changed
     ChangedLZ = true;
   }
   else if ((ButtonInput & WBeroCombo) == WBeroCombo)
   {
-    ttyd::string::strcpy(NextBero, "w_bero");
+    ttyd::string::strcpy(tempNextBero, "w_bero");
     
     // Prevent the loading zone from being changed
     ChangedLZ = true;
   }
   else if ((ButtonInput & EBeroCombo) == EBeroCombo)
   {
-    ttyd::string::strcpy(NextBero, "e_bero");
+    ttyd::string::strcpy(tempNextBero, "e_bero");
     
     // Prevent the loading zone from being changed
     ChangedLZ = true;
@@ -2147,9 +2164,10 @@ uint32_t getCurseReturnValue(uint32_t pouchCheckItem, const char *CheckMapArray[
   // Only run if the player doesn't already have the desired curse, and if the Loading Zone randomizer is in use
   if (!pouchCheckItem && LZRando)
   {
+    char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
     for (uint32_t i = 0; i < ArraySize; i++)
     {
-      if (ttyd::string::strcmp(NextMap, CheckMapArray[i]) == 0)
+      if (ttyd::string::strcmp(tempNextMap, CheckMapArray[i]) == 0)
       {
         // Return arbitrary value greater than 0
         return 1;
@@ -2442,9 +2460,9 @@ bool resetSystemFlag(void *GSWAddress)
   {
     ResetSystemFlag = false;
     
-    // Only reset if the Sequence is at 404
-    uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-    if (SequencePosition == 404)
+    // Only reset if GSW(4) is set to 21, as this is the value used when loading a file that has just saved after the credits
+    uint32_t GSW_4 = ttyd::swdrv::swByteGet(4);
+    if (GSW_4 == 21)
     {
       NewSystemFlagValue |= (1 << 0); // Turn on the 0 bit
       
@@ -2546,7 +2564,7 @@ bool Mod::preventGetItemOnReload(uint32_t id)
   }
 }
 
-void Mod::preventMarioEndOfChapterHeads(int type, int duration, uint8_t *color)
+void Mod::preventMarioEndOfChapterHeads(int type, int duration, uint8_t color[4])
 {
   // Only prevent from displaying if the Loading Zone randomizer is currently in use
   if (LZRando)

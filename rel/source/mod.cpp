@@ -87,7 +87,7 @@ void Mod::init()
   });
   
   // Prevent the Mario heads from appearing at the end of chapters
-  mPFN_preventMarioEndOfChapterHeads_trampoline = patch::hookFunction(ttyd::fadedrv::fadeEntry, [](int type, int duration, uint8_t *color)
+  mPFN_preventMarioEndOfChapterHeads_trampoline = patch::hookFunction(ttyd::fadedrv::fadeEntry, [](int type, int duration, uint8_t color[4])
   {
     return gMod->preventMarioEndOfChapterHeads(type, duration, color);
   });

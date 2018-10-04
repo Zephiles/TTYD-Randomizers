@@ -84,8 +84,9 @@ void Mod::LZRandoDisplayStuff()
   ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
   ttyd::seqdrv::SeqIndex GameOver = ttyd::seqdrv::SeqIndex::kGameOver;
   
-  bool dmo_comparison = ttyd::string::strcmp(NextMap, "dmo_00") == 0;
-  bool title_comparison = ttyd::string::strcmp(NextMap, "title") == 0;
+  char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
+  bool dmo_comparison = ttyd::string::strcmp(tempNextMap, "dmo_00") == 0;
+  bool title_comparison = ttyd::string::strcmp(tempNextMap, "title") == 0;
   
   // Only display while a file is loaded, and while not in battles
   // Don't display while in the intro or on the title screen
@@ -98,14 +99,15 @@ void Mod::LZRandoDisplayStuff()
   int32_t PosX = -232;
   int32_t PosY = -120;
   float Scale = 0.75;
+  char *tempDisplayBuffer = DisplayBuffer; // Prevent DisplayBuffer from being loaded in multiple times
   
-  sprintf(DisplayBuffer,
+  sprintf(tempDisplayBuffer,
     "Seq: %lu\nLZ: %s\nMap: %s",
     ttyd::swdrv::swByteGet(0),
     NextBero,
-    NextMap);
+    tempNextMap);
     
-  drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
+  drawStringMultipleLines(PosX, PosY, color, tempDisplayBuffer, Scale);
 }
 
 void adjustAllFinalScoresArray()
@@ -267,13 +269,14 @@ void displayAllFinalScores()
   int32_t PosX = 185;
   int32_t PosY = 180;
   float Scale = 0.6;
+  char *tempDisplayBuffer = DisplayBuffer; // Prevent DisplayBuffer from being loaded in multiple times
 
-  sprintf(DisplayBuffer,
+  sprintf(tempDisplayBuffer,
     "%ld/%ld",
     FinalScoresMenuCounter,
     TotalPages);
     
-  drawStringSingleLine(PosX, PosY, TextColor, DisplayBuffer, Scale);
+  drawStringSingleLine(PosX, PosY, TextColor, tempDisplayBuffer, Scale);
   
   // Draw the page title
   PosX = -80;
@@ -316,7 +319,7 @@ void displayAllFinalScores()
       if (AllFinalScoresArray[i] != static_cast<int32_t>(0x80000000))
       {
         // The player did not reset this run
-        sprintf(DisplayBuffer,
+        sprintf(tempDisplayBuffer,
           "%ld. %ld",
           i + 1,
           AllFinalScoresArray[i]);
@@ -324,13 +327,13 @@ void displayAllFinalScores()
       else
       {
         // The player reset this run
-        sprintf(DisplayBuffer,
+        sprintf(tempDisplayBuffer,
           "%ld. Reset",
           i + 1);
       }
       
       // Draw the current line
-      drawStringSingleLine(PosX, PosY, TextColor, DisplayBuffer, Scale);
+      drawStringSingleLine(PosX, PosY, TextColor, tempDisplayBuffer, Scale);
       
       // Implement a new line
       PosY -= 20;
@@ -353,10 +356,12 @@ void Mod::LZRandoChallengeStuff()
   
   uint32_t color = 0xFFFFFFFF;
   
-  bool dmo_comparison = ttyd::string::strcmp(NextMap, "dmo_00") == 0;
-  bool title_comparison = ttyd::string::strcmp(NextMap, "title") == 0;
+  char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
+  bool dmo_comparison = ttyd::string::strcmp(tempNextMap, "dmo_00") == 0;
+  bool title_comparison = ttyd::string::strcmp(tempNextMap, "title") == 0;
   
   uint32_t ButtonInputTrg = ttyd::system::keyGetButtonTrg(0);
+  char *tempDisplayBuffer = DisplayBuffer; // Prevent DisplayBuffer from being loaded in multiple times
   
   // Get and display Score
   // Don't display while in the intro or on the title screen
@@ -495,7 +500,7 @@ void Mod::LZRandoChallengeStuff()
     
     // Check for the Atomic Boo
     BossDefeatedIndex++;
-    if (ttyd::string::strcmp(NextMap, "jin_00") == 0)
+    if (ttyd::string::strcmp(tempNextMap, "jin_00") == 0)
     {
       // Check GSWF(2226)
       bool AtomicBooCheck = ttyd::swdrv::swGet(2226);
@@ -516,7 +521,7 @@ void Mod::LZRandoChallengeStuff()
     
     // Check for Bonetail
     BossDefeatedIndex++;
-    if (ttyd::string::strcmp(NextMap, "jon_06") == 0)
+    if (ttyd::string::strcmp(tempNextMap, "jon_06") == 0)
     {
       // Check GSWF(5085)
       bool BonetailCheck = ttyd::swdrv::swGet(5085);
@@ -621,11 +626,11 @@ void Mod::LZRandoChallengeStuff()
     int32_t PosY = -100;
     float Scale = 0.75;
     
-    sprintf(DisplayBuffer,
+    sprintf(tempDisplayBuffer,
       "Score: %ld",
       Score);
       
-    drawStringSingleLine(PosX, PosY, color, DisplayBuffer, Scale);
+    drawStringSingleLine(PosX, PosY, color, tempDisplayBuffer, Scale);
     
     // Display the Final Score if time is up
     if (TimesUpCounter > 0)
@@ -634,11 +639,11 @@ void Mod::LZRandoChallengeStuff()
       PosY = -80;
       // Scale = 0.75;
       
-      sprintf(DisplayBuffer,
+      sprintf(tempDisplayBuffer,
         "Final Score: %ld",
         FinalScore);
       
-      drawStringSingleLine(PosX, PosY, color, DisplayBuffer, Scale);
+      drawStringSingleLine(PosX, PosY, color, tempDisplayBuffer, Scale);
     }
     
     // Display where the points came from
@@ -654,7 +659,7 @@ void Mod::LZRandoChallengeStuff()
         PosY += 20;
       }
       
-      sprintf(DisplayBuffer,
+      sprintf(tempDisplayBuffer,
         "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld",
         MainScores[0], // Crystal Stars/Magical Map
         MainScores[1], // Curses
@@ -667,7 +672,7 @@ void Mod::LZRandoChallengeStuff()
         MainScores[8], // Partner Upgrades
         MainScores[9]); // Game Overs
       
-      drawStringSingleLine(PosX, PosY, color, DisplayBuffer, Scale);
+      drawStringSingleLine(PosX, PosY, color, tempDisplayBuffer, Scale);
     }
     
     // Get input for whether to display the score sources or not
@@ -743,14 +748,14 @@ void Mod::LZRandoChallengeStuff()
       uint32_t second = (TimerCount / FPS) % 60;
       uint32_t frame = TimerCount % FPS;
       
-      sprintf(DisplayBuffer,
+      sprintf(tempDisplayBuffer,
         "%.2ld:%.2ld:%.2ld.%.2ld",
         hour,
         minute,
         second,
         frame);
       
-      drawStringSingleLine(FontDrawX, FontDrawY, color, DisplayBuffer, Scale);
+      drawStringSingleLine(FontDrawX, FontDrawY, color, tempDisplayBuffer, Scale);
     }
     
     if (TimerActive)
@@ -801,12 +806,12 @@ void Mod::LZRandoChallengeStuff()
           PosY = 25;
           Scale = 0.9;
           
-          sprintf(DisplayBuffer,
+          sprintf(tempDisplayBuffer,
             "%s\n%s",
             "Press Y to continue playing",
             "Press X to return to the title screen");
           
-          drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
+          drawStringMultipleLines(PosX, PosY, color, tempDisplayBuffer, Scale);
           
           // Get input for what to do next
           if ((ButtonInputTrg & PAD_Y) == PAD_Y)
@@ -881,18 +886,19 @@ void Mod::titleScreenStuff()
   int32_t PosX = -203;
   int32_t PosY = -35;
   float Scale = 0.9;
+  char *tempDisplayBuffer = DisplayBuffer; // Prevent DisplayBuffer from being loaded in multiple times
   
   #ifdef TTYD_JP
     PosX += 5;
     PosY += 30;
   #endif
   
-  sprintf(DisplayBuffer,
+  sprintf(tempDisplayBuffer,
     "%s\n%s",
-    "Item Randomizer - v1.2.22",
-    "Loading Zone Randomizer - v1.0.5");
+    "Item Randomizer - v1.2.23",
+    "Loading Zone Randomizer - v1.0.6");
   
-  drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
+  drawStringMultipleLines(PosX, PosY, color, tempDisplayBuffer, Scale);
   
   // Display overall version
   PosX = -225;
@@ -904,7 +910,7 @@ void Mod::titleScreenStuff()
     PosY += 20;
   #endif
   
-  const char *VersionNumber = "v2.0.5";
+  const char *VersionNumber = "v2.0.6";
   drawStringSingleLine(PosX, PosY, color, VersionNumber, Scale);
 }
 
@@ -935,15 +941,16 @@ void Mod::gameModes()
   // PosX = -255;
   PosY = -10;
   // Scale = 0.75;
+  char *tempDisplayBuffer = DisplayBuffer; // Prevent DisplayBuffer from being loaded in multiple times
   
-  sprintf(DisplayBuffer,
+  sprintf(tempDisplayBuffer,
     "%s\n%s\n%s\n%s",
     "Hold L and press the following to toggle modes:",
     "Y = Randomize Coins",
     "X = Loading Zone Randomizer",
     "Z = Loading Zone Randomizer - 1 Hour Challenge");
   
-  drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
+  drawStringMultipleLines(PosX, PosY, color, tempDisplayBuffer, Scale);
   
   // Display the Item Randomizer setting as On or Off
   char ItemRandoText[4]; // 3 bytes for ItemRandoText, 1 byte for NULL
@@ -987,7 +994,7 @@ void Mod::gameModes()
   // Scale = 0.75;
   
   // Display current modes
-  sprintf(DisplayBuffer,
+  sprintf(tempDisplayBuffer,
     "%s%s\n%s%s\n%s%s",
     "Randomize Coins: ",
     ItemRandoText,
@@ -996,7 +1003,7 @@ void Mod::gameModes()
     "Loading Zone Randomizer - 1 Hour Challenge: ",
     LZRandoChallengeText);
     
-  drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
+  drawStringMultipleLines(PosX, PosY, color, tempDisplayBuffer, Scale);
   
   // Get input for game modes
   uint32_t ButtonInput = ttyd::system::keyGetButton(0);
@@ -1131,13 +1138,14 @@ void Mod::helpMenu()
   int32_t PosX = 185;
   int32_t PosY = 180;
   float Scale = 0.6;
+  char *tempDisplayBuffer = DisplayBuffer; // Prevent DisplayBuffer from being loaded in multiple times
   
-  sprintf(DisplayBuffer,
+  sprintf(tempDisplayBuffer,
     "%d/%d",
     HelpMenuCounter,
     HelpMenuArraySize);
     
-  drawStringSingleLine(PosX, PosY, TextColor, DisplayBuffer, Scale);
+  drawStringSingleLine(PosX, PosY, TextColor, tempDisplayBuffer, Scale);
   
   // Draw the main text
   PosX = -232;
@@ -1163,7 +1171,7 @@ void Mod::helpMenu()
     PosY = 180;
     // Scale = 0.6;
     
-    sprintf(DisplayBuffer,
+    sprintf(tempDisplayBuffer,
       "%s (%ld)",
       "Item Randomizer",
       HelpMenuCounter - ItemRandoStartingPage + 1);
@@ -1187,7 +1195,7 @@ void Mod::helpMenu()
     PosY = 180;
     // Scale = 0.6;
     
-    sprintf(DisplayBuffer,
+    sprintf(tempDisplayBuffer,
       "%s (%ld)",
       "Loading Zone Randomizer",
       HelpMenuCounter - LZRandoStartingPage + 1);
@@ -1199,7 +1207,7 @@ void Mod::helpMenu()
     PosY = 180;
     // Scale = 0.6;
     
-    sprintf(DisplayBuffer,
+    sprintf(tempDisplayBuffer,
       "%s (%ld)",
       "1 Hour Challenge",
       HelpMenuCounter - ChallengeModeStartingPage + 1);
@@ -1210,7 +1218,7 @@ void Mod::helpMenu()
     return;
   }
   
-  drawStringSingleLine(PosX, PosY, TextColor, DisplayBuffer, Scale);
+  drawStringSingleLine(PosX, PosY, TextColor, tempDisplayBuffer, Scale);
 }
 
 void Mod::displayStuff()
