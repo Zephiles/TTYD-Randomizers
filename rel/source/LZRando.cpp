@@ -41,6 +41,7 @@ extern uint16_t LZMapArraySize;
 extern uint32_t GSWAddressesStart;
 extern bool TransformIntoShip;
 extern bool MarioFreeze;
+extern bool ResetSystemFlag;
 extern uint16_t GSWF_Array_Size;
 extern uint16_t GSWF_Array[];
 extern uint32_t seqMainAddress;
@@ -78,6 +79,8 @@ extern "C" {
   void BranchBackReplaceJumpFallAnim();
   void StartRandomizeBeroOnFileLoad();
   void BranchBackRandomizeBeroOnFileLoad();
+  void StartResetSystemFlag();
+  void BranchBackResetSystemFlag();
 }
 
 namespace mod {
@@ -1528,8 +1531,8 @@ void setUpNewFile()
   *reinterpret_cast<uint32_t *>(LotteryAddress) = 0;
   *reinterpret_cast<uint32_t *>(LotteryAddress + 0x4) = 0;
   
-  // Turn off a bit to enable loading zones
-  *reinterpret_cast<uint32_t *>(GSWAddresses) &= ~(1 << 0); // Turn off the 0 bit
+  // Don't reset the System Flag, as it will cause Mario to spawn at the center of the room
+  ResetSystemFlag = false;
   
   // Turn on all of the GSWFs in the array
   uint16_t ArraySize = GSWF_Array_Size; // Prevent the compiled code from loading this variable more than once
@@ -2340,30 +2343,33 @@ char *checkCurrentTextbox(char *currentText)
 extern "C" {
 const char *replaceJumpFallAnim(char *jumpFallString)
 {
-  if (ttyd::string::strncmp(jumpFallString, "M_J_", 4) == 0)
+  if (LZRandoChallenge)
   {
-    if (ttyd::string::strcmp(NextMap, "gor_01") == 0)
+    if (ttyd::string::strncmp(jumpFallString, "M_J_", 4) == 0)
     {
-      // Return an arbitrary string
-      const char *newString = "w_bero";
-      
-      if (MarioFreeze)
+      if (ttyd::string::strcmp(NextMap, "gor_01") == 0)
       {
-        return newString;
-      }
-      else
-      {
-        ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
-      
-        // Should use evt_sub_check_intersect instead
-        if ((player->playerPosition[0] >= -10) && (player->playerPosition[0] <= 10))
+        // Return an arbitrary string
+        const char *newString = "w_bero";
+        
+        if (MarioFreeze)
         {
-          if ((player->playerPosition[2] >= 250) && (player->playerPosition[2] <= 267))
+          return newString;
+        }
+        else
+        {
+          ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
+        
+          // Should use evt_sub_check_intersect instead
+          if ((player->playerPosition[0] >= -10) && (player->playerPosition[0] <= 10))
           {
-            if (player->playerPosition[1] >= 58)
+            if ((player->playerPosition[2] >= 250) && (player->playerPosition[2] <= 267))
             {
-              MarioFreeze = true;
-              return newString;
+              if (player->playerPosition[1] >= 58)
+              {
+                MarioFreeze = true;
+                return newString;
+              }
             }
           }
         }
@@ -2376,18 +2382,41 @@ const char *replaceJumpFallAnim(char *jumpFallString)
 }
 
 extern "C" {
-uint32_t randomizeBeroOnFileLoad(uint32_t swByteGetCheck, void *GSWAddress, uint32_t NewValue)
+uint32_t randomizeBeroOnFileLoad(uint32_t swByteGetCheck, void *GSWAddress, uint32_t NewSystemFlagValue)
 {
   // Only randomize while using the Loading Zone randomizer
   if (LZRando)
   {
-    NewValue &= ~(1 << 0); // Turn off the 0 bit
+    NewSystemFlagValue &= ~(1 << 0); // Turn off the 0 bit
+    
+    // Set a flag to have the system flag reset later
+    ResetSystemFlag = true;
   }
   
   // Store the new value
-  *reinterpret_cast<uint32_t *>(GSWAddress) = NewValue;
+  *reinterpret_cast<uint32_t *>(GSWAddress) = NewSystemFlagValue;
   
   return swByteGetCheck;
+}
+}
+
+extern "C" {
+bool resetSystemFlag(void *GSWAddress)
+{
+  uint32_t NewSystemFlagValue = *reinterpret_cast<uint32_t *>(GSWAddress);
+  
+  // Only reset if ResetSystemFlag is on and while using the Loading Zone randomizer
+  if (ResetSystemFlag && LZRando)
+  {
+    ResetSystemFlag = false;
+    
+    NewSystemFlagValue |= (1 << 0); // Turn on the 0 bit
+    
+    // Store the new value
+    *reinterpret_cast<uint32_t *>(GSWAddress) = NewSystemFlagValue;
+  }
+  
+  return (NewSystemFlagValue & (1 << 0)); // Check if the 0 bit is on
 }
 }
 
@@ -2487,28 +2516,32 @@ void Mod::preventMarioEndOfChapterHeads(int type, int duration, uint8_t *color)
   {
     const int MarioHeadFadeIn = 54;
     const int MarioHeadFadeOut = 55;
+    const int MarioHeadAfterCreditsFadeOut = 60;
     const int BlackFadeIn = 9;
     const int BlackFadeOut = 10;
     
     if (type == MarioHeadFadeIn)
     {
-      // Only change if the Sequence is not 404, as the heads automatically appear when loading a file when the Sequence is 404
-      uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-      if (SequencePosition != 404)
-      {
-        // Change the Mario heads to a black screen
-        type = BlackFadeIn;
-        
-        // Change the duration to 0 so that the black screen goes away instantly
-        duration = 0;
-      }
+      // Clear the black screen
+      type = BlackFadeIn;
+      
+      // Change the duration to 0 to set the screen to black instantly
+      duration = 0;
     }
     else if (type == MarioHeadFadeOut)
     {
-      // Clear the black screen
+      // Change the Mario heads to a black screen
       type = BlackFadeOut;
       
-      // Change the duration to 0 to set the screen to black instantly
+      // Change the duration to 0 so that the black screen goes away instantly
+      duration = 0;
+    }
+    else if (type == MarioHeadAfterCreditsFadeOut)
+    {
+      // Replace the Mario endgame heads with a black screen
+      type = BlackFadeOut;
+      
+      // Change the duration to 0 so that the black screen goes away instantly
       duration = 0;
     }
   }
@@ -2535,6 +2568,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t PowerRushPIconCheck = 0x8001A314;
     uint32_t ReplaceJumpFallAnim = 0x800411D0;
     uint32_t RandomizeBeroFileLoad = 0x800F3A70;
+    uint32_t ResetSystemFlag = 0x8000847C;
   #elif defined TTYD_JP
     uint32_t RandomWarp = 0x800086F0;
     uint32_t TubeModeCheck = 0x80090D90;
@@ -2549,6 +2583,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t CheckCurrentTextbox = 0x800CE750;
     uint32_t ReplaceJumpFallAnim = 0x80040B34;
     uint32_t RandomizeBeroFileLoad = 0x800EEDB4;
+    uint32_t ResetSystemFlag = 0x800083A4;
   #elif defined TTYD_EU
     uint32_t RandomWarp = 0x80008994;
     uint32_t TubeModeCheck = 0x800936A0;
@@ -2566,6 +2601,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t PowerRushPIconCheck = 0x8001A4D8;
     uint32_t ReplaceJumpFallAnim = 0x800412B8;
     uint32_t RandomizeBeroFileLoad = 0x800F48DC;
+    uint32_t ResetSystemFlag = 0x80008648;
   #endif
   
   // Random Warps
@@ -2631,6 +2667,10 @@ void Mod::writeLZRandoAssemblyPatches()
   // Randomize the loading zone upon loading a file
   patch::writeBranch(reinterpret_cast<void *>(RandomizeBeroFileLoad), reinterpret_cast<void *>(StartRandomizeBeroOnFileLoad));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackRandomizeBeroOnFileLoad), reinterpret_cast<void *>(RandomizeBeroFileLoad + 0x4));
+  
+  // Reset the System Flag if it was modified when loading a file
+  patch::writeBranch(reinterpret_cast<void *>(ResetSystemFlag), reinterpret_cast<void *>(StartResetSystemFlag));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackResetSystemFlag), reinterpret_cast<void *>(ResetSystemFlag + 0x4));
 }
 
 void Mod::LZRandoStuff()

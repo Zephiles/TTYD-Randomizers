@@ -75,6 +75,7 @@ bool GameOverFlag = false;
 bool NewFile = false;
 bool TransformIntoShip = false;
 bool MarioFreeze = false;
+bool ResetSystemFlag = false;
 bool ClearCacheFlag = false;
 bool SQWarpAway = false;
 char *NewBero = new char[32]; // 31 bytes for NextBero, 1 byte for NULL

@@ -890,7 +890,7 @@ void Mod::titleScreenStuff()
   sprintf(DisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.2.22",
-    "Loading Zone Randomizer - v1.0.3");
+    "Loading Zone Randomizer - v1.0.4");
   
   drawStringMultipleLines(PosX, PosY, color, DisplayBuffer, Scale);
   
@@ -904,7 +904,7 @@ void Mod::titleScreenStuff()
     PosY += 20;
   #endif
   
-  const char *VersionNumber = "v2.0.3";
+  const char *VersionNumber = "v2.0.4";
   drawStringSingleLine(PosX, PosY, color, VersionNumber, Scale);
 }
 
@@ -1152,7 +1152,7 @@ void Mod::helpMenu()
   uint32_t ItemRandoStartingPage = 2;
   uint32_t ItemRandoTotalPages = 8;
   uint32_t LZRandoStartingPage = ItemRandoStartingPage + ItemRandoTotalPages;
-  uint32_t LZRandoTotalPages = 9;
+  uint32_t LZRandoTotalPages = 10;
   uint32_t ChallengeModeStartingPage = LZRandoStartingPage + LZRandoTotalPages;
   uint32_t ChallengeModeTotalPages = 9;
   
@@ -1180,17 +1180,6 @@ void Mod::helpMenu()
       // Draw second column of Loading Zone Randomizer page 5
       const char *BossesText = "15. Shadow Sirens (Ch8)\n16. Grodus\n17. Bowser & Kammy\n18. Shadow Queen\n19. Bonetail";
       drawStringMultipleLines(PosX, PosY, TextColor, BossesText, Scale);
-    }
-    else if (HelpMenuCounter == (LZRandoStartingPage + 8))
-    {
-      // Check if currently on page 9 of the Loading Zone Randomizer section
-      PosX = -90;
-      PosY = -90;
-      // Scale = 0.6;
-      
-      // Draw second column of Loading Zone Randomizer page 9
-      const char *FollowersText = "4. Frankly\n5. Gus";
-      drawStringMultipleLines(PosX, PosY, TextColor, FollowersText, Scale);
     }
     
     // Draw the Loading Zone Randomizer page title

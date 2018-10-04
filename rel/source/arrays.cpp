@@ -112,7 +112,7 @@ uint16_t GSWF_Array_Size = sizeof(GSWF_Array) / sizeof(GSWF_Array[0]);
 
 const char *HelpMenuArray[] = {
   // Page 1
-  "This menu displays information about the following:\n\n1. Item Randomizer\n   Pages 2-9\n\n2. Loading Zone Randomizer\n   Pages 10-18\n\n3. Loading Zone Randomizer - 1 Hour Challenge\n   Pages 19-27\n\nPress D-Pad Left/Right to change pages\nPress L + Start to close the menu",
+  "This menu displays information about the following:\n\n1. Item Randomizer\n   Pages 2-9\n\n2. Loading Zone Randomizer\n   Pages 10-19\n\n3. Loading Zone Randomizer - 1 Hour Challenge\n   Pages 20-28\n\nPress D-Pad Left/Right to change pages\nPress L + Start to close the menu",
   
   // Page 2
   "The following will be randomized:\n\n1. Items/Badges that spawn in the field\n\n2. Items/Badges from chests and blocks\n\n3. Single Coin Blocks\n\n4. Star Pieces in floor panels\n\n5. Coins from the overworld (only when the Randomize\n   Coins option is On). The coins dropped when\n   running away from a battle are not randomized.",
@@ -163,33 +163,36 @@ const char *HelpMenuArray[] = {
   "When going to fight Doopliss 2, Vivian is forced out\nboth before and after the fight. This is to prevent\nthe game from crashing.\n\nWhen warping to Doopliss's room, whether you fight\nhim the first or second time is based on the Sequence.\nIf the Sequence is before or at the first fight, then\none of the fights will be chosen at random. If the\nSequence is past the first fight but before or at the\nsecond fight, then the second fight will be chosen.\n\nWhen warping to Glitzville, the Sequence will be\nautomatically adjusted for you to be able to get the\nSuper Hammer if you don't have it already. This\nhappens even if you have the Ultra Hammer already.",
   
   // Page 18
-  "When warping into either the Glitz Pit Arena or one\nof the locker rooms, any current matches are\nautomatically cleared. This is to prevent softlocks\nas well as a match trying to start at the same time\nas the cutscene for fighting Grubba is playing.\n\nYou will be warped to the credits after defeating\nthe Shadow Queen.\n\nWhen obtaining a follower, it will be randomized into\none of the following:\n\n1. Yoshi Egg\n2. Flavio\n3. Punio",
+  "When warping into either the Glitz Pit Arena or one\nof the locker rooms, any current matches are\nautomatically cleared. This is to prevent softlocks\nas well as a match trying to start at the same time\nas the cutscene for fighting Grubba is playing.\n\nYou will be warped to the credits after defeating\nthe Shadow Queen.\n\nIf you warp into the X-Naut Fortress room right\nbefore Magnus 2, then you can exit via the west\nentrance by walking/jumping off of the platform with\nthe pipe that is right next to the conveyor belt.\nThis will put you onto the conveyor belt. You can\nthen use Paper Mode to go through the bars.",
   
   // Page 19
-  "The 1 hour challenge is a challenge mode in which\nyou play the game for 1 hour to try to gain as many\npoints as possible. If any of the settings in this\nconflict with the settings of the standard Loading\nZone randomizer, then these settings will take\npriority.\n\nThe points given are as follows:\n\n1. 2 points are given for collecting a crystal star/\n   Magical Map\n\n2. 6 points are given for collecting a curse",
+  "When obtaining a follower, it will be randomized into\none of the following:\n\n1. Yoshi Egg\n2. Flavio\n3. Punio\n4. Frankly\n5. Gus",
   
   // Page 20
-  "3. 1 point is given for collecting an important item.\n   The exception to this is the Battle Trunks,\n   which give 1 point per 10 of them.\n\n4. 2 points are given for having a follower. These\n   points are lost if you lose the follower.\n\n5. 2 points are given for each level up\n\n6. 10 points are given for defeating a boss, with the\n   following exceptions:\n\n   i.  25 points are given for the Shadow Queen, and\n      30 points are given for Bonetail\n   ii. 8 points are given for Grodus and Bowser &\n      Kammy",
+  "The 1 hour challenge is a challenge mode in which\nyou play the game for 1 hour to try to gain as many\npoints as possible. If any of the settings in this\nconflict with the settings of the standard Loading\nZone randomizer, then these settings will take\npriority.\n\nThe points given are as follows:\n\n1. 2 points are given for collecting a crystal star/\n   Magical Map\n\n2. 6 points are given for collecting a curse",
   
   // Page 21
+  "3. 1 point is given for collecting an important item.\n   The exception to this is the Battle Trunks,\n   which give 1 point per 10 of them.\n\n4. 2 points are given for having a follower. These\n   points are lost if you lose the follower.\n\n5. 2 points are given for each level up\n\n6. 10 points are given for defeating a boss, with the\n   following exceptions:\n\n   i.  25 points are given for the Shadow Queen, and\n      30 points are given for Bonetail\n   ii. 8 points are given for Grodus and Bowser &\n      Kammy",
+  
+  // Page 22
   "7. 1 point is given for every 100 coins that you\n   have. An additional point is given for having\n   exactly 999 coins.\n\n8. 1 point is given for every 10 badges in the badge\n   log. This also includes badges that normally do not\n   show up in the log, such as Triple Dip.\n\n9. 5 points are given for every partner upgrade\n\n10. 5 points are lost for every Game Over that occurs",
   
-  // Page 22:
+  // Page 23
   "Several cheat codes have been added to this mode:\n\n1. Pressing the following changes the loading zone:\n\n  i.  L + D-Pad Up - changes it to North\n  ii.  L + D-Pad Down - changes it to South\n  iii. L + D-Pad Left - changes it to West\n  iv. L + D-Pad Right - changes it to East\n\n2. L + B reloads the room that you're currently in.\n   There are some instances where you will not be\n   able to reload the room, such as when fighting/\n   about to fight a boss, or being in a Pit room.\n   Reloading the room will also cause the items in the\n   room to respawn.",
   
-  // Page 23:
+  // Page 24
   "3. You are able to walk and jump on water. Spin\n   Jumping and going onto water with Yoshi will\n   still cause you to fall into it normally.\n\nIf you manually change the loading zone via the\ncheat, then the loading zone will no longer be\nrandomized until you leave the current room. The LZ\nwill also no longer say 'Pending' if you reload the room.\n\nWhen using this mode, Mario will no longer transform\ninto the Boat, as being able to walk on water makes\nit unnecessary",
   
-  // Page 24
+  // Page 25
   "The current Score and Time are displayed on-screen.\nWhen the timer reaches 0, the game will state that\nthe time is up, and will give the options to either\ncontinue playing or to return to the title screen. The\nFinal Score will also be displayed, as well as where\neach of the points came from. The order of the\npoints are the same as the list prior. If you choose\nto continue playing, then the timer will reset to 1\nhour, but the Final Score will remain displayed. Both\nthe Score and the sources for the Score will still\nupdate, but the Final Score will remain unchanged.\n\nL + R can be pressed at anytime during gameplay to\ntoggle the display for where the points came from\n\nMost cutscenes are skipped or shortened",
   
-  // Page 25
+  // Page 26
   "Many maps from the standard Loading Zone\nrandomizer are excluded\n\nThe Debug Badge will never spawn\n\nCrystal stars and/or the Magical Map cannot be\nobtained within the first 5 minutes\n\nThe Pit cannot be accessed within the first 10 minutes\n\nBosses cannot be accessed within the first 20 minutes\n\nSaying No to the Shadow Queen will warp you to a\ndifferent room instead of resulting in a Game Over.\nHowever, doing so will set the Sequence to 405.",
   
-  // Page 26
+  // Page 27
   "Defeating the Shadow Queen will warp you to a\ndifferent room\n\nWhen a boss that does not require a specific\nSequence (such as the Atomic Boo) is defeated, you\nmust go to a different room in order for them to\nrespawn. Warping to the same room will not respawn\nthem; you must warp to a different room first.",
   
-  // Page 27
+  // Page 28
   "While on the File Select Screen, L + Y can be pressed\nto toggle a menu that displays the Final Scores from\nyour previous challenge runs. This menu can only be\nopened while using the Challenge Mode. The menu\ndisplays the scores in the order that they occured,\nso the first one on the list is the first run\ncompleted, etc. If you got a Game Over and then\nproceeded to start a new run, then that entry will\nbe marked with Reset instead of an actual score. In\nthe event that the scores exceed the total amount\non the page (currently supports up to 64 scores), then\nD-Pad Left/Right can be used to navigate to the\nother pages. It is important to note that the scores\nwill be cleared upon resetting the game, as resetting\nclears all of the game's memory."  
 };
 uint8_t HelpMenuArraySize = sizeof(HelpMenuArray) / sizeof(HelpMenuArray[0]);
