@@ -2198,6 +2198,7 @@ uint32_t enableBoatMode(uint32_t pouchCheckItem)
 {
   const char *CheckMapArray[] = {
     "dou_05",
+    "dou_11",
     "tik_20" };
   uint32_t ArraySize = sizeof(CheckMapArray) / sizeof(CheckMapArray[0]);  
   
