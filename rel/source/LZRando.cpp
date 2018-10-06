@@ -1028,6 +1028,12 @@ void getRandomWarp()
         ttyd::swdrv::swClear(2388);
       }
     }
+    else if (ttyd::string::strcmp(tempNextMap, "tou_04") == 0)
+    {
+      // Clear GSWF(2384) and GSWF(2385) to prevent the pipe cutscenes from playing
+      ttyd::swdrv::swClear(2384);
+      ttyd::swdrv::swClear(2385);
+    }
     else if (ttyd::string::strcmp(tempNextMap, "tou_05") == 0)
     {
       if (LZRandoChallenge)
@@ -2197,9 +2203,9 @@ extern "C" {
 uint32_t enableBoatMode(uint32_t pouchCheckItem)
 {
   const char *CheckMapArray[] = {
+    "tik_20",
     "dou_05",
-    "dou_11",
-    "tik_20" };
+    "dou_11" };
   uint32_t ArraySize = sizeof(CheckMapArray) / sizeof(CheckMapArray[0]);  
   
   return getCurseReturnValue(pouchCheckItem, CheckMapArray, ArraySize);

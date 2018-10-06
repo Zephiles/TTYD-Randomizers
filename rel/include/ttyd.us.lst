@@ -668,7 +668,7 @@
 // 800D3D30:pouchGetHP
 // 800D3D3C:pouchAddHP
 // 800D3D8C:pouchAddStarPiece
-// 800D3DA8:pouchGetStarPiece
+800D3DA8:pouchGetStarPiece
 // 800D3DB4:pouchSetSuperCoin
 // 800D3DC8:pouchGetSuperCoin
 // 800D3DD4:pouchSetCoin

@@ -51,7 +51,7 @@ void pouchSetAP(int16_t sp);
 // pouchGetHP
 // pouchAddHP
 // pouchAddStarPiece
-// pouchGetStarPiece
+int16_t pouchGetStarPiece();
 // pouchSetSuperCoin
 // pouchGetSuperCoin
 // pouchSetCoin

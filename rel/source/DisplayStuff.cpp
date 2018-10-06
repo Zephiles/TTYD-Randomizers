@@ -368,7 +368,7 @@ void Mod::LZRandoChallengeStuff()
   if ((NextSeq >= Game) && (NextSeq <= GameOver) && !dmo_comparison && !title_comparison)
   {
     int32_t Score = 0;
-    int32_t MainScores[10] = { 0 };
+    int32_t MainScores[11] = { 0 };
     uint32_t PouchPointer = reinterpret_cast<uint32_t>(ttyd::mario_pouch::pouchGetPtr());
     
     // Check Important Items
@@ -604,8 +604,11 @@ void Mod::LZRandoChallengeStuff()
       InGameOver = false;
     }
     
+    // Add 1 point for every Star Piece the player has
+    MainScores[9] = ttyd::mario_pouch::pouchGetStarPiece();
+    
     // Subtract 5 points for each Game Over
-    MainScores[9] -= GameOverCount * 5;
+    MainScores[10] -= GameOverCount * 5;
     
     // Get total score
     int32_t MainScoresArraySize = sizeof(MainScores) / sizeof(MainScores[0]);
@@ -660,7 +663,7 @@ void Mod::LZRandoChallengeStuff()
       }
       
       sprintf(tempDisplayBuffer,
-        "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld",
+        "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld",
         MainScores[0], // Crystal Stars/Magical Map
         MainScores[1], // Curses
         MainScores[2], // Important Items
@@ -670,7 +673,8 @@ void Mod::LZRandoChallengeStuff()
         MainScores[6], // Coins
         MainScores[7], // Badge Log
         MainScores[8], // Partner Upgrades
-        MainScores[9]); // Game Overs
+        MainScores[9], // Star Pieces
+        MainScores[10]); // Game Overs
       
       drawStringSingleLine(PosX, PosY, color, tempDisplayBuffer, Scale);
     }
@@ -896,7 +900,7 @@ void Mod::titleScreenStuff()
   sprintf(tempDisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.2.23",
-    "Loading Zone Randomizer - v1.0.7");
+    "Loading Zone Randomizer - v1.0.8");
   
   drawStringMultipleLines(PosX, PosY, color, tempDisplayBuffer, Scale);
   
@@ -910,7 +914,7 @@ void Mod::titleScreenStuff()
     PosY += 20;
   #endif
   
-  const char *VersionNumber = "v2.0.7";
+  const char *VersionNumber = "v2.0.8";
   drawStringSingleLine(PosX, PosY, color, VersionNumber, Scale);
 }
 
