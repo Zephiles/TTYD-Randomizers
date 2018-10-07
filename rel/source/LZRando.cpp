@@ -974,6 +974,10 @@ void getRandomWarp()
           // Allow Blooper to be fought if the Sequence is before or at 20
           // Set the Sequence to 20 so that Blooper can be fought
           ttyd::swdrv::swByteSet(0, 20);
+          ttyd::string::strcpy(tempNextBero, "w_bero_1");
+          
+          // Prevent the loading zone from being changed
+          ChangedLZ = true;
         }
       }
     }
