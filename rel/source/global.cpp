@@ -43,6 +43,7 @@ uint32_t CrystalStarPointerAddress = r13 - 0x7040;
 // uint32_t AreaLZsAddressesStart = r13 - 0x6F58;
 
 // Display Stuff
+bool TransparentTextFlag = false;
 char *DisplayBuffer = new char[256];
 bool ShowScoreSources = false;
 bool TimerDisabled = false;

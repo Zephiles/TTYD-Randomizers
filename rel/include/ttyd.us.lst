@@ -479,6 +479,31 @@
 // 8007FCF0:unk_JP_US_PAL_008
 // 8007FD84:windowInit
 
+// msgdrv.o
+// 8007FDF4:selectWindow_Disp
+// 8007FF3C:selectWindow_Main
+// 80080260:msgWindow_Disp
+// 8008093C:msgWindow_Clear_Main
+// 80080C20:msgWindow_Main
+// 80081424:msgWindow_ForceClose
+// 800814F4:msgWindow_Repeat
+// 8008156C:msgWindow_Continue
+// 800815BC:msgWindow_Add
+// 80081630:msgWindow_Delete
+// 80081688:msgWindow_Entry
+// 80081A1C:msgIconStr2ID
+// 80081AA0:msgGetCommand
+// 80081B40:_ismbblead
+80081B8C:msgSearch
+// 80081C6C:msg_compare
+// 80081CB4:msgGetWork
+// 80081CBC:msgAnalize
+// 80083360:msgDispKeyWait_render
+// 800833E0:msgDisp
+// 80083F34:msgMain
+// 8008465C:msgLoad
+// 80084938:msgInit
+
 // swdrv.o
 // 80085744:_swByteGet
 // 80085754:_swByteSet

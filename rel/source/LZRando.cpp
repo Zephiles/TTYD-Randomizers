@@ -396,6 +396,25 @@ void getRandomWarp()
         continue;
       }
     }
+    else if (ttyd::string::strcmp(tempNextMap, "dou_07") == 0)
+    {
+      // Only check if the player hasn't gotten the Boat Mode curse yet
+      if (!(ttyd::swdrv::swGet(2980)))
+      {
+        if (SequencePosition != 246)
+        {
+          // Automaticallt adjust the Sequence if the player talked to the chest but didn't fight the Embers
+          // Automatically adjust the Sequence if the Embers were defeated but the player did not get the key
+          // Automatically adjust the Sequence if the player got the Black Key but didn't open the chest
+          // if (ttyd::swdrv::swGet(2988) || ttyd::swdrv::swGet(2989) || ttyd::swdrv::swGet(2987))
+          if (ttyd::swdrv::swGet(2988)) // Should only need to check 2988, as the others cannot be on if 2988 isn't
+          {
+            // Set the Sequence to 246 to be able to open the chest
+            ttyd::swdrv::swByteSet(0, 246);
+          }
+        }
+      }
+    }
     else if (ttyd::string::strcmp(tempNextMap, "eki_05") == 0)
     {
       // Change the loading zone used if the player has not opened the Ultra Boots chest yet
@@ -1064,6 +1083,13 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(tempNextMap, "tou_08") == 0)
     {
+      // Prevent warping to this room if using the challenge mode and the Sequence is less than 130
+      if (LZRandoChallenge && (SequencePosition < 130))
+      {
+        // Warp to a different room, as the Grubba intro cutscene is currently set to play
+        continue;
+      }
+      
       // Turn off GSWF(2388) to clear any currently-registered fights
       ttyd::swdrv::swClear(2388);
     }
@@ -1580,6 +1606,9 @@ void setUpNewFile()
   *reinterpret_cast<uint32_t *>(LotteryAddress) = 0;
   *reinterpret_cast<uint32_t *>(LotteryAddress + 0x4) = 0;
   
+  // Turn off a bit to enable loading zones - probably not needed, but keeping as a failsafe
+  *reinterpret_cast<uint32_t *>(GSWAddresses) &= ~(1 << 0); // Turn off the 0 bit
+  
   // Turn on all of the GSWFs in the array
   uint16_t ArraySize = GSWF_Array_Size; // Prevent the compiled code from loading this variable more than once
   for (int i = 0; i < ArraySize; i++)
@@ -1673,119 +1702,165 @@ void specificMapEdits()
 {
   ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
   ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
-  
-  if (NextSeq != Game)
-  {
-    return;
-  }
-  
-  // Reset TransformIntoShip, so that it doesn't conflict with other loading zones
-  TransformIntoShip = false;
-  
-  // Reset SQWarpAway flag, as it needs to be off once in a new room
-  SQWarpAway = false;
-  
-  // Reset JustDefeatedBoss, so that it can be used for other bosses
-  JustDefeatedBoss = 0;
-  
-  uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-  uint32_t PartnerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId()));
-  ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
-  // uint32_t AreaObjectAddresses = *reinterpret_cast<uint32_t *>(AreaObjectsAddressesStart + 0x4);
-  // uint32_t AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZsAddressesStart);
-  // AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x4);
+  ttyd::seqdrv::SeqIndex MapChange = ttyd::seqdrv::SeqIndex::kMapChange;
   
   char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
-  if (ttyd::string::strcmp(tempNextMap, "gon_12") == 0)
+  
+  if (NextSeq == Game)
   {
-    if (SequencePosition < 50)
+    // Reset TransformIntoShip, so that it doesn't conflict with other loading zones
+    TransformIntoShip = false;
+    
+    // Reset SQWarpAway flag, as it needs to be off once in a new room
+    SQWarpAway = false;
+    
+    // Reset JustDefeatedBoss, so that it can be used for other bosses
+    JustDefeatedBoss = 0;
+    
+    uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
+    uint32_t PartnerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId()));
+    ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
+    // uint32_t AreaObjectAddresses = *reinterpret_cast<uint32_t *>(AreaObjectsAddressesStart + 0x4);
+    // uint32_t AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZsAddressesStart);
+    // AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x4);
+    
+    if (ttyd::string::strcmp(tempNextMap, "gon_12") == 0)
     {
-      uint8_t CurrentPartnerOut = getPartnerOut(PartnerPointer);
-      
-      if ((CurrentPartnerOut == 0) || (CurrentPartnerOut > static_cast<uint8_t>(ttyd::party::PartyMembers::Koops)))
+      if (SequencePosition < 50)
       {
-        // Bring out Goombella if either no partner is out or a partner from past Chapter 1 is out
-        ttyd::mario_party::marioPartyEntry(ttyd::party::PartyMembers::Goombella);
-      }
-    }
-  }
-  if (ttyd::string::strcmp(tempNextMap, "gor_01") == 0)
-  {
-    if (MarioFreeze)
-    {
-      uint32_t RopeAddress = *reinterpret_cast<uint32_t *>(_mapEntAddress);
-      RopeAddress= *reinterpret_cast<uint32_t *>(RopeAddress + 0x154);
-      float RopePosZ = *reinterpret_cast<float *>(RopeAddress + 0x8B4);
-      
-      player->flags1 |= (1 << 1); // Turn on the 1 bit
-      player->wJumpVelocityY = 0;
-      player->wJumpAccelerationY = 0;
-      player->unk_84 = 0;
-      player->playerPosition[0] = -1;
-      player->playerPosition[1] = 59;
-      player->playerPosition[2] = RopePosZ + 10;
-      
-      #ifdef TTYD_JP
-        player->unk_19c = 180;
-        player->wPlayerDirection = 180;
-      #else
-        player->unk_1a0 = 180;
-        player->unk_1b0 = 180;
-      #endif
-    }
-  }
-  else if (ttyd::string::strcmp(tempNextMap, "jin_04") == 0)
-  {
-    if (SequencePosition == 200)
-    {
-      // Warp to a different room to skip the cutscene of Doopliss getting the Ruby star
-      ttyd::swdrv::swByteSet(0, 201);
-      ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "jin_04", "w_bero");
-    }
-    else if ((SequencePosition == 210) || (SequencePosition == 211))
-    {
-      // Check if the Sequence is currently set to fight Doopliss 2
-      uint8_t CurrentPartnerOut = getPartnerOut(PartnerPointer);
-      
-      if (CurrentPartnerOut != static_cast<uint8_t>(ttyd::party::PartyMembers::Vivian))
-      {
-        // Check if Mario's Y Coordinate is 670 and that he is currently not moving
-        if ((player->playerPosition[1] == 670) && (player->currentMotionId == 0))
+        uint8_t CurrentPartnerOut = getPartnerOut(PartnerPointer);
+        
+        if ((CurrentPartnerOut == 0) || (CurrentPartnerOut > static_cast<uint8_t>(ttyd::party::PartyMembers::Koops)))
         {
-          // Force Vivian out
-          ttyd::mario_party::marioPartyEntry(ttyd::party::PartyMembers::Vivian);
+          // Bring out Goombella if either no partner is out or a partner from past Chapter 1 is out
+          ttyd::mario_party::marioPartyEntry(ttyd::party::PartyMembers::Goombella);
         }
       }
     }
-    else if (SequencePosition == 213)
+    else if (ttyd::string::strcmp(tempNextMap, "gor_01") == 0)
     {
-      // Set the Sequence ahead to 214 to skip the Shadow Sirens cutscene in Twilight Town
-      ttyd::swdrv::swByteSet(0, 214);
+      if (MarioFreeze)
+      {
+        uint32_t RopeAddress = *reinterpret_cast<uint32_t *>(_mapEntAddress);
+        RopeAddress= *reinterpret_cast<uint32_t *>(RopeAddress + 0x154);
+        float RopePosZ = *reinterpret_cast<float *>(RopeAddress + 0x8B4);
+        
+        player->flags1 |= (1 << 1); // Turn on the 1 bit
+        player->wJumpVelocityY = 0;
+        player->wJumpAccelerationY = 0;
+        player->unk_84 = 0;
+        player->playerPosition[0] = -1;
+        player->playerPosition[1] = 59;
+        player->playerPosition[2] = RopePosZ + 10;
+        
+        #ifdef TTYD_JP
+          player->unk_19c = 180;
+          player->wPlayerDirection = 180;
+        #else
+          player->unk_1a0 = 180;
+          player->unk_1b0 = 180;
+        #endif
+      }
+    }
+    else if (ttyd::string::strcmp(tempNextMap, "jin_04") == 0)
+    {
+      if (SequencePosition == 200)
+      {
+        // Warp to a different room to skip the cutscene of Doopliss getting the Ruby star
+        ttyd::swdrv::swByteSet(0, 201);
+        ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "jin_04", "w_bero");
+      }
+      else if ((SequencePosition == 210) || (SequencePosition == 211))
+      {
+        // Check if the Sequence is currently set to fight Doopliss 2
+        uint8_t CurrentPartnerOut = getPartnerOut(PartnerPointer);
+        
+        if (CurrentPartnerOut != static_cast<uint8_t>(ttyd::party::PartyMembers::Vivian))
+        {
+          // Check if Mario's Y Coordinate is 670 and that he is currently not moving
+          if ((player->playerPosition[1] == 670) && (player->currentMotionId == 0))
+          {
+            // Force Vivian out
+            ttyd::mario_party::marioPartyEntry(ttyd::party::PartyMembers::Vivian);
+          }
+        }
+      }
+      else if (SequencePosition == 213)
+      {
+        // Set the Sequence ahead to 214 to skip the Shadow Sirens cutscene in Twilight Town
+        ttyd::swdrv::swByteSet(0, 214);
+      }
+    }
+    else if (ttyd::string::strcmp(tempNextMap, "las_29") == 0)
+    {
+      // Make sure a partner is out for the Shadow Queen cutscene
+      if (!PartnerPointer)
+      {
+        // Bring out Goombella if no partner is out
+        ttyd::mario_party::marioPartyHello(ttyd::party::PartyMembers::Goombella);
+      }
+      
+      // Warp out of the Shadow Queen room if she is defeated, so that the cutscene is skipped
+      if (SequencePosition == 401)
+      {
+        if (LZRandoChallenge)
+        {
+          // Warp to a random room if the challenge mode is being used
+          ttyd::swdrv::swByteSet(0, 405);
+          ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "las_29", "w_bero");
+        }
+        else
+        {
+          // Warp to the credits
+          ttyd::swdrv::swByteSet(0, 404);
+          ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "end_00", nullptr);
+        }
+      }
+    }
+    else if (ttyd::string::strcmp(tempNextMap, "muj_00") == 0)
+    {
+      // Make sure a partner is out for the ship cutscene
+      if (SequencePosition == 259)
+      {
+        if (!PartnerPointer)
+        {
+          // Bring out Goombella if no partner is out
+          ttyd::mario_party::marioPartyHello(ttyd::party::PartyMembers::Goombella);
+        }
+      }
     }
   }
-  else if (ttyd::string::strcmp(tempNextMap, "las_29") == 0)
+  else if (NextSeq == MapChange)
   {
-    // Make sure a partner is out for the Shadow Queen cutscene
-    if (!PartnerPointer)
+    // Prevent partners and followers from being removed when in a jin map
+    if (ttyd::string::strncmp(tempNextMap, "jin_04", 3) == 0)
     {
-      // Bring out Goombella if no partner is out
-      ttyd::mario_party::marioPartyHello(ttyd::party::PartyMembers::Goombella);
-    }
-    
-    // Warp out of the Shadow Queen room if she is defeated, so that the cutscene is skipped
-    if (SequencePosition == 401)
-    {
-      if (LZRandoChallenge)
+      #ifdef TTYD_US
+        const uint32_t jin_REL_ID = 0xD;
+        uint32_t party_kill_script_offset = 0x15108;
+      #elif defined TTYD_JP
+        const uint32_t jin_REL_ID = 0xE;
+        uint32_t party_kill_script_offset = 0x14FD8;
+      #elif defined TTYD_EU
+        const uint32_t jin_REL_ID = 0xE;
+        uint32_t party_kill_script_offset = 0x15108;
+      #endif
+      
+      uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
+      uint32_t REL_Pointer = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x15C);
+      
+      // Make sure a REL file is actually loaded
+      if (REL_Pointer != 0)
       {
-        // Warp to a random room if the challenge mode is being used
-        ttyd::swdrv::swByteSet(0, 405);
-        ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "las_29", "w_bero");
-      }
-      else
-      {
-        // Warp to the credits
-        ttyd::swdrv::swByteSet(0, 404);
-        ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "end_00", nullptr);
+        // Check if the jin REL is loaded
+        uint32_t REL = *reinterpret_cast<uint32_t *>(REL_Pointer);
+        if (REL == jin_REL_ID)
+        {
+          // Adjust the range so that the code never runs
+          // Set the Sequences to arbitrary values that are never used
+          *reinterpret_cast<uint32_t *>(REL_Pointer + party_kill_script_offset + 0xC) = 0x200;
+          *reinterpret_cast<uint32_t *>(REL_Pointer + party_kill_script_offset + 0x10) = 0x200;
+        }
       }
     }
   }
@@ -2058,6 +2133,16 @@ void setNextBero()
     return;
   }
   
+  // Only run while a file is loaded
+  ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
+  ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
+  ttyd::seqdrv::SeqIndex Battle = ttyd::seqdrv::SeqIndex::kBattle;
+  
+  if ((NextSeq < Game) || (NextSeq > Battle))
+  {
+    return;
+  }
+  
   char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
   
   // Prevent changing the loading zone if currently in a room where using it would result in a softlock
@@ -2088,6 +2173,7 @@ void setNextBero()
   uint16_t SBeroCombo = PAD_L | PAD_DPAD_DOWN;
   uint16_t WBeroCombo = PAD_L | PAD_DPAD_LEFT;
   uint16_t EBeroCombo = PAD_L | PAD_DPAD_RIGHT;
+  uint16_t CurrentBeroCombo = PAD_L | PAD_Y;
   
   char *tempNextBero = NextBero; // Prevent NextMap from being loaded in multiple times
   if ((ButtonInput & NBeroCombo) == NBeroCombo)
@@ -2115,6 +2201,11 @@ void setNextBero()
   {
     ttyd::string::strcpy(tempNextBero, "e_bero");
     
+    // Prevent the loading zone from being changed
+    ChangedLZ = true;
+  }
+  else if ((ButtonInput & CurrentBeroCombo) == CurrentBeroCombo)
+  {
     // Prevent the loading zone from being changed
     ChangedLZ = true;
   }
@@ -2196,6 +2287,7 @@ uint32_t enablePaperTubeModes(uint32_t pouchCheckItem)
     "usu_01",
     "jin_05",
     "jin_07",
+    "jin_11",
     "eki_05" };
   uint32_t ArraySize = sizeof(CheckMapArray) / sizeof(CheckMapArray[0]);  
   
@@ -2575,45 +2667,75 @@ bool Mod::preventGetItemOnReload(uint32_t id)
   }
 }
 
-void Mod::preventMarioEndOfChapterHeads(int type, int duration, uint8_t color[4])
+void Mod::preventSpecificFades(int type, int duration, uint8_t color[4])
 {
   // Only prevent from displaying if the Loading Zone randomizer is currently in use
   if (LZRando)
   {
+    const int BlackMarioHeadFadeIn = 1;
+    const int BlackMarioHeadFadeOut = 2;
     const int MarioHeadFadeIn = 54;
     const int MarioHeadFadeOut = 55;
     const int MarioHeadAfterCreditsFadeOut = 60;
     const int BlackFadeIn = 9;
     const int BlackFadeOut = 10;
     
-    if (type == MarioHeadFadeIn)
+    switch (type)
     {
-      // Clear the black screen
-      type = BlackFadeIn;
-      
-      // Change the duration to 0 to set the screen to black instantly
-      duration = 0;
-    }
-    else if (type == MarioHeadFadeOut)
-    {
-      // Change the Mario heads to a black screen
-      type = BlackFadeOut;
-      
-      // Change the duration to 0 so that the black screen goes away instantly
-      duration = 0;
-    }
-    else if (type == MarioHeadAfterCreditsFadeOut)
-    {
-      // Replace the Mario endgame heads with a black screen
-      type = BlackFadeOut;
-      
-      // Change the duration to 0 so that the black screen goes away instantly
-      duration = 0;
+      case BlackMarioHeadFadeIn:
+      {
+        // Clear the black screen
+        type = BlackFadeIn;
+        
+        // Change the duration to the default value used for BlackFadeIn
+        duration = 300;
+        break;
+      }
+      case BlackMarioHeadFadeOut:
+      {
+        // Change the black Mario head to a black screen
+        type = BlackFadeOut;
+        
+        // Change the duration to the default value used for BlackFadeOut
+        duration = 300;
+        break;
+      }
+      case MarioHeadFadeIn:
+      {
+        // Clear the black screen
+        type = BlackFadeIn;
+        
+        // Change the duration to 0 to set the screen to black instantly
+        duration = 0;
+        break;
+      }
+      case MarioHeadFadeOut:
+      {
+        // Change the Mario heads to a black screen
+        type = BlackFadeOut;
+        
+        // Change the duration to 0 so that the black screen goes away instantly
+        duration = 0;
+        break;
+      }
+      case MarioHeadAfterCreditsFadeOut:
+      {
+        // Replace the Mario endgame heads with a black screen
+        type = BlackFadeOut;
+        
+        // Change the duration to 0 so that the black screen goes away instantly
+        duration = 0;
+        break;
+      }
+      default:
+      {
+        break;
+      }
     }
   }
   
   // Call original function
-  mPFN_preventMarioEndOfChapterHeads_trampoline(type, duration, color);
+  mPFN_preventSpecificFades_trampoline(type, duration, color);
 }
 
 void Mod::writeLZRandoAssemblyPatches()

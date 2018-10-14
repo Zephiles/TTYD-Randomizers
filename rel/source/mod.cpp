@@ -3,6 +3,7 @@
 #include <ttyd/system.h>
 #include <ttyd/itemdrv.h>
 #include <ttyd/mario_pouch.h>
+#include <ttyd/msgdrv.h>
 #include <ttyd/mario_party.h>
 #include <ttyd/party.h>
 #include <ttyd/countdown.h>
@@ -49,6 +50,12 @@ void Mod::init()
   // Prevent Crystal Stars from bosses adjusting the max SP and giving special moves
   patch::hookFunction(ttyd::mario_pouch::pouchGetStarStone, [](uint32_t id){});
   
+  // Get custom messages for specific items/badges
+  mPFN_getCustomMsg_trampoline = patch::hookFunction(ttyd::msgdrv::msgSearch, [](const char *msgKey)
+  {
+    return gMod->getCustomMsg(msgKey);
+  });
+  
   // LZ Rando
   // Prevent the game from removing partners
   // Prevent partyLeft from running
@@ -87,9 +94,9 @@ void Mod::init()
   });
   
   // Prevent the Mario heads from appearing at the end of chapters
-  mPFN_preventMarioEndOfChapterHeads_trampoline = patch::hookFunction(ttyd::fadedrv::fadeEntry, [](int type, int duration, uint8_t color[4])
+  mPFN_preventSpecificFades_trampoline = patch::hookFunction(ttyd::fadedrv::fadeEntry, [](int type, int duration, uint8_t color[4])
   {
-    return gMod->preventMarioEndOfChapterHeads(type, duration, color);
+    return gMod->preventSpecificFades(type, duration, color);
   });
   
   // Randomize the loading zone

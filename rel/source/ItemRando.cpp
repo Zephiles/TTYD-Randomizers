@@ -831,6 +831,162 @@ void preventTextboxOptions(char *currentText, void *storeAddress, int32_t select
 }
 }
 
+const char *Mod::getCustomMsg(const char *msgKey)
+{
+  if (ttyd::string::strcmp(msgKey, "msg_cake") == 0)
+  {
+    // Change the description for the Cake
+    const char *description = "Replenishes 10 HP.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "msg_kame_no_noroi") == 0)
+  {
+    // Change the description for Koopa Curse
+    const char *description = "Has a chance of inducing the\nslow status to all enemies.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "msg_teki_kyouka") == 0)
+  {
+    // Change the description for Trade Off
+    const char *description = "Increases the levels of all\nenemies by 5. Can be stacked.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "in_debug_badge") == 0)
+  {
+    // Change the name for the Debug Badge
+    const char *name = "Debug Badge";
+    return name;
+  }
+  else if (ttyd::string::strcmp(msgKey, "msg_debug_badge") == 0)
+  {
+    // Change the description for the Debug Badge
+    const char *description = "Automatically does action\ncommands, stylishes,\nsuperguards, and fills the\nrun meter.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "in_mega_jump") == 0)
+  {
+    // Change the name for Mega Jump
+    const char *name = "Mega Jump";
+    return name;
+  }
+  else if (ttyd::string::strcmp(msgKey, "btl_mega_jump") == 0)
+  {
+    // Change the battle description for Mega Jump
+    const char *description = "Stomp on a single enemy using\ntremendous attack power.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "msg_mega_jump") == 0)
+  {
+    // Change the menu description for Mega Jump
+    const char *description = "Allows Mario to perform a\njump attack for 4 FP. This\nattack does ((Jump Power\nx 2) + 4) damage to one\nenemy.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "in_mega_smash") == 0)
+  {
+    // Change the name for Mega Smash
+    const char *name = "Mega Smash";
+    return name;
+  }
+  else if (ttyd::string::strcmp(msgKey, "btl_mega_smash") == 0)
+  {
+    // Change the battle description for Mega Smash
+    const char *description = "Hammer a single enemy using\ntremendous attack power.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "msg_mega_smash") == 0)
+  {
+    // Change the menu description for Mega Smash
+    const char *description = "Allows Mario to perform a\nhammer attack for 4 FP. This\nattack does (Hammer Power\n + 4) damage to one enemy.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "in_mega_quake") == 0)
+  {
+    // Change the name for Mega Quake
+    const char *name = "Mega Quake";
+    return name;
+  }
+  else if (ttyd::string::strcmp(msgKey, "btl_mega_quake") == 0)
+  {
+    // Change the battle description for Mega Quake
+    const char *description = "Greatly damages all ground\nenemies.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "msg_mega_quake") == 0)
+  {
+    // Change the menu description for Mega Quake
+    const char *description = "Allows Mario to perform a\nhammer attack for 7 FP. This\nattack does 10 base damage\nto all grounded enemies.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "in_lucky_start_p") == 0)
+  {
+    // Change the name for Lucky Start P
+    const char *name = "Lucky Start P";
+    return name;
+  }
+  else if (ttyd::string::strcmp(msgKey, "msg_lucky_start_p") == 0)
+  {
+    // Change the menu description for Lucky Start P
+    const char *description = "Make something good happen\nto your partner when you\nfirst enter battle.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "in_art_attack_hitboxes") == 0)
+  {
+    // Change the name for the Art Attack hitboxes badge
+    const char *name = "A.A. Hitboxes";
+    return name;
+  }
+  else if (ttyd::string::strcmp(msgKey, "msg_art_attack_hitboxes") == 0)
+  {
+    // Change the menu description for the Art Attack hitboxes badge
+    const char *description = "Displays hitboxes around\nenemies when using Art\nAttack.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "in_run_meter") == 0)
+  {
+    // Change the name for the Run Meter badge
+    const char *name = "Run Meter";
+    return name;
+  }
+  else if (ttyd::string::strcmp(msgKey, "msg_run_meter") == 0)
+  {
+    // Change the menu description for the Run Meter badge
+    const char *description = "Automatically fills the run\nmeter.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "in_super_charge") == 0)
+  {
+    // Change the name for Super Charge
+    const char *name = "Super Charge";
+    return name;
+  }
+  else if (ttyd::string::strcmp(msgKey, "btl_hlp_cmd_operation_super_charge") == 0)
+  {
+    // Change the battle description to use the Charge description
+    msgKey = "btl_hlp_cmd_operation_charge";
+  }
+  else if (ttyd::string::strcmp(msgKey, "msg_super_charge") == 0)
+  {
+    // Change the menu description for Super Charge
+    const char *description = "Wear this to add Super\nCharge to Mario's Tactics\nmenu. This move requires\n2 FP and charges by +4.";
+    return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "in_super_charge_p") == 0)
+  {
+    // Change the name for Super Charge P
+    const char *name = "Super Charge P";
+    return name;
+  }
+  else if (ttyd::string::strcmp(msgKey, "msg_super_charge_p") == 0)
+  {
+    // Change the menu description for Super Charge P
+    const char *description = "Wear this to add Super\nCharge to your partner's\nTactics menu. This move\nrequires 2 FP and charges\nby +4.";
+    return description;
+  }
+  
+  // Call original function
+  return mPFN_getCustomMsg_trampoline(msgKey);
+}
+
 void enableArtAttackHitboxes()
 {
   #ifdef TTYD_US
@@ -872,6 +1028,141 @@ void enableArtAttackHitboxes()
 
   patch::writeBranch(reinterpret_cast<void *>(HookAddress), reinterpret_cast<void *>(StartArtAttackHitboxes));
   patch::writeBranch(reinterpret_cast<void *>(BranchArtAttackHitboxes), reinterpret_cast<void *>(HookAddress + 0x4));
+}
+
+void adjustItemsTypeSort()
+{
+  #ifdef TTYD_US
+    uint32_t itemDataTable = 0x803108A8;
+  #elif defined TTYD_JP
+    uint32_t itemDataTable = 0x8030EE58;
+  #elif defined TTYD_EU
+    uint32_t itemDataTable = 0x8031C638;
+  #endif
+  
+  // Adjust standard items
+  for (int i = GoldBar; i <= FreshJuice; i++)
+  {
+    int16_t CurrentSortType = *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12);
+    
+    if (CurrentSortType >= 50)
+    {
+      *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12) += 1;
+    }
+  }
+  
+  // Adjust badges
+  for (int i = PowerJump; i <= SuperChargeP; i++)
+  {
+    int16_t CurrentSortType = *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12);
+    if (CurrentSortType <= 8)
+    {
+      *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12) += 1;
+    }
+    else if (CurrentSortType <= 15)
+    {
+      *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12) += 2;
+    }
+    else if (CurrentSortType <= 17)
+    {
+      *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12) += 3;
+    }
+    else if (CurrentSortType <= 21)
+    {
+      *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12) += 4;
+    }
+    else if (CurrentSortType <= 22)
+    {
+      *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12) += 5;
+    }
+    else if (CurrentSortType <= 36)
+    {
+      *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12) += 6;
+    }
+    else if (CurrentSortType <= 59)
+    {
+      *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12) += 7;
+    }
+    else if (CurrentSortType <= 61)
+    {
+      *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12) += 8;
+    }
+    else if (CurrentSortType <= 67)
+    {
+      *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12) += 9;
+    }
+    else if (CurrentSortType <= 73)
+    {
+      *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12) += 10;
+    }
+    else if (CurrentSortType <= 96)
+    {
+      *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12) += 11;
+    }
+    else if (CurrentSortType <= 110)
+    {
+      *reinterpret_cast<int16_t *>(itemDataTable + (i * 0x28) + 0x12) += 14;
+    }
+  }
+  
+  // Adjust the type sort order for the unused items/badges
+  // Koopa Curse
+  int16_t MrSoftenerType = *reinterpret_cast<int16_t *>(itemDataTable + (MrSoftener * 0x28) + 0x12);
+  *reinterpret_cast<int16_t *>(itemDataTable + (KoopaCurse * 0x28) + 0x12) = MrSoftenerType + 1;
+  
+  // Mega Jump
+  int16_t PowerJumpType = *reinterpret_cast<int16_t *>(itemDataTable + (PowerJump * 0x28) + 0x12);
+  *reinterpret_cast<int16_t *>(itemDataTable + (UpgradedPowerJump * 0x28) + 0x12) = PowerJumpType - 1;
+  
+  // Mega Smash
+  int16_t PowerSmashType = *reinterpret_cast<int16_t *>(itemDataTable + (PowerSmash * 0x28) + 0x12);
+  *reinterpret_cast<int16_t *>(itemDataTable + (UpgradedPowerSmash * 0x28) + 0x12) = PowerSmashType - 1;
+  
+  // Mega Quake
+  int16_t QuakeHammerType = *reinterpret_cast<int16_t *>(itemDataTable + (QuakeHammer * 0x28) + 0x12);
+  *reinterpret_cast<int16_t *>(itemDataTable + (UpgradedQuakeHammer * 0x28) + 0x12) = QuakeHammerType - 1;
+  
+  // Super Charge
+  int16_t ChargeType = *reinterpret_cast<int16_t *>(itemDataTable + (Charge * 0x28) + 0x12);
+  *reinterpret_cast<int16_t *>(itemDataTable + (SuperCharge * 0x28) + 0x12) = ChargeType - 1;
+  
+  // Super Charge P
+  int16_t ChargePType = *reinterpret_cast<int16_t *>(itemDataTable + (ChargeP * 0x28) + 0x12);
+  *reinterpret_cast<int16_t *>(itemDataTable + (SuperChargeP * 0x28) + 0x12) = ChargePType - 1;
+  
+  // Triple Dip
+  int16_t DoubleDipType = *reinterpret_cast<int16_t *>(itemDataTable + (DoubleDip * 0x28) + 0x12);
+  *reinterpret_cast<int16_t *>(itemDataTable + (TripleDip * 0x28) + 0x12) = DoubleDipType - 1;
+  
+  // All or Nothing P
+  int16_t AllorNothingType = *reinterpret_cast<int16_t *>(itemDataTable + (AllorNothing * 0x28) + 0x12);
+  *reinterpret_cast<int16_t *>(itemDataTable + (AllorNothingP * 0x28) + 0x12) = AllorNothingType + 1;
+  
+  // Lucky Day P
+  int16_t LuckyDayType = *reinterpret_cast<int16_t *>(itemDataTable + (LuckyDay * 0x28) + 0x12);
+  *reinterpret_cast<int16_t *>(itemDataTable + (LuckyDayP * 0x28) + 0x12) = LuckyDayType + 1;
+  
+  // Lucky Start P
+  int16_t LuckyStartType = *reinterpret_cast<int16_t *>(itemDataTable + (LuckyStart * 0x28) + 0x12);
+  *reinterpret_cast<int16_t *>(itemDataTable + (LuckyStartPLuckyStartIcon * 0x28) + 0x12) = LuckyStartType + 1;
+  
+  // Pity Flower P
+  int16_t PityFlowerType = *reinterpret_cast<int16_t *>(itemDataTable + (PityFlower * 0x28) + 0x12);
+  *reinterpret_cast<int16_t *>(itemDataTable + (PityFlowerP * 0x28) + 0x12) = PityFlowerType + 1;
+  
+  // FP Drain P
+  int16_t FPDrainType = *reinterpret_cast<int16_t *>(itemDataTable + (FPDrain * 0x28) + 0x12);
+  *reinterpret_cast<int16_t *>(itemDataTable + (FPDrainP * 0x28) + 0x12) = FPDrainType + 1;
+  
+  // Debug Badge
+  int16_t BumpAttackType = *reinterpret_cast<int16_t *>(itemDataTable + (BumpAttack * 0x28) + 0x12);
+  *reinterpret_cast<int16_t *>(itemDataTable + (DebugBadge * 0x28) + 0x12) = BumpAttackType + 1;
+  
+  // Art Attack badge
+  *reinterpret_cast<int16_t *>(itemDataTable + (InvalidItemBadgeNoKnownEffect * 0x28) + 0x12) = BumpAttackType + 2;
+  
+  // Run Meter badge
+  *reinterpret_cast<int16_t *>(itemDataTable + (InvalidItemBadgePNoKnownEffect * 0x28) + 0x12) = BumpAttackType + 3;
 }
 
 void Mod::writeItemRandoAssemblyPatches()
@@ -1257,6 +1548,15 @@ void Mod::writeItemRandoAssemblyPatches()
   *reinterpret_cast<uint16_t *>(itemDataTable + (InvalidItemBadgeNoKnownEffect * 0x28) + 0x20) = ArtAttackBadgeIcon;
   *reinterpret_cast<uint16_t *>(itemDataTable + (InvalidItemBadgePNoKnownEffect * 0x28) + 0x20) = RunMeterBadgeIcon;
   
+  // Change the name and descriptions to use for the Debug Badge
+  const char *DebugBadgeJPName = "Debug Badge";
+  const char *DebugBadgeName = "in_debug_badge";
+  const char *DebugBadgeMenuDescription = "msg_debug_badge";
+  *reinterpret_cast<uint32_t *>(itemDataTable + (DebugBadge * 0x28) + 0x0) = reinterpret_cast<uint32_t>(DebugBadgeJPName);
+  *reinterpret_cast<uint32_t *>(itemDataTable + (DebugBadge * 0x28) + 0x4) = reinterpret_cast<uint32_t>(DebugBadgeName);
+  *reinterpret_cast<uint32_t *>(itemDataTable + (DebugBadge * 0x28) + 0x8) = reinterpret_cast<uint32_t>(DebugBadgeMenuDescription);
+  *reinterpret_cast<uint32_t *>(itemDataTable + (DebugBadge * 0x28) + 0xC) = reinterpret_cast<uint32_t>(DebugBadgeMenuDescription);
+  
   // Change the icon for the small Supernova star from the Sapphire star to the Crystal star
   *reinterpret_cast<uint8_t *>(ZubastarIconAddress1 + 0x3) = ZubastarIconValue;
   *reinterpret_cast<uint8_t *>(ZubastarIconAddress2 + 0x3) = ZubastarIconValue;
@@ -1273,11 +1573,23 @@ void Mod::writeItemRandoAssemblyPatches()
   *reinterpret_cast<uint16_t *>(TripleDipAddress + 0x16) = 140; // Discounted Buy price
   *reinterpret_cast<uint16_t *>(TripleDipAddress + 0x1A) = 100; // Sell price
   
+  // Change the menu description for Triple Dip
+  const char *TripleDipMenuDescription = "msg_3kai_item";
+  *reinterpret_cast<uint32_t *>(TripleDipAddress + 0xC) = reinterpret_cast<uint32_t>(TripleDipMenuDescription);
+  
   // Change buy and sell prices for Super Charge
   uint32_t SuperChargeAddress = itemDataTable + (SuperCharge * 0x28);
   *reinterpret_cast<uint16_t *>(SuperChargeAddress + 0x14) = 100; // Buy price
   *reinterpret_cast<uint16_t *>(SuperChargeAddress + 0x16) = 70; // Discounted Buy price
   *reinterpret_cast<uint16_t *>(SuperChargeAddress + 0x1A) = 50; // Sell price
+  
+  // Change the name and descriptions to use for Super Charge
+  const char *SuperChargeName = "in_super_charge";
+  const char *SuperChargeBattleDescription = "btl_hlp_cmd_operation_charge";
+  const char *SuperChargeMenuDescription = "msg_super_charge";
+  *reinterpret_cast<uint32_t *>(SuperChargeAddress + 0x4) = reinterpret_cast<uint32_t>(SuperChargeName);
+  *reinterpret_cast<uint32_t *>(SuperChargeAddress + 0x8) = reinterpret_cast<uint32_t>(SuperChargeBattleDescription);
+  *reinterpret_cast<uint32_t *>(SuperChargeAddress + 0xC) = reinterpret_cast<uint32_t>(SuperChargeMenuDescription);
   
   // Change buy and sell prices for Super Charge P
   uint32_t SuperChargePAddress = itemDataTable + (SuperChargeP * 0x28);
@@ -1285,12 +1597,28 @@ void Mod::writeItemRandoAssemblyPatches()
   *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x16) = 105; // Discounted Buy price
   *reinterpret_cast<uint16_t *>(SuperChargePAddress + 0x1A) = 75; // Sell price
   
+  // Change the name and descriptions to use for Super Charge P
+  const char *SuperChargePName = "in_super_charge_p";
+  const char *SuperChargePBattleDescription = "btl_hlp_cmd_operation_charge";
+  const char *SuperChargePMenuDescription = "msg_super_charge_p";
+  *reinterpret_cast<uint32_t *>(SuperChargePAddress + 0x4) = reinterpret_cast<uint32_t>(SuperChargePName);
+  *reinterpret_cast<uint32_t *>(SuperChargePAddress + 0x8) = reinterpret_cast<uint32_t>(SuperChargePBattleDescription);
+  *reinterpret_cast<uint32_t *>(SuperChargePAddress + 0xC) = reinterpret_cast<uint32_t>(SuperChargePMenuDescription);
+  
   // Change buy prices, sell prices, and BP cost for Mega Jump
   uint32_t MegaJumpAddress = itemDataTable + (UpgradedPowerJump * 0x28);
   *reinterpret_cast<uint16_t *>(MegaJumpAddress + 0x14) = 100; // Buy price
   *reinterpret_cast<uint16_t *>(MegaJumpAddress + 0x16) = 70; // Discounted Buy price
   *reinterpret_cast<uint16_t *>(MegaJumpAddress + 0x1A) = 50; // Sell price
   *reinterpret_cast<uint8_t *>(MegaJumpAddress + 0x1C) = 2; // BP cost
+  
+  // Change the name and descriptions to use for Mega Jump
+  const char *MegaJumpName = "in_mega_jump";
+  const char *MegaJumpBattleDescription = "btl_mega_jump";
+  const char *MegaJumpMenuDescription = "msg_mega_jump";
+  *reinterpret_cast<uint32_t *>(MegaJumpAddress + 0x4) = reinterpret_cast<uint32_t>(MegaJumpName);
+  *reinterpret_cast<uint32_t *>(MegaJumpAddress + 0x8) = reinterpret_cast<uint32_t>(MegaJumpBattleDescription);
+  *reinterpret_cast<uint32_t *>(MegaJumpAddress + 0xC) = reinterpret_cast<uint32_t>(MegaJumpMenuDescription);
   
   // Change the FP needed for Mega Jump from 6 to 4
   *reinterpret_cast<uint8_t *>(MegaJumpFPAddress + 0x11) = 0x4;
@@ -1302,22 +1630,64 @@ void Mod::writeItemRandoAssemblyPatches()
   *reinterpret_cast<uint16_t *>(MegaSmashAddress + 0x1A) = 50; // Sell price
   *reinterpret_cast<uint8_t *>(MegaSmashAddress + 0x1C) = 2; // BP cost
   
+  // Change the name and descriptions to use for Mega Smash
+  const char *MegaSmashName = "in_mega_smash";
+  const char *MegaSmashBattleDescription = "btl_mega_smash";
+  const char *MegaSmashMenuDescription = "msg_mega_smash";
+  *reinterpret_cast<uint32_t *>(MegaSmashAddress + 0x4) = reinterpret_cast<uint32_t>(MegaSmashName);
+  *reinterpret_cast<uint32_t *>(MegaSmashAddress + 0x8) = reinterpret_cast<uint32_t>(MegaSmashBattleDescription);
+  *reinterpret_cast<uint32_t *>(MegaSmashAddress + 0xC) = reinterpret_cast<uint32_t>(MegaSmashMenuDescription);
+  
   // Change the FP needed for Mega Smash from 6 to 4
   *reinterpret_cast<uint8_t *>(MegaSmashFPAddress + 0x11) = 0x4;
   
-  // Change buy and sell prices for Mega Quake Hammer
+  // Change buy and sell prices for Mega Quake
   uint32_t MegaQuakeHammerAddress = itemDataTable + (UpgradedQuakeHammer * 0x28);
   *reinterpret_cast<uint16_t *>(MegaQuakeHammerAddress + 0x14) = 400; // Buy price
   *reinterpret_cast<uint16_t *>(MegaQuakeHammerAddress + 0x16) = 280; // Discounted Buy price
   *reinterpret_cast<uint16_t *>(MegaQuakeHammerAddress + 0x1A) = 200; // Sell price
   
+  // Change the name and descriptions to use for Mega Quake
+  const char *MegaQuakeName = "in_mega_quake";
+  const char *MegaQuakeBattleDescription = "btl_mega_quake";
+  const char *MegaQuakeMenuDescription = "msg_mega_quake";
+  *reinterpret_cast<uint32_t *>(MegaQuakeHammerAddress + 0x4) = reinterpret_cast<uint32_t>(MegaQuakeName);
+  *reinterpret_cast<uint32_t *>(MegaQuakeHammerAddress + 0x8) = reinterpret_cast<uint32_t>(MegaQuakeBattleDescription);
+  *reinterpret_cast<uint32_t *>(MegaQuakeHammerAddress + 0xC) = reinterpret_cast<uint32_t>(MegaQuakeMenuDescription);
+  
   // Change BP cost of badge 335 from 2 to 1
   uint32_t InvalidItemBadgeNoKnownEffectAddress = itemDataTable + (InvalidItemBadgeNoKnownEffect * 0x28);
   *reinterpret_cast<uint8_t *>(InvalidItemBadgeNoKnownEffectAddress + 0x1C) = 1; // BP cost
   
+  // Change the name and descriptions to use for the Art Attack hitboxes badge
+  const char *ArtAttackHitboxesJPName = "A.A. Hitboxes";
+  const char *ArtAttackHitboxesName = "in_art_attack_hitboxes";
+  const char *ArtAttackHitboxesMenuDescription = "msg_art_attack_hitboxes";
+  *reinterpret_cast<uint32_t *>(InvalidItemBadgeNoKnownEffectAddress + 0x0) = reinterpret_cast<uint32_t>(ArtAttackHitboxesJPName);
+  *reinterpret_cast<uint32_t *>(InvalidItemBadgeNoKnownEffectAddress + 0x4) = reinterpret_cast<uint32_t>(ArtAttackHitboxesName);
+  *reinterpret_cast<uint32_t *>(InvalidItemBadgeNoKnownEffectAddress + 0x8) = reinterpret_cast<uint32_t>(ArtAttackHitboxesMenuDescription);
+  *reinterpret_cast<uint32_t *>(InvalidItemBadgeNoKnownEffectAddress + 0xC) = reinterpret_cast<uint32_t>(ArtAttackHitboxesMenuDescription);
+  
   // Change BP cost of badge 336 from 2 to 1
   uint32_t InvalidItemBadgePNoKnownEffectAddress = itemDataTable + (InvalidItemBadgePNoKnownEffect * 0x28);
   *reinterpret_cast<uint8_t *>(InvalidItemBadgePNoKnownEffectAddress + 0x1C) = 1; // BP cost
+  
+  // Change the name and descriptions to use for the Run Meter badge
+  const char *RunMeterJPName = "Run Meter";
+  const char *RunMeterName = "in_run_meter";
+  const char *RunMeterMenuDescription = "msg_run_meter";
+  *reinterpret_cast<uint32_t *>(InvalidItemBadgePNoKnownEffectAddress + 0x0) = reinterpret_cast<uint32_t>(RunMeterJPName);
+  *reinterpret_cast<uint32_t *>(InvalidItemBadgePNoKnownEffectAddress + 0x4) = reinterpret_cast<uint32_t>(RunMeterName);
+  *reinterpret_cast<uint32_t *>(InvalidItemBadgePNoKnownEffectAddress + 0x8) = reinterpret_cast<uint32_t>(RunMeterMenuDescription);
+  *reinterpret_cast<uint32_t *>(InvalidItemBadgePNoKnownEffectAddress + 0xC) = reinterpret_cast<uint32_t>(RunMeterMenuDescription);
+  
+  // Change the name and descriptions to use for Lucky Start P
+  const char *LuckyStartPName = "in_lucky_start_p";
+  const char *LuckyStartPMenuDescription = "msg_lucky_start_p";
+  uint32_t LuckyStartPLuckyStartIconAddress = itemDataTable + (LuckyStartPLuckyStartIcon * 0x28);
+  *reinterpret_cast<uint32_t *>(LuckyStartPLuckyStartIconAddress + 0x4) = reinterpret_cast<uint32_t>(LuckyStartPName);
+  *reinterpret_cast<uint32_t *>(LuckyStartPLuckyStartIconAddress + 0x8) = reinterpret_cast<uint32_t>(LuckyStartPMenuDescription);
+  *reinterpret_cast<uint32_t *>(LuckyStartPLuckyStartIconAddress + 0xC) = reinterpret_cast<uint32_t>(LuckyStartPMenuDescription);
   
   // Prevent certain textbox options from being selected
   patch::writeBranch(reinterpret_cast<void *>(PreventTextbox), reinterpret_cast<void *>(StartPreventTextboxOptions));
@@ -1325,6 +1695,9 @@ void Mod::writeItemRandoAssemblyPatches()
   
   // Enable Art Attack hitboxes if a specific badge is equipped
   enableArtAttackHitboxes();
+  
+  // Adjust the type sort order for all items/badges
+  adjustItemsTypeSort();
 }
 
 void Mod::itemRandoStuff()
