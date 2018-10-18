@@ -89,6 +89,7 @@ namespace mod {
 
 void CheckMapForReloadChanges()
 {
+  uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
   char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
   
   // If reloading the room with a Curse chest, make sure the chest is closed if the player has the Curse from it
@@ -172,6 +173,19 @@ void CheckMapForReloadChanges()
       }
     }
   }
+  else if (ttyd::string::strcmp(tempNextMap, "hom_00") == 0)
+  {
+    // Check if the player is currently able to obtain the Station Key
+    if (SequencePosition == 310)
+    {
+      // Check if the player has gotten the Station Key already
+      if (ttyd::mario_pouch::pouchCheckItem(StationKey1) > 0)
+      {
+        // Update the Sequence to what it would normally be after getting the Station Key
+        ttyd::swdrv::swByteSet(0, 311);
+      }
+    }
+  }
   else if (ttyd::string::strcmp(tempNextMap, "mri_09") == 0)
   {
     // Check if the Blue Key chest is open or not
@@ -191,8 +205,6 @@ void CheckMapForReloadChanges()
   }
   else if (ttyd::string::strcmp(tempNextMap, "tou_01") == 0)
   {
-    uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-
     // Prevent the player from being able to get the Super Hammer multiple times
     if (SequencePosition == 139)
     {
@@ -570,10 +582,19 @@ void getRandomWarp()
       if (LZRandoChallenge)
       {
         // Skip the cutscene with Doopliss if using the challenge mode
-        if (SequencePosition < 310)
+        if (SequencePosition <= 310)
         {
-          // Set the Sequence to 310 to prevent the cutscene from playing
-          ttyd::swdrv::swByteSet(0, 310);
+          // Check if the player has gotten the Station Key
+          if (ttyd::mario_pouch::pouchCheckItem(StationKey1) > 0)
+          {
+            // Adjust the Sequence to prevent the player from getting multiple Station Keys
+            ttyd::swdrv::swByteSet(0, 311);
+          }
+          else
+          {
+            // Set the Sequence to 310 to prevent the cutscene from playing
+            ttyd::swdrv::swByteSet(0, 310);
+          }
         }
       }
     }
