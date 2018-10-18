@@ -464,6 +464,15 @@ void setValuesMapChange()
   // Set GSWF(1230), which is the flag that opens the shop door leading to Don Pianta
   ttyd::swdrv::swSet(1230);
   
+  // Clear most bools
+  HitShineSprite = false;
+  CrystalStarIsInField = false;
+  EmeraldStarAlreadyChanged = false;
+  MarioRunAwayCoinDrop = false;
+  HitMultiCoinBlock = false;
+  RanAwayFromBattle = false;
+  RandomizeGivenItem = false;
+  
   // Reset EnemyHeldItemArray, in the event that it bugs out for some reason
   // Need to figure out why it bugs out in the first place
   ttyd::__mem::memset(EnemyHeldItemArray, 0, sizeof(EnemyHeldItemArray));
