@@ -950,7 +950,7 @@ void Mod::titleScreenStuff()
     PosY += 15;
   #endif
   
-  const char *VersionNumber = "v2.0.12";
+  const char *VersionNumber = "v2.0.13";
   drawStringSingleLine(PosX, PosY, alpha, color, VersionNumber, Scale);
 }
 
