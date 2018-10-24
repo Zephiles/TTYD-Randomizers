@@ -897,6 +897,12 @@ void getRandomWarp()
           // Allow Magnus 1.0 to be fought if the Sequence is before or at 110
           // Set the Sequence to 110 so that Magnus 1.0 can be fought
           ttyd::swdrv::swByteSet(0, 110);
+          
+          // Manually set the loading zone to prevent the game from crashing
+          ttyd::string::strcpy(tempNextBero, "e_bero");
+          
+          // Prevent the loading zone from being changed
+          ChangedLZ = true;
         }
       }
     }
