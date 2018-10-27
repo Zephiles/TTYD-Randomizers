@@ -829,6 +829,11 @@ void preventTextboxOptions(char *currentText, void *storeAddress, int32_t select
     // Prevent the first option from being selected if currently being asked to do the Special Moves tutorial
     NewOption = SecondOption;
   }
+  else if (ttyd::string::strcmp(currentText, "stg6_rsh_diary_01_yn") == 0)
+  {
+    // Prevent the first option from being selected, so that the game does not crash when reading the diary
+    NewOption = SecondOption;
+  }
   else
   {
     // Store the original value
@@ -990,6 +995,18 @@ const char *Mod::getCustomMsg(const char *msgKey)
     // Change the menu description for Super Charge P
     const char *description = "Wear this to add Super\nCharge to your partner's\nTactics menu. This move\nrequires 2 FP and charges\nby +4.";
     return description;
+  }
+  else if (ttyd::string::strcmp(msgKey, "stg6_rsh_diary_01") == 0)
+  {
+    // Change the text asking if you want to read the diary
+    const char *message = "<system>\nSelect Yes to read the\ndiary.\n<o>";
+    return message;
+  }
+  else if (ttyd::string::strcmp(msgKey, "stg6_rsh_diary_01_yn") == 0)
+  {
+    // Change the yes/no text answers for the diary
+    const char *message = "<select 0 1 0 40>No\nNo\nMaybe";
+    return message;
   }
   
   // Call original function

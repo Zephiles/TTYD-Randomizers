@@ -14,11 +14,11 @@ uint32_t PossibleLZMaps[] = { aji_00, aji_01, aji_02, aji_03, aji_04, aji_05, aj
 uint16_t LZMapArraySize = sizeof(PossibleLZMaps) / sizeof(PossibleLZMaps[0]);
 
 // LZ Challenge Mode
-uint32_t PossibleChallengeMaps[] = { aji_02, aji_03, aji_05, aji_07, aji_11, aji_12, aji_13, aji_14, bom_00, bom_01, bom_02, bom_03, bom_04, dou_00, dou_02, dou_04, dou_05, dou_06, dou_07, dou_09, dou_10, eki_00, eki_02, eki_03, eki_04, eki_05, eki_06, gon_01, gon_02, gon_03, gon_04, gon_05, gon_06, gon_07, gon_08, gon_09, gon_11, gon_12, gon_13, gor_00, gor_01, gor_02, gor_03, gor_04, gra_00, gra_01, gra_02, gra_03, gra_04, gra_05, gra_06, hei_00, hei_01, hei_02, hei_04, hei_06, hei_08, hei_10, hei_12, hei_13, hom_00, jin_00, jin_03, jin_04, jin_05, jin_06, jin_07, jin_08, jin_09, jin_10, jin_11, jon_00, las_01, las_02, las_03, las_04, las_06, las_07, las_09, las_11, las_12, las_13, las_14, las_15, las_16, las_17, las_18, las_19, las_20, las_22, las_24, las_25, las_26, las_28, las_29, las_30, moo_01, moo_02, moo_06, moo_07, mri_00, mri_01, mri_02, mri_03, mri_04, mri_05, mri_06, mri_07, mri_09, mri_10, mri_12, mri_13, mri_15, mri_16, mri_17, mri_19, mri_20, muj_00, muj_01, muj_02, muj_03, muj_04, muj_05, muj_12, nok_00, nok_01, pik_00, pik_01, pik_03, pik_04, rsh_00_c, rsh_02_c, rsh_03_c, rsh_04_c, rsh_05_a, rsh_06_a, tik_00, tik_01, tik_02, tik_03, tik_04, tik_05, tik_06, tik_07, tik_11, tik_12, tik_13, tik_15, tik_16, tik_17, tik_18, tik_19, tik_20, tik_21, tou_01, tou_02, tou_03, tou_04, tou_05, tou_06, tou_07, tou_08, tou_12, usu_00, usu_01, win_00, win_01, win_02, win_03, win_05 };
+uint32_t PossibleChallengeMaps[] = { aji_02, aji_03, aji_05, aji_07, aji_11, aji_12, aji_13, aji_14, bom_00, bom_01, bom_02, bom_03, bom_04, dou_00, dou_02, dou_04, dou_05, dou_06, dou_07, dou_09, dou_10, eki_00, eki_02, eki_03, eki_04, eki_05, eki_06, gon_01, gon_02, gon_03, gon_04, gon_05, gon_06, gon_07, gon_08, gon_09, gon_11, gon_12, gon_13, gor_00, gor_01, gor_02, gor_03, gor_04, gra_00, gra_01, gra_02, gra_03, gra_04, gra_05, gra_06, hei_00, hei_01, hei_02, hei_04, hei_06, hei_08, hei_10, hei_12, hei_13, hom_00, jin_00, jin_03, jin_04, jin_05, jin_06, jin_07, jin_08, jin_09, jin_10, jin_11, jon_00, las_01, las_02, las_03, las_04, las_05, las_06, las_07, las_09, las_11, las_12, las_13, las_14, las_15, las_16, las_17, las_18, las_19, las_20, las_22, las_24, las_25, las_26, las_28, las_29, las_30, moo_01, moo_02, moo_06, moo_07, mri_00, mri_01, mri_02, mri_03, mri_04, mri_05, mri_06, mri_07, mri_09, mri_10, mri_12, mri_13, mri_15, mri_16, mri_17, mri_19, mri_20, muj_00, muj_01, muj_02, muj_03, muj_04, muj_05, muj_12, nok_00, nok_01, pik_00, pik_01, pik_03, pik_04, rsh_00_c, rsh_02_c, rsh_03_c, rsh_04_c, rsh_05_a, rsh_06_a, tik_00, tik_01, tik_02, tik_03, tik_04, tik_05, tik_06, tik_07, tik_11, tik_12, tik_13, tik_15, tik_16, tik_17, tik_18, tik_19, tik_20, tik_21, tou_01, tou_02, tou_03, tou_04, tou_05, tou_06, tou_07, tou_08, tou_12, usu_00, usu_01, win_00, win_01, win_02, win_03, win_05 };
 uint16_t ChallengeMapArraySize = sizeof(PossibleChallengeMaps) / sizeof(PossibleChallengeMaps[0]);
 
 // Set up array for GSWFs to turn on upon starting a new file with the Loading Zone randomizer/Challenge Mode
-uint16_t GSWF_Array[] = {
+uint16_t NewFile_GSWF_Array[] = {
   // Turn on GSWF(0) to skip shop tutorials
   0,
   
@@ -47,8 +47,8 @@ uint16_t GSWF_Array[] = {
   // Turn on GSWF(1200) to prevent partners from explaining Save Blocks in central Rogueport
   1200,
   
-  // Turn on GSWF(1334) to have the entrances revealed already in tik_03
-  1334,
+  // turn on GSWF(1213) to have Gus defeated
+  1213,
   
   // Turn on GSWF(1353) to skip having to talk to the Plane Mode curse chest for the first time
   1353,
@@ -111,11 +111,39 @@ uint16_t GSWF_Array[] = {
   // Turn on GSWF(5374) to skip the Trouble Center tutorial
   5374
 };
-uint16_t GSWF_Array_Size = sizeof(GSWF_Array) / sizeof(GSWF_Array[0]);
+uint16_t NewFile_GSWF_Array_Size = sizeof(NewFile_GSWF_Array) / sizeof(NewFile_GSWF_Array[0]);
+
+uint16_t Rawk_Hawk_GSWF_Array[] = {
+  // Turn off GSWF(2383) to make sure the champion match from tou_08 isn't set
+  2383,
+  
+  // Turn off GSWF(2389) to make sure no previous match has been won/lost
+  2389,
+  
+  // Turn off GSWF(2399) to make sure the player hasn't previously entered the battle late yet
+  2399,
+  
+  // Turn off GSWF(2400) to make sure the post-champion cutscene hasn't played yet
+  2400,
+  
+  // Turn off GSWF(2443) to make sure the win/lose battle condition hasn't been set
+  2443,
+  
+  // Turn off GSWF(2465) to make sure the player isn't considered to be the champion
+  2465,
+  
+  // Turn off GSWF(2503) to make sure the player is able to obtain the champ's belt
+  2503,
+  
+  // Turn off GSWF(2532) to make sure the after-battle cutscene hasn't played yet
+  2532
+};
+uint16_t Rawk_Hawk_GSWF_Array_Size = sizeof(Rawk_Hawk_GSWF_Array) / sizeof(Rawk_Hawk_GSWF_Array[0]);
+  
 
 const char *HelpMenuArray[] = {
   // Page 1
-  "This menu displays information about the following:\n\n1. Item Randomizer\n   Pages 2-9\n\n2. Loading Zone Randomizer\n   Pages 10-19\n\n3. Loading Zone Randomizer - 1 Hour Challenge\n   Pages 20-28\n\nPress D-Pad Left/Right to change pages\nPress L + Start to close the menu",
+  "This menu displays information about the following:\n\n1. Item Randomizer\n   Pages 2-9\n\n2. Loading Zone Randomizer\n   Pages 10-20\n\n3. Loading Zone Randomizer - 1 Hour Challenge\n   Pages 21-29\n\nPress D-Pad Left/Right to change pages\nPress L + Start to close the menu",
   
   // Page 2
   "The following will be randomized:\n\n1. Items/Badges that spawn in the field\n\n2. Items/Badges from chests and blocks\n\n3. Single Coin Blocks\n\n4. Star Pieces in floor panels\n\n5. Coins from the overworld (only when the Randomize\n   Coins option is On). The coins dropped when\n   running away from a battle are not randomized.",
@@ -154,7 +182,7 @@ const char *HelpMenuArray[] = {
   "In the event of a Game Over, you can wait for the\nintro to start playing again to resume gameplay on\nthe current file\n\nSeveral cheat codes have been added to this mode\nto avoid softlocks:\n\n  1. Pressing L + Z will force Mario off of Yoshi\n\n  2. The game will never allow Mario to be\n     transformed into Peach nor Bowser\n\nWhen warping to a room that has a boss, the\nSequence will be adjusted to allow you to fight that\nboss, assuming that the Sequence was previously\nbelow or at the necessary value for that boss",
   
   // Page 14
-  "The following Bosses are included:\n\n1. Blooper\n2. Gold Fuzzy\n3. Hooktail\n4. Shadow Sirens (Ch2)\n5. Magnus 1\n6. Grubba\n7. Atomic Boo\n8. Doopliss 1\n9. Doopliss 2\n10. Cortez\n11. Crump (Ch5)\n12. Smorg\n13. Magnus 2\n14. Gloomtail",
+  "The following Bosses are included:\n\n1. Blooper\n2. Gold Fuzzy\n3. Red Bones (Ch1)\n4. Hooktail\n5. Shadow Sirens (Ch2)\n6. Magnus 1\n7. Rawk Hawk\n8. Grubba\n9. Atomic Boo\n10. Doopliss 1\n11. Doopliss 2\n12. Cortez\n13. Crump (Ch5)\n14. Smorg",
   
   // Page 15
   "The Escape Timer will never appear in the rooms that\nuse it\n\nThe Sequence will be automatically adjusted to allow\nyou to get the Paper curses, regardless of what value\nit is currently at. The same is true for collecting\nthe Black Keys for them if necessary.\n\nWhen loading into the room with the Ultra Boots, the\nSequence will be automatically adjusted to allow you\nto get them if it's currently above the necessary\nlevel. Additionally, the loading zone will be\nautomatically set if you are currently able to obtain\nthem.\n\nThe Pianta Parlor minigame rooms are inaccessible",
@@ -163,39 +191,42 @@ const char *HelpMenuArray[] = {
   "The Cog is automatically inserted upon starting a new\nfile. It will still appear in the overworld, however.\n\nZess T. is now automatically blocking the west\nentrance upon starting a new file. The Contact Lens\nare also automatically ordered. The Sequence needs\nto be past 55 to be able to buy them, however.\n\nFor the US and EU versions of the game, the Power\nRush and Power Rush P icons will be randomized\nupon starting a new file. They will use the icons from\nthe other versions of the game.\n\nIn the event that you enter a battle with no partner\nout, Goombella will automatically be brought out. The\nexception to this is the Doopliss 2 fight.",
   
   // Page 17
-  "When going to fight Doopliss 2, Vivian is forced out\nboth before and after the fight. This is to prevent\nthe game from crashing.\n\nWhen warping to Doopliss's room, whether you fight\nhim the first or second time is based on the Sequence.\nIf the Sequence is before or at the first fight, then\none of the fights will be chosen at random. If the\nSequence is past the first fight but before or at the\nsecond fight, then the second fight will be chosen.\n\nWhen warping to Glitzville, the Sequence will be\nautomatically adjusted for you to be able to get the\nSuper Hammer if you don't have it already. This\nhappens even if you have the Ultra Hammer already.",
+  "When going to fight Doopliss 2, Vivian is forced out\nboth before and after the fight. This is to prevent\nthe game from crashing.\n\nWhen warping to Glitzville, the Sequence will be\nautomatically adjusted for you to be able to get the\nSuper Hammer if you don't have it already. This\nhappens even if you have the Ultra Hammer already.\n\nWhen warping into one of the locker rooms, any\ncurrent matches are automatically cleared. This is to\nprevent the game from softlocking in one of those\nrooms.\n\nYou will be warped to the credits after defeating\nthe Shadow Queen.",
   
   // Page 18
-  "When warping into either the Glitz Pit Arena or one\nof the locker rooms, any current matches are\nautomatically cleared. This is to prevent softlocks\nas well as a match trying to start at the same time\nas the cutscene for fighting Grubba is playing.\n\nYou will be warped to the credits after defeating\nthe Shadow Queen.\n\nIf you warp into the X-Naut Fortress room right\nbefore Magnus 2, then you can exit via the west\nentrance by walking/jumping off of the platform with\nthe pipe that is right next to the conveyor belt.\nThis will put you onto the conveyor belt. You can\nthen use Paper Mode to go through the bars.",
+  "If you warp into the X-Naut Fortress room right\nbefore Magnus 2, then you can exit via the west\nentrance by walking/jumping off of the platform with\nthe pipe that is right next to the conveyor belt.\nThis will put you onto the conveyor belt. You can\nthen use Paper Mode to go through the bars.\n\nWhen warping to Doopliss's room, whether you fight\nhim the first or second time is based on the Sequence.\nIf the Sequence is before or at the first fight, then\none of the fights will be chosen at random. If the\nSequence is past the first fight but before or at the\nsecond fight, then the second fight will be chosen.",
   
   // Page 19
-  "In addition to the cheats added before, you can\npress Z + D-Pad Up to toggle the on-screen text\nto be transparent.\n\nWhen obtaining a follower, it will be randomized into\none of the following:\n\n1. Yoshi Egg\n2. Flavio\n3. Punio\n4. Frankly\n5. Gus",
+  "When warping to the Glitz Pit Arena, whether you\nfight Rawk Hawk or Grubba is based on the Sequence.\nIf the Sequence is before Grubba, then one of them is\nchosen at random. If the Sequence is exactly 163 (the\nvalue for Grubba), then Grubba will be chosen. If the\nSequence is after Grubba, then there is a 50% chance\nthat you will fight Rawk Hawk.\n\nIn addition to the cheats added before, you can\npress Z + D-Pad Up to toggle the on-screen text\nto be transparent.",
   
   // Page 20
-  "The 1 hour challenge is a challenge mode in which\nyou play the game for 1 hour to try to gain as many\npoints as possible. If any of the settings in this\nconflict with the settings of the standard Loading\nZone randomizer, then these settings will take\npriority.\n\nThe points given are as follows:\n\n1. 2 points are given for collecting a crystal star/\n   Magical Map\n\n2. 6 points are given for collecting a curse",
+  "When obtaining a follower, it will be randomized into\none of the following:\n\n1. Yoshi Egg\n2. Flavio\n3. Punio\n4. Frankly\n5. Gus",
   
   // Page 21
-  "3. 1 point is given for collecting an important item.\n   The exception to this is the Battle Trunks,\n   which give 1 point per 10 of them.\n\n4. 2 points are given for having a follower. These\n   points are lost if you lose the follower.\n\n5. 2 points are given for each level up\n\n6. 10 points are given for defeating a boss, with the\n   following exceptions:\n\n   i.  25 points are given for the Shadow Queen, and\n      30 points are given for Bonetail\n   ii. 8 points are given for Grodus and Bowser &\n      Kammy",
+  "The 1 hour challenge is a challenge mode in which\nyou play the game for 1 hour to try to gain as many\npoints as possible. If any of the settings in this\nconflict with the settings of the standard Loading\nZone randomizer, then these settings will take\npriority.\n\nThe points given are as follows:\n\n1. 2 points are given for collecting a crystal star/\n   Magical Map\n\n2. 6 points are given for collecting a curse",
   
   // Page 22
-  "7. 1 point is given for every 100 coins that you\n   have. An additional point is given for having\n   exactly 999 coins.\n\n8. 1 point is given for every 10 badges in the badge\n   log. This also includes badges that normally do not\n   show up in the log, such as Triple Dip.\n\n9. 5 points are given for every partner upgrade\n\n10. 1 point is given for every Star Piece that you\n    currently have\n\n11. 5 points are lost for every Game Over that occurs",
+  "3. 1 point is given for collecting an important item.\n   The exception to this is the Battle Trunks,\n   which give 1 point per 10 of them.\n\n4. 2 points are given for having a follower. These\n   points are lost if you lose the follower.\n\n5. 2 points are given for each level up\n\n6. 10 points are given for defeating a boss, with the\n   following exceptions:\n\n   i.  25 points are given for the Shadow Queen, and\n      30 points are given for Bonetail\n   ii. 8 points are given for Grodus and Bowser &\n      Kammy",
   
   // Page 23
-  "Several cheat codes have been added to this mode:\n\n1. Pressing the following changes the loading zone:\n\n  i.  L + D-Pad Up - changes it to North\n  ii.  L + D-Pad Down - changes it to South\n  iii. L + D-Pad Left - changes it to West\n  iv. L + D-Pad Right - changes it to East\n\n2. Pressing L + B reloads the room that you're\n   currently in. There are some instances where you\n   will not be able to reload the room, such as when\n   fighting/about to fight a boss, or being in a Pit\n   room. Reloading the room will also cause the items\n   in the room to respawn.",
+  "7. 1 point is given for every 100 coins that you\n   have. An additional point is given for having\n   exactly 999 coins.\n\n8. 1 point is given for every 10 badges in the badge\n   log. This also includes badges that normally do not\n   show up in the log, such as Triple Dip.\n\n9. 5 points are given for every partner upgrade\n\n10. 1 point is given for every Star Piece that you\n    currently have\n\n11. 5 points are lost for every Game Over that occurs",
   
   // Page 24
-  "3. You are able to walk and jump on water. Spin\n   Jumping and going onto water with Yoshi will\n   still cause you to fall into it normally.\n\n4. Pressing L + Y locks the current LZ\n\nIf you either manually change the loading zone or\nlock it via the cheats, then it will no longer be\nrandomized until you leave the current room. The LZ\nwill also no longer say 'Pending' if you reload the\nroom.\n\nWhen using this mode, Mario will no longer transform\ninto the Boat, as being able to walk on water makes\nit unnecessary",
+  "Several cheat codes have been added to this mode:\n\n1. Pressing the following changes the loading zone:\n\n  i.  L + D-Pad Up - changes it to North\n  ii.  L + D-Pad Down - changes it to South\n  iii. L + D-Pad Left - changes it to West\n  iv. L + D-Pad Right - changes it to East\n\n2. Pressing L + B reloads the room that you're\n   currently in. There are some instances where you\n   will not be able to reload the room, such as when\n   fighting/about to fight a boss, or being in a Pit\n   room. Reloading the room will also cause the items\n   in the room to respawn.",
   
   // Page 25
-  "The current Score and Time are displayed on-screen.\nWhen the timer reaches 0, the game will state that\nthe time is up, and will give the options to either\ncontinue playing or to return to the title screen. The\nFinal Score will also be displayed, as well as where\neach of the points came from. The order of the\npoints are the same as the list prior. If you choose\nto continue playing, then the timer will reset to 1\nhour, but the Final Score will remain displayed. Both\nthe Score and the sources for the Score will still\nupdate, but the Final Score will remain unchanged.\n\nL + R can be pressed at anytime during gameplay to\ntoggle the display for where the points came from\n\nMost cutscenes are skipped or shortened",
+  "3. You are able to walk and jump on water. Spin\n   Jumping and going onto water with Yoshi will\n   still cause you to fall into it normally.\n\n4. Pressing L + Y locks the current LZ\n\nIf you either manually change the loading zone or\nlock it via the cheats, then it will no longer be\nrandomized until you leave the current room. The LZ\nwill also no longer say 'Pending' if you reload the\nroom.\n\nWhen using this mode, Mario will no longer transform\ninto the Boat, as being able to walk on water makes\nit unnecessary",
   
   // Page 26
-  "Many maps from the standard Loading Zone\nrandomizer are excluded\n\nThe Debug Badge will never spawn\n\nCrystal stars and/or the Magical Map cannot be\nobtained within the first 5 minutes\n\nThe Pit cannot be accessed within the first 10 minutes\n\nBosses cannot be accessed within the first 20 minutes\n\nSaying No to the Shadow Queen will warp you to a\ndifferent room instead of resulting in a Game Over.\nHowever, doing so will set the Sequence to 405.",
+  "The current Score and Time are displayed on-screen.\nWhen the timer reaches 0, the game will state that\nthe time is up, and will give the options to either\ncontinue playing or to return to the title screen. The\nFinal Score will also be displayed, as well as where\neach of the points came from. The order of the\npoints are the same as the list prior. If you choose\nto continue playing, then the timer will reset to 1\nhour, but the Final Score will remain displayed. Both\nthe Score and the sources for the Score will still\nupdate, but the Final Score will remain unchanged.\n\nL + R can be pressed at anytime during gameplay to\ntoggle the display for where the points came from\n\nMost cutscenes are skipped or shortened",
   
   // Page 27
-  "Defeating the Shadow Queen will warp you to a\ndifferent room\n\nWhen a boss that does not require a specific\nSequence (such as the Atomic Boo) is defeated, you\nmust go to a different room in order for them to\nrespawn. Warping to the same room will not respawn\nthem; you must warp to a different room first.",
+  "Many maps from the standard Loading Zone\nrandomizer are excluded\n\nThe Debug Badge will never spawn\n\nCrystal stars and/or the Magical Map cannot be\nobtained within the first 5 minutes\n\nThe Pit cannot be accessed within the first 10 minutes\n\nBosses cannot be accessed within the first 20 minutes\n\nSaying No to the Shadow Queen will warp you to a\ndifferent room instead of resulting in a Game Over.\nHowever, doing so will set the Sequence to 405.",
   
   // Page 28
+  "Defeating the Shadow Queen will warp you to a\ndifferent room\n\nWhen a boss that does not require a specific\nSequence (such as the Atomic Boo) is defeated, you\nmust go to a different room in order for them to\nrespawn. Warping to the same room will not respawn\nthem; you must warp to a different room first.\n\nThe 50% chance to fight Rawk Hawk is now a 100%\nchance",
+  
+  // Page 29
   "While on the File Select Screen, L + Y can be pressed\nto toggle a menu that displays the Final Scores from\nyour previous challenge runs. This menu can only be\nopened while using the Challenge Mode. The menu\ndisplays the scores in the order that they occured,\nso the first one on the list is the first run\ncompleted, etc. If you got a Game Over and then\nproceeded to start a new run, then that entry will\nbe marked with Reset instead of an actual score. In\nthe event that the scores exceed the total amount\non the page (currently supports up to 64 scores), then\nD-Pad Left/Right can be used to navigate to the\nother pages. It is important to note that the scores\nwill be cleared upon resetting the game, as resetting\nclears all of the game's memory."  
 };
 uint8_t HelpMenuArraySize = sizeof(HelpMenuArray) / sizeof(HelpMenuArray[0]);

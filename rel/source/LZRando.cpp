@@ -4,8 +4,8 @@
 #include "buttons.h"
 #include "patch.h"
 
-#include <ttyd/string.h>
 #include <ttyd/swdrv.h>
+#include <ttyd/string.h>
 #include <ttyd/mario_pouch.h>
 #include <ttyd/pmario_sound.h>
 #include <ttyd/system.h>
@@ -24,14 +24,16 @@
 
 #include <cstdio>
 
+extern uint16_t Rawk_Hawk_GSWF_Array_Size;
+extern uint16_t Rawk_Hawk_GSWF_Array[];
+extern char *NextBero;
+extern bool ChangedLZ;
 extern char *NextMap;
 extern bool LZRandoChallenge;
 extern uint32_t TimerCount;
 extern bool LZRando;
-extern char *NextBero;
 extern char *NextArea;
 extern bool ReloadCurrentScreen;
-extern bool ChangedLZ;
 extern bool GameOverFlag;
 extern bool NewFile;
 extern bool GameOverChallengeMode;
@@ -39,12 +41,13 @@ extern uint32_t PossibleChallengeMaps[];
 extern uint16_t ChallengeMapArraySize;
 extern uint32_t PossibleLZMaps[];
 extern uint16_t LZMapArraySize;
+extern bool DefeatedRawkHawk;
 extern uint32_t GSWAddressesStart;
 extern bool TransformIntoShip;
 extern bool CloseCurtainFlag;
 extern bool MarioFreeze;
-extern uint16_t GSWF_Array_Size;
-extern uint16_t GSWF_Array[];
+extern uint16_t NewFile_GSWF_Array_Size;
+extern uint16_t NewFile_GSWF_Array[];
 extern uint32_t seqMainAddress;
 extern bool ClearCacheFlag;
 extern bool SQWarpAway;
@@ -86,6 +89,40 @@ extern "C" {
 }
 
 namespace mod {
+
+void InitRawkHawk()
+{
+  // Turn off specific GSWFs
+  uint16_t ArraySize = Rawk_Hawk_GSWF_Array_Size; // Prevent the compiled code from loading this variable more than once
+  for (int i = 0; i < ArraySize; i++)
+  {
+    ttyd::swdrv::swClear(Rawk_Hawk_GSWF_Array[i]);
+  }
+  
+  
+  for (int i = 0; i < 4; i++)
+  {
+    // Turn on GSWF(2513) through GSWF(2516) to skip Rawk Hawk's in-battle dialogye
+    ttyd::swdrv::swSet(2513 + i);
+    
+    // Turn on GSW(501) to make sure that Rawk Hawk is the current battle
+    // Turn on GSW(503) and GSW(504) to make sure that nothing goes wrong when setting up the fight
+    // Don't set GSW(502)
+    if (i != 1)
+    {
+      ttyd::swdrv::swByteSet(501 + i, 0);
+    }
+  }
+  
+  // Turn on GSW(502) so that the battle condtion is to use a special move at least once
+  ttyd::swdrv::swByteSet(502, 6);
+  
+  // Turn on GSWF(2388) to make sure that a match is registered
+  ttyd::swdrv::swSet(2388);
+  
+  // Turn on GSWF(2509) to make sure that the Goomba first strike has occured already
+  ttyd::swdrv::swSet(2509);
+}
 
 void CheckMapForReloadChanges()
 {
@@ -220,11 +257,17 @@ void CheckMapForReloadChanges()
   {
     // Turn off GSWF(2388) to clear any currently-registered fights
     ttyd::swdrv::swClear(2388);
+    
+    // Turn off GSWF(2389) to prevent winning coins/going down a rank
+    ttyd::swdrv::swClear(2389);
   }
   else if (ttyd::string::strcmp(tempNextMap, "tou_10") == 0)
   {
     // Turn off GSWF(2388) to clear any currently-registered fights
     ttyd::swdrv::swClear(2388);
+    
+    // Turn off GSWF(2389) to prevent winning coins/going down a rank
+    ttyd::swdrv::swClear(2389);
   }
 }
 
@@ -307,14 +350,9 @@ void getRandomWarp()
     return;
   }
   
-  // Warp back to the Shadow Queen room if currently in that Sequence
+  // Warp to the second fight of the Shadow Queen if the player just beat the first fight
   if (ttyd::string::strcmp(tempNextBero, "minnnanokoe") == 0)
   {
-    ttyd::string::strcpy(tempNextMap, "las_29");
-    ttyd::string::strncpy(tempNextArea, "las_29", 3);
-    
-    // Prevent the loading zone from being changed
-    ChangedLZ = true;
     return;
   }
   
@@ -479,7 +517,7 @@ void getRandomWarp()
         // Only run if the player has the Black Key
         if (ttyd::mario_pouch::pouchCheckItem(BlackKey2) > 0)
         {
-          // Adjust the Sequence if necessary, as the Sequence being past 44 will set GSWF(1493)
+          // Adjust the Sequence if necessary, as the Sequence being past 44 will turn on GSWF(1493)
           if (SequencePosition > 44)
           {
             ttyd::swdrv::swByteSet(0, 44);
@@ -498,7 +536,7 @@ void getRandomWarp()
         // Only run if the player hasn't gotten the Black Key yet
         if (ttyd::mario_pouch::pouchCheckItem(BlackKey2) == 0)
         {
-          // Adjust the Sequence if necessary, as the Sequence being past 42 will set GSWF(1494)
+          // Adjust the Sequence if necessary, as the Sequence being past 42 will Turn on GSWF(1494)
           if (SequencePosition > 42)
           {
             ttyd::swdrv::swByteSet(0, 42);
@@ -531,7 +569,7 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(tempNextMap, "gor_02") == 0)
     {
-      // Reset GSWF(1207) to allow the player to get the follower again
+      // Turn off GSWF(1207) to allow the player to get the follower again
       ttyd::swdrv::swClear(1207);
     }
     else if (ttyd::string::strcmp(tempNextMap, "gra_06") == 0)
@@ -774,6 +812,23 @@ void getRandomWarp()
       // Reset NextMap to proper Pit map
       ttyd::string::strcpy(tempNextMap, reinterpret_cast<char *>(NewPitMap));
     }
+    else if (ttyd::string::strcmp(tempNextMap, "las_05") == 0)
+    {
+      if (SequencePosition <= 382)
+      {
+        if (CheckChallengeModeTimerCutoff())
+        {
+          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+          continue;
+        }
+        else
+        {
+          // Allow the Dark Bones to be fought if the Sequence is before or at 382
+          // Set the Sequence to 382 so that the Dark Bones can be fought
+          ttyd::swdrv::swByteSet(0, 382);
+        }
+      }
+    }
     else if (ttyd::string::strcmp(tempNextMap, "las_09") == 0)
     {
       if (SequencePosition <= 390)
@@ -880,7 +935,7 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(tempNextMap, "mri_00") == 0)
     {
-      // Reset GSWF(2826) to allow the player to get the follower again
+      // Turn off GSWF(2826) to allow the player to get the follower again
       ttyd::swdrv::swClear(2826);
     }
     else if (ttyd::string::strcmp(tempNextMap, "mri_01") == 0)
@@ -1027,6 +1082,11 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(tempNextMap, "tik_03") == 0)
+    {
+      // Turn on GSWF(1334) to have the entrances revealed already
+      ttyd::swdrv::swSet(1334);
+    }
     else if (ttyd::string::strcmp(tempNextMap, "tou_01") == 0)
     {
       // Adjust the Sequence to allow the player to get the Super Hammer if they don't have it already
@@ -1060,27 +1120,90 @@ void getRandomWarp()
         }
         else
         {
-          // Allow Grubba to be fought if the Sequence is before or at 163
-          // Set the Sequence to 163 so that Grubba can be fought
-          ttyd::swdrv::swByteSet(0, 163);
-          ttyd::string::strcpy(tempNextBero, "w_bero");
+          if (SequencePosition == 163)
+          {
+            // Only Grubba can be fought when the Sequence is exactly 163
+            ttyd::string::strcpy(tempNextBero, "w_bero");
           
-          // Prevent the loading zone from being changed
-          ChangedLZ = true;
-          
-          // Turn off GSWF(2388) to clear any currently-registered fights
-          ttyd::swdrv::swClear(2388);
+            // Prevent the loading zone from being changed
+            ChangedLZ = true;
+            
+            // Turn off GSWF(2388) to clear any currently-registered fights
+            ttyd::swdrv::swClear(2388);
+          }
+          else
+          {
+            // Allow Rawk Hawk or Grubba to be fought at random
+            bool BossCheck = ttyd::system::irand(1000) < 500;
+            
+            if (BossCheck)
+            {
+              // Set up to fight Rawk Hawk
+              if (SequencePosition < 133)
+              {
+                // Set the Sequence past 128 to prevent the Rawk Hawk and Koopinator cutscene from playing
+                ttyd::swdrv::swByteSet(0, 133);
+              }
+              
+              InitRawkHawk();
+              ttyd::string::strcpy(tempNextBero, "w_bero");
+                  
+              // Prevent the loading zone from being changed
+              ChangedLZ = true;
+            }
+            else
+            {
+              // Set up to fight Grubba
+              // Set the Sequence to 163 so that Grubba can be fought
+              ttyd::swdrv::swByteSet(0, 163);
+              ttyd::string::strcpy(tempNextBero, "w_bero");
+            
+              // Prevent the loading zone from being changed
+              ChangedLZ = true;
+              
+              // Turn off GSWF(2388) to clear any currently-registered fights
+              ttyd::swdrv::swClear(2388);
+            }
+          }
         }
       }
       else
       {
-        // Turn off GSWF(2388) to clear any currently-registered fights
-        ttyd::swdrv::swClear(2388);
+        if (CheckChallengeModeTimerCutoff())
+        {
+          // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+          continue;
+        }
+        else if (LZRandoChallenge)
+        {
+          // Force the Rawk Hawk fight if using the challenge mode
+          // Set up to fight Rawk Hawk
+          InitRawkHawk();
+          ttyd::string::strcpy(tempNextBero, "w_bero");
+              
+          // Prevent the loading zone from being changed
+          ChangedLZ = true;
+        }
+        else
+        {
+          // Randomly choose if Rawk Hawk should be fought or not
+          bool RawkHawkCheck = ttyd::system::irand(1000) < 500;
+          
+          if (RawkHawkCheck)
+          {
+            // Set up to fight Rawk Hawk
+            InitRawkHawk();
+            ttyd::string::strcpy(tempNextBero, "w_bero");
+                
+            // Prevent the loading zone from being changed
+            ChangedLZ = true;
+          }
+        }
       }
     }
     else if (ttyd::string::strcmp(tempNextMap, "tou_04") == 0)
     {
-      // Clear GSWF(2384) and GSWF(2385) to prevent the pipe cutscenes from playing
+      // Turn off GSWF(2384) and GSWF(2385) to prevent the pipe cutscenes from playing
       ttyd::swdrv::swClear(2384);
       ttyd::swdrv::swClear(2385);
     }
@@ -1108,6 +1231,30 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(tempNextMap, "tou_07") == 0)
+    {
+      if (DefeatedRawkHawk)
+      {
+        DefeatedRawkHawk = false;
+        
+        // Turn on GSWF(2389) and turn off GSWF(2503) to allow the player to get the Champ's Belt
+        ttyd::swdrv::swSet(2389);
+        ttyd::swdrv::swClear(2503);
+        
+        // Adjust the Sequence to allow the player to get the Champ's Belt
+        if (SequencePosition < 172)
+        {
+          // Set the Sequence to 172 to allow the player to get the Champ's Belt
+          ttyd::swdrv::swByteSet(0, 172);
+        }
+        
+        // Lock the loading zone to North to save time
+        ttyd::string::strcpy(tempNextBero, "n_bero");
+          
+        // Prevent the loading zone from being changed
+        ChangedLZ = true;
+      }
+    }
     else if (ttyd::string::strcmp(tempNextMap, "tou_08") == 0)
     {
       // Prevent warping to this room if using the challenge mode and the Sequence is less than 130
@@ -1119,11 +1266,17 @@ void getRandomWarp()
       
       // Turn off GSWF(2388) to clear any currently-registered fights
       ttyd::swdrv::swClear(2388);
+      
+      // Turn off GSWF(2389) to prevent winning coins/going down a rank
+      ttyd::swdrv::swClear(2389);
     }
     else if (ttyd::string::strcmp(tempNextMap, "tou_10") == 0)
     {
       // Turn off GSWF(2388) to clear any currently-registered fights
       ttyd::swdrv::swClear(2388);
+      
+      // Turn off GSWF(2389) to prevent winning coins/going down a rank
+      ttyd::swdrv::swClear(2389);
     }
     else if (ttyd::string::strcmp(tempNextMap, "usu_00") == 0)
     {
@@ -1637,10 +1790,10 @@ void setUpNewFile()
   *reinterpret_cast<uint32_t *>(GSWAddresses) &= ~(1 << 0); // Turn off the 0 bit
   
   // Turn on all of the GSWFs in the array
-  uint16_t ArraySize = GSWF_Array_Size; // Prevent the compiled code from loading this variable more than once
+  uint16_t ArraySize = NewFile_GSWF_Array_Size; // Prevent the compiled code from loading this variable more than once
   for (int i = 0; i < ArraySize; i++)
   {
-    ttyd::swdrv::swSet(GSWF_Array[i]);
+    ttyd::swdrv::swSet(NewFile_GSWF_Array[i]);
   }
 }
 
@@ -2096,7 +2249,7 @@ void reloadScreen()
     }
     else if (ttyd::string::strcmp(tempNextMap, "tou_03") == 0)
     {
-      if (SequencePosition == 163)
+      if ((SequencePosition == 163) || (ttyd::swdrv::swGet(2388)))
       {
         return;
       }
@@ -2461,35 +2614,44 @@ char *checkCurrentTextbox(char *currentText)
       // Just defeated Magnus 1.0
       JustDefeatedBoss = 4;
     }
+    else if ((ttyd::string::strcmp(currentText, "stg3_tou_438") == 0) || 
+      (ttyd::string::strcmp(currentText, "stg3_tou_re_133") == 0))
+    {
+      // Just defeated Rawk Hawk
+      JustDefeatedBoss = 5;
+      
+      // Set a flag to allow the player to get the Champ's Belt, even if the GSWF for it gets reset
+      DefeatedRawkHawk = true;
+    }
     else if (ttyd::string::strcmp(currentText, "stg3_tou_473") == 0)
     {
       // Just defeated Grubba
-      JustDefeatedBoss = 5;
+      JustDefeatedBoss = 6;
     }
     else if (ttyd::string::strcmp(currentText, "stg5_dou_25") == 0)
     {
       // Just defeated Cortez
-      JustDefeatedBoss = 6;
+      JustDefeatedBoss = 7;
     }
     else if (ttyd::string::strcmp(currentText, "stg6_rsh_247") == 0)
     {
       // Just defeated Smorg
-      JustDefeatedBoss = 7;
+      JustDefeatedBoss = 8;
     }
     else if (ttyd::string::strcmp(currentText, "stg7_aji_42") == 0)
     {
       // Just defeated Magnus 2.0
-      JustDefeatedBoss = 8;
+      JustDefeatedBoss = 9;
     }
     else if (ttyd::string::strcmp(currentText, "stg8_las_24") == 0)
     {
       // Just defeated the Shadow Sirens (Chapter 8)
-      JustDefeatedBoss = 9;
+      JustDefeatedBoss = 10;
     }
     else if (ttyd::string::strcmp(currentText, "stg8_las_70") == 0)
     {
       // Just defeated Grodus
-      JustDefeatedBoss = 10;
+      JustDefeatedBoss = 11;
       
       // Skip most of the Grodus dialogue by warping to the Bowser part
       ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "las_28", "koopa_evt");
@@ -2500,12 +2662,20 @@ char *checkCurrentTextbox(char *currentText)
     else if (ttyd::string::strcmp(currentText, "stg8_las_101") == 0)
     {
       // Just defeated Bowser & Kammy
-      JustDefeatedBoss = 11;
+      JustDefeatedBoss = 12;
     }
     else if (ttyd::string::strcmp(currentText, "stg8_las_139") == 0)
     {
       // Set a flag to warp away from the Shadow Queen fight if the player says No
       SQWarpAway = true;
+    }
+    else if (ttyd::string::strcmp(currentText, "stg8_las_146") == 0)
+    {
+      // Skip the dialogue at the end of the first Shadow Queen fight
+      ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "las_29", "minnnanokoe");
+      
+      // Prevent the loading zone from being changed
+      ChangedLZ = true;
     }
   }
   
@@ -2561,6 +2731,9 @@ uint32_t randomizeBeroOnFileLoad(uint32_t swByteGetCheck, void *GSWAddress, uint
   if (LZRando)
   {
     NewSystemFlagValue &= ~(1 << 0); // Turn off the 0 bit
+    
+    // Reset a flag that should always be reset when loading a file
+    DefeatedRawkHawk = false;
     
     // Set a flag to reset the System Flag later
     ResetSystemFlag = true;

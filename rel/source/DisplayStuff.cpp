@@ -32,7 +32,7 @@ extern bool GameOverChallengeMode;
 extern uint32_t seqMainAddress;
 extern uint32_t FinalScoresMenuCounter;
 extern uint8_t JustDefeatedBoss;
-extern bool BossDefeated[19];
+extern bool BossDefeated[22];
 extern uint32_t BossScore;
 extern uint32_t GSWAddressesStart;
 extern bool InGameOver;
@@ -455,126 +455,131 @@ void Mod::LZRandoChallengeStuff()
     }
     
     // Check for bosses
-    uint32_t BossDefeatedIndex = 0;
-    
-    // Check for bosses based on current textbox
-    for (int i = 1; i <= 9; i++)
-    {
-      if (JustDefeatedBoss == i)
-      {
-        if (!BossDefeated[BossDefeatedIndex])
-        {
-          BossDefeated[BossDefeatedIndex] = true;
-          BossScore += 10;
-        }
-      }
-      else
-      {
-        BossDefeated[BossDefeatedIndex] = false;
-      }
-      
-      BossDefeatedIndex++;
-    }
-    
-    // Check for Grodus and Bowser & Kammy
-    for (int i = 10; i <= 11; i++)
-    {
-      if (JustDefeatedBoss == i)
-      {
-        if (!BossDefeated[BossDefeatedIndex])
-        {
-          BossDefeated[BossDefeatedIndex] = true;
-          BossScore += 8;
-        }
-      }
-      else
-      {
-        BossDefeated[BossDefeatedIndex] = false;
-      }
-      
-      BossDefeatedIndex++;
-    }
-    
-    // Check for bosses based on Sequence
+    uint32_t TotalBosses = sizeof(BossDefeated) / sizeof(BossDefeated[0]);
+    uint32_t TotalBossesTextbox10Points = 10;
+    uint32_t StartSequenceChecks = TotalBossesTextbox10Points + 3; // 2 used for Grodus and Bowser & Kammy
+    uint32_t EndSequenceChecks = StartSequenceChecks + 6; // 7 Total
+    uint32_t ShadowQueenNumCheck = EndSequenceChecks + 1;
+    uint32_t AtomicBooNumCheck = EndSequenceChecks + 2;
+    uint32_t BonetailNumCheck = EndSequenceChecks + 3;
+
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-    uint16_t SequenceChecks[] = { 85, 200, 211, 260, 388 };
-    
-    int32_t ArraySize = sizeof(SequenceChecks) / sizeof(SequenceChecks[0]);
-    for (int i = 0; i < ArraySize; i++)
+    const uint16_t SequenceChecks[] = { 39, 85, 200, 211, 260, 383, 388 };
+
+    for (uint32_t i = 1; i <= TotalBosses; i++)
     {
-      if (SequencePosition == SequenceChecks[i])
+      // Check for bosses based on current textbox
+      if (i <= TotalBossesTextbox10Points)
       {
-        if (!BossDefeated[BossDefeatedIndex])
+        if (i == JustDefeatedBoss)
         {
-          BossDefeated[BossDefeatedIndex] = true;
-          BossScore += 10;
+          if (!BossDefeated[i - 1])
+          {
+            BossDefeated[i - 1] = true;
+            BossScore += 10;
+          }
+        }
+        else
+        {
+          BossDefeated[i - 1] = false;
         }
       }
-      else
+      else if ((i == (TotalBossesTextbox10Points + 1)) || 
+        (i == (TotalBossesTextbox10Points + 2)))
       {
-        BossDefeated[BossDefeatedIndex] = false;
+        // Check for Grodus and Bowser & Kammy
+        if (i == JustDefeatedBoss)
+        {
+          if (!BossDefeated[i - 1])
+          {
+            BossDefeated[i - 1] = true;
+            BossScore += 8;
+          }
+        }
+        else
+        {
+          BossDefeated[i - 1] = false;
+        }
       }
-      
-      BossDefeatedIndex++;
-    }
-    
-    // Check for the Shadow Queen
-    if (SequencePosition == 401)
-    {
-      if (!BossDefeated[BossDefeatedIndex])
+      else if ((i >= StartSequenceChecks) && (i <= EndSequenceChecks))
       {
-        BossDefeated[BossDefeatedIndex] = true;
-        BossScore += 25;
+        // Check for bosses based on Sequence
+        if (SequencePosition == SequenceChecks[i - StartSequenceChecks])
+        {
+          if (!BossDefeated[i - 1])
+          {
+            BossDefeated[i - 1] = true;
+            BossScore += 10;
+          }
+        }
+        else
+        {
+          BossDefeated[i - 1] = false;
+        }
       }
-    }
-    else
-    {
-      BossDefeated[BossDefeatedIndex] = false;
-    }
-    
-    // Check for the Atomic Boo
-    BossDefeatedIndex++;
-    if (ttyd::string::strcmp(tempNextMap, "jin_00") == 0)
-    {
-      // Check GSWF(2226)
-      bool AtomicBooCheck = ttyd::swdrv::swGet(2226);
-      
-      if (AtomicBooCheck && !BossDefeated[BossDefeatedIndex])
+      else if (i == ShadowQueenNumCheck)
       {
-        BossDefeated[BossDefeatedIndex] = true;
-        BossScore += 10;
+        // Check for the Shadow Queen
+        if (SequencePosition == 401)
+        {
+          if (!BossDefeated[i - 1])
+          {
+            BossDefeated[i - 1] = true;
+            BossScore += 25;
+          }
+        }
+        else
+        {
+          BossDefeated[i - 1] = false;
+        }
       }
-    }
-    else
-    {
-      BossDefeated[BossDefeatedIndex] = false;
-      
-      // Turn off GSWF(2226) so that the player can refight the Atomic Boo
-      ttyd::swdrv::swClear(2226);
-    }
-    
-    // Check for Bonetail
-    BossDefeatedIndex++;
-    if (ttyd::string::strcmp(tempNextMap, "jon_06") == 0)
-    {
-      // Check GSWF(5085)
-      bool BonetailCheck = ttyd::swdrv::swGet(5085);
-      
-      if (BonetailCheck && !BossDefeated[BossDefeatedIndex])
+      else if (i == AtomicBooNumCheck)
       {
-        BossDefeated[BossDefeatedIndex] = true;
-        BossScore += 30;
+        // Check for the Atomic Boo
+        if (ttyd::string::strcmp(tempNextMap, "jin_00") == 0)
+        {
+          // Check GSWF(2226)
+          bool AtomicBooCheck = ttyd::swdrv::swGet(2226);
+          
+          if (AtomicBooCheck && !BossDefeated[i - 1])
+          {
+            BossDefeated[i - 1] = true;
+            BossScore += 10;
+          }
+        }
+        else
+        {
+          BossDefeated[i - 1] = false;
+          
+          // Turn off GSWF(2226) so that the player can refight the Atomic Boo
+          ttyd::swdrv::swClear(2226);
+        }
+      }
+      else if (i == BonetailNumCheck)
+      {
+        // Check for Bonetail
+        if (ttyd::string::strcmp(tempNextMap, "jon_06") == 0)
+        {
+          // Check GSWF(5085)
+          bool BonetailCheck = ttyd::swdrv::swGet(5085);
+          
+          if (BonetailCheck && !BossDefeated[i - 1])
+          {
+            BossDefeated[i - 1] = true;
+            BossScore += 30;
+          }
+        }
+        else
+        {
+          BossDefeated[i - 1] = false;
+          
+          // Turn off GSWF(5084) and GSWF(5085) so that the player can refight Bonetail
+          ttyd::swdrv::swClear(5084);
+          ttyd::swdrv::swClear(5085);
+        }
       }
     }
-    else
-    {
-      BossDefeated[BossDefeatedIndex] = false;
-      
-      // Turn off GSWF(5084) and GSWF(5085) so that the player can refight Bonetail
-      ttyd::swdrv::swClear(5084);
-      ttyd::swdrv::swClear(5085);
-    }
-    
+
     // Add 10 points for each boss defeated; 25 points for the Shadow Queens and 30 points for Bonetail
     MainScores[5] = BossScore;
     
@@ -935,8 +940,8 @@ void Mod::titleScreenStuff()
   
   sprintf(tempDisplayBuffer,
     "%s\n%s",
-    "Item Randomizer - v1.3.1",
-    "Loading Zone Randomizer - v1.0.12");
+    "Item Randomizer - v1.3.2",
+    "Loading Zone Randomizer - v1.0.13");
   
   drawStringMultipleLines(PosX, PosY, alpha, color, tempDisplayBuffer, Scale);
   
@@ -950,7 +955,7 @@ void Mod::titleScreenStuff()
     PosY += 15;
   #endif
   
-  const char *VersionNumber = "v2.0.14";
+  const char *VersionNumber = "v2.0.15";
   drawStringSingleLine(PosX, PosY, alpha, color, VersionNumber, Scale);
 }
 
@@ -1202,7 +1207,7 @@ void Mod::helpMenu()
   uint32_t ItemRandoStartingPage = 2;
   uint32_t ItemRandoTotalPages = 8;
   uint32_t LZRandoStartingPage = ItemRandoStartingPage + ItemRandoTotalPages;
-  uint32_t LZRandoTotalPages = 10;
+  uint32_t LZRandoTotalPages = 11;
   uint32_t ChallengeModeStartingPage = LZRandoStartingPage + LZRandoTotalPages;
   uint32_t ChallengeModeTotalPages = 9;
   
@@ -1228,7 +1233,7 @@ void Mod::helpMenu()
       // Scale = 0.6;
       
       // Draw second column of Loading Zone Randomizer page 5
-      const char *BossesText = "15. Shadow Sirens (Ch8)\n16. Grodus\n17. Bowser & Kammy\n18. Shadow Queen\n19. Bonetail";
+      const char *BossesText = "15. Magnus 2\n16. Dark Bones (las_05)\n17. Gloomtail\n18. Shadow Sirens (Ch8)\n19. Grodus\n20. Bowser & Kammy\n21. Shadow Queen\n22. Bonetail";
       drawStringMultipleLines(PosX, PosY, alpha, TextColor, BossesText, Scale);
     }
     
