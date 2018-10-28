@@ -499,13 +499,20 @@ void getRandomWarp()
     }
     else if (ttyd::string::strcmp(tempNextMap, "gon_03") == 0)
     {
-      if (LZRandoChallenge)
+      if (SequencePosition <= 38)
       {
-        // Skip the cutscene with Koops using the challenge mode
-        if (SequencePosition < 38)
+        // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
+        if (CheckChallengeModeTimerCutoff())
         {
-          // Set the Sequence to 38 to prevent the cutscene from playing
-          ttyd::swdrv::swByteSet(0, 38);
+          continue;
+        }
+        else
+        {
+          if (LZRandoChallenge)
+          {
+            // Only set the Sequence when using the challenge mode, as the cutscene will also set it
+            ttyd::swdrv::swByteSet(0, 38);
+          }
         }
       }
     }
@@ -1086,6 +1093,14 @@ void getRandomWarp()
     {
       // Turn on GSWF(1334) to have the entrances revealed already
       ttyd::swdrv::swSet(1334);
+    }
+    else if (ttyd::string::strcmp(tempNextMap, "tik_05") == 0)
+    {
+      if (SequencePosition == 15)
+      {
+        // Set the Sequence to 16 to prevent the cutscene from playing
+        ttyd::swdrv::swByteSet(0, 16);
+      }
     }
     else if (ttyd::string::strcmp(tempNextMap, "tou_01") == 0)
     {

@@ -41,6 +41,7 @@ extern "C" {
 uint32_t GSWAddressesStart = r13 - 0x6F50;
 uint32_t CrystalStarPointerAddress = r13 - 0x7040;
 // uint32_t AreaLZsAddressesStart = r13 - 0x6F58;
+uint32_t TitleWorkPointer2 = r13 - 0x7F80;
 
 // Display Stuff
 bool TransparentTextFlag = false;

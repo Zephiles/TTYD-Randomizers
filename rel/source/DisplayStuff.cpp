@@ -44,6 +44,7 @@ extern bool TimerDisabled;
 extern bool TimerActive;
 extern bool DisablePlayerControl;
 extern bool GameOverFlag;
+extern uint32_t TitleWorkPointer2;
 extern bool RandomizeCoins;
 extern bool LZRando;
 extern bool LZRandoChallenge;
@@ -910,7 +911,7 @@ void Mod::titleScreenStuff()
   
   // Display Item Randomizer versions and Loading Zone Randomizer version
   // Draw window for the text to go in
-  uint32_t color = 0x000000CC;
+  uint32_t WindowColor = 0x000000CC;
   int32_t CoordX = -219;
   int32_t CoordY = -25;
   int32_t Width = 453;
@@ -923,11 +924,11 @@ void Mod::titleScreenStuff()
     Width -= 11;
   #endif
   
-  displayWindow(color, CoordX, CoordY, Width, Height, Curve);
+  displayWindow(WindowColor, CoordX, CoordY, Width, Height, Curve);
   
   // Display the text
   uint8_t alpha = 0xFF;
-  color = 0xFFFFFFFF;
+  uint32_t TextColor = 0xFFFFFFFF;
   int32_t PosX = -203;
   int32_t PosY = -35;
   float Scale = 0.9;
@@ -941,9 +942,9 @@ void Mod::titleScreenStuff()
   sprintf(tempDisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.3.2",
-    "Loading Zone Randomizer - v1.0.13");
+    "Loading Zone Randomizer - v1.0.14");
   
-  drawStringMultipleLines(PosX, PosY, alpha, color, tempDisplayBuffer, Scale);
+  drawStringMultipleLines(PosX, PosY, alpha, TextColor, tempDisplayBuffer, Scale);
   
   // Display overall version
   PosX = -230;
@@ -955,8 +956,66 @@ void Mod::titleScreenStuff()
     PosY += 15;
   #endif
   
-  const char *VersionNumber = "v2.0.15";
-  drawStringSingleLine(PosX, PosY, alpha, color, VersionNumber, Scale);
+  const char *VersionNumber = "v2.0.16";
+  drawStringSingleLine(PosX, PosY, alpha, TextColor, VersionNumber, Scale);
+  
+  // Draw the remaining time for when gameplay will resume
+  if (GameOverFlag && LZRando)
+  {
+    // The text should only be displayed if the player gets a Game Over and is using the Loading Zone randomizer
+    // Draw window for the text to go in
+    WindowColor = 0x000000F4;
+    CoordX = -199;
+    CoordY = 65;
+    Width = 405;
+    Height = 45;
+    // Curve = 10;
+    
+    #ifdef TTYD_JP
+      CoordX += 7;
+      CoordY += 30;
+      Width -= 13;
+    #endif
+    
+    displayWindow(WindowColor, CoordX, CoordY, Width, Height, Curve);
+    
+    // Display the text
+    // alpha = 0xFF;
+    // TextColor = 0xFFFFFFFF;
+    PosX = -183;
+    PosY = 55;
+    // Scale = 0.9;
+    
+    #ifdef TTYD_JP
+      PosX += 5;
+      PosY += 30;
+    #endif
+    
+    uint32_t TotalWaitTime = ttyd::system::sysMsec2Frame(19000); // 19 seconds
+    uint32_t tempTitleWorkPointer2 = *reinterpret_cast<uint32_t *>(TitleWorkPointer2);
+    uint32_t CurrentWaitTime = *reinterpret_cast<uint32_t *>(tempTitleWorkPointer2 + 0x28);
+    int32_t RemainingTime = TotalWaitTime - CurrentWaitTime;
+    
+    // CurrentWaitTime will always end up being 1 frame over TotalWaitTime, so prevent that from displaying
+    if (RemainingTime < 0)
+    {
+      RemainingTime = 0;
+    }
+    
+    // Get the proper FPS for the timer
+    uint32_t FPS = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
+    FPS = *reinterpret_cast<uint32_t *>(FPS + 0x4);
+    
+    uint32_t second = (RemainingTime / FPS) % 60;
+    uint32_t frame = RemainingTime % FPS;
+    
+    sprintf(tempDisplayBuffer,
+      "Gameplay will resume in: %.2ld.%.2ld",
+      second,
+      frame);
+    
+    drawStringSingleLine(PosX, PosY, alpha, TextColor, tempDisplayBuffer, Scale);
+  }
 }
 
 void Mod::gameModes()
