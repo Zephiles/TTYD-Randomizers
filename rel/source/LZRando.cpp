@@ -50,7 +50,7 @@ extern uint16_t NewFile_GSWF_Array_Size;
 extern uint16_t NewFile_GSWF_Array[];
 extern uint32_t seqMainAddress;
 extern bool ClearCacheFlag;
-extern bool SQWarpAway;
+extern uint8_t SQWarpAwayCounter;
 extern uint8_t JustDefeatedBoss;
 // extern uint32_t AreaObjectsAddressesStart;
 // extern uint32_t AreaLZsAddressesStart;
@@ -1906,8 +1906,8 @@ void specificMapEdits()
     // Reset TransformIntoShip, so that it doesn't conflict with other loading zones
     TransformIntoShip = false;
     
-    // Reset SQWarpAway flag, as it needs to be off once in a new room
-    SQWarpAway = false;
+    // Reset SQWarpAwayCounter to 0, as it needs to be off once in a new room
+    SQWarpAwayCounter = 0;
     
     // Reset JustDefeatedBoss, so that it can be used for other bosses
     JustDefeatedBoss = 0;
@@ -2681,8 +2681,8 @@ char *checkCurrentTextbox(char *currentText)
     }
     else if (ttyd::string::strcmp(currentText, "stg8_las_139") == 0)
     {
-      // Set a flag to warp away from the Shadow Queen fight if the player says No
-      SQWarpAway = true;
+      // Set a value to warp away from the Shadow Queen fight if the player says No
+      SQWarpAwayCounter = 1;
     }
     else if (ttyd::string::strcmp(currentText, "stg8_las_146") == 0)
     {
@@ -2851,12 +2851,21 @@ void *Mod::preventMarioShipForceStop()
 
 uint32_t Mod::warpAwayFromSQ(void *ptr)
 {
-  if (SQWarpAway)
+  // Prevent getting a Game Over if the player said No to the Shadow Queen
+  if (SQWarpAwayCounter > 0)
   {
-    // Prevent getting a Game Over if the player said No to the Shadow Queen
-    // Warp to a different room
-    ttyd::swdrv::swByteSet(0, 405);
-    ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "las_29", "w_bero");
+    // Only run this code once, as it runs multiple times during a transition, and it will interfere with other code if it sets the Sequence more than once
+    if (SQWarpAwayCounter == 1)
+    {
+      // Increment the counter so that the Sequence isn't set multiple times
+      SQWarpAwayCounter = 2;
+      
+      // Set the Sequence to post game
+      ttyd::swdrv::swByteSet(0, 405);
+      
+      // Warp to a different room
+      ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "las_29", "w_bero");
+    }
     
     // Prevent the function from running, so that it does not trigger a Game Over
     return 0;
