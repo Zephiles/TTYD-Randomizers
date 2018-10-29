@@ -603,6 +603,16 @@ void getRandomWarp()
         }
       }
     }
+    else if (ttyd::string::strcmp(tempNextMap, "hei_08") == 0)
+    {
+      // Manually check to see if the player has the Moon Stone or not
+      if (ttyd::mario_pouch::pouchCheckItem(MoonStone) == 0)
+      {
+        // The player doesn't have the Moon Stone, so make sure it can spawn
+        // Turn off GSWF(1775) so that the Moon Stone can spawn
+        ttyd::swdrv::swClear(1775);
+      }
+    }
     else if (ttyd::string::strcmp(tempNextMap, "hei_10") == 0)
     {
       if (CheckChallengeModeTimerCutoff())
@@ -620,6 +630,16 @@ void getRandomWarp()
             }
           }
         }
+      }
+    }
+    else if (ttyd::string::strcmp(tempNextMap, "hei_12") == 0)
+    {
+      // Manually check to see if the player has the Sun Stone or not
+      if (ttyd::mario_pouch::pouchCheckItem(SunStone) == 0)
+      {
+        // The player doesn't have the Sun Stone, so make sure it can spawn
+        // Turn off GSWF(1774) so that the Sun Stone can spawn
+        ttyd::swdrv::swClear(1774);
       }
     }
     else if (ttyd::string::strcmp(tempNextMap, "hom_00") == 0)

@@ -942,7 +942,7 @@ void Mod::titleScreenStuff()
   sprintf(tempDisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.3.2",
-    "Loading Zone Randomizer - v1.0.15");
+    "Loading Zone Randomizer - v1.0.16");
   
   drawStringMultipleLines(PosX, PosY, alpha, TextColor, tempDisplayBuffer, Scale);
   
@@ -956,7 +956,7 @@ void Mod::titleScreenStuff()
     PosY += 15;
   #endif
   
-  const char *VersionNumber = "v2.0.17";
+  const char *VersionNumber = "v2.0.18";
   drawStringSingleLine(PosX, PosY, alpha, TextColor, VersionNumber, Scale);
   
   // Draw the remaining time for when gameplay will resume
