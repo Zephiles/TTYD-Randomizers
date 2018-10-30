@@ -2047,34 +2047,59 @@ void specificMapEdits()
   }
   else if (NextSeq == MapChange)
   {
-    // Prevent partners and followers from being removed when in a jin map
-    if (ttyd::string::strncmp(tempNextMap, "jin_04", 3) == 0)
+    // Check for specific edits to REL files
+    #ifdef TTYD_US
+      const uint32_t eki_REL_ID = 0x6;
+      const uint32_t jin_REL_ID = 0xD;
+      uint32_t jin_party_kill_script_offset = 0x15108;
+      uint32_t eki04_init_script_offset = 0xE5B8;
+    #elif defined TTYD_JP
+      const uint32_t eki_REL_ID = 0x7;
+      const uint32_t jin_REL_ID = 0xE;
+      uint32_t jin_party_kill_script_offset = 0x14FD8;
+      uint32_t eki04_init_script_offset = 0xE5A8;
+    #elif defined TTYD_EU
+      const uint32_t eki_REL_ID = 0x7;
+      const uint32_t jin_REL_ID = 0xE;
+      uint32_t jin_party_kill_script_offset = 0x15108;
+      uint32_t eki04_init_script_offset = 0xE5B8;
+    #endif
+    
+    uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
+    uint32_t REL_Pointer = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x15C);
+    
+    // Make sure a REL file is actually loaded
+    if (REL_Pointer != 0)
     {
-      #ifdef TTYD_US
-        const uint32_t jin_REL_ID = 0xD;
-        uint32_t party_kill_script_offset = 0x15108;
-      #elif defined TTYD_JP
-        const uint32_t jin_REL_ID = 0xE;
-        uint32_t party_kill_script_offset = 0x14FD8;
-      #elif defined TTYD_EU
-        const uint32_t jin_REL_ID = 0xE;
-        uint32_t party_kill_script_offset = 0x15108;
-      #endif
-      
-      uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
-      uint32_t REL_Pointer = *reinterpret_cast<uint32_t *>(GSWAddresses + 0x15C);
-      
-      // Make sure a REL file is actually loaded
-      if (REL_Pointer != 0)
+      uint32_t REL = *reinterpret_cast<uint32_t *>(REL_Pointer);
+      switch (REL)
       {
-        // Check if the jin REL is loaded
-        uint32_t REL = *reinterpret_cast<uint32_t *>(REL_Pointer);
-        if (REL == jin_REL_ID)
+        case eki_REL_ID:
         {
-          // Adjust the range so that the code never runs
-          // Set the Sequences to arbitrary values that are never used
-          *reinterpret_cast<uint32_t *>(REL_Pointer + party_kill_script_offset + 0xC) = 0x200;
-          *reinterpret_cast<uint32_t *>(REL_Pointer + party_kill_script_offset + 0x10) = 0x200;
+          // Make sure the current map is eki_04
+          if (ttyd::string::strcmp(tempNextMap, "eki_04") == 0)
+          {
+            // Prevent eki_04 from adjusting the Sequence
+            // Replace the conditional instruction with a return, as it is at the end of the function
+            *reinterpret_cast<uint32_t *>(REL_Pointer + eki04_init_script_offset + 0xE4) = 0x00000002; // return
+            break;
+          }
+          else
+          {
+            // Prevent code in the next case from running
+            break;
+          }
+        }
+        case jin_REL_ID:
+        {
+          // Prevent partners and followers from being removed when in a jin map
+          // Replace the first instruction with a return, as this entire function needs to be avoided
+          *reinterpret_cast<uint32_t *>(REL_Pointer + jin_party_kill_script_offset) = 0x00000002; // return
+          break;
+        }
+        default:
+        {
+          break;
         }
       }
     }

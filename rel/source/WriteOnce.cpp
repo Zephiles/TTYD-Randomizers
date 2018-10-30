@@ -57,6 +57,23 @@ void msgWindow_Entry__strlen__allocation__fix()
   *reinterpret_cast<uint32_t *>(msgWindowMrAddress) = 0x38830001; // addi r4,r3,1
 }
 
+void adjustTitleScreenTimer()
+{
+  #ifdef TTYD_US
+    // Set the instruction to multiple by 8 instead of 20, so that it checks for 7 seconds total
+    uint32_t setTotalTimeAddress = 0x800096B4;
+    *reinterpret_cast<uint32_t *>(setTotalTimeAddress) = 0x1C030008; // mulli r0,r3,8
+  #elif defined TTYD_JP
+    // Set the instruction to compare to 420, which is 7 seconds in frames
+    uint32_t setTotalTimeAddress = 0x80009534;
+    *reinterpret_cast<uint32_t *>(setTotalTimeAddress) = 0x2C0001A4; // cmpwi r0,420
+  #elif defined TTYD_EU
+    // Set the instruction to multiple by 8 instead of 20, so that it checks for 7 seconds total
+    uint32_t setTotalTimeAddress = 0x80009878;
+    *reinterpret_cast<uint32_t *>(setTotalTimeAddress) = 0x1C030008; // mulli r0,r3,8
+  #endif
+}
+
 void writeNextMap()
 {
   // These are normally not set during the boot process, which can cause issues with string comparisons with other code
@@ -70,6 +87,7 @@ void Mod::writeOnce()
   Mod::writeLZRandoAssemblyPatches();
   displayBacktraceScreen();
   msgWindow_Entry__strlen__allocation__fix();
+  adjustTitleScreenTimer();
   writeNextMap();
   
   // Only run with in the US and EU versions of the game

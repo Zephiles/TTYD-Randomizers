@@ -942,7 +942,7 @@ void Mod::titleScreenStuff()
   sprintf(tempDisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.3.2",
-    "Loading Zone Randomizer - v1.0.16");
+    "Loading Zone Randomizer - v1.0.17");
   
   drawStringMultipleLines(PosX, PosY, alpha, TextColor, tempDisplayBuffer, Scale);
   
@@ -956,7 +956,7 @@ void Mod::titleScreenStuff()
     PosY += 15;
   #endif
   
-  const char *VersionNumber = "v2.0.18";
+  const char *VersionNumber = "v2.0.19";
   drawStringSingleLine(PosX, PosY, alpha, TextColor, VersionNumber, Scale);
   
   // Draw the remaining time for when gameplay will resume
@@ -991,7 +991,7 @@ void Mod::titleScreenStuff()
       PosY += 30;
     #endif
     
-    uint32_t TotalWaitTime = ttyd::system::sysMsec2Frame(19000); // 19 seconds
+    uint32_t TotalWaitTime = ttyd::system::sysMsec2Frame(7000); // 7 seconds
     uint32_t tempTitleWorkPointer2 = *reinterpret_cast<uint32_t *>(TitleWorkPointer2);
     uint32_t CurrentWaitTime = *reinterpret_cast<uint32_t *>(tempTitleWorkPointer2 + 0x28);
     int32_t RemainingTime = TotalWaitTime - CurrentWaitTime;
