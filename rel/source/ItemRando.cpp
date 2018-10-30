@@ -1013,6 +1013,16 @@ const char *Mod::getCustomMsg(const char *msgKey)
   return mPFN_getCustomMsg_trampoline(msgKey);
 }
 
+bool Mod::initBattleStuff()
+{
+  // Make sure the Jump and Hammer upgrades have been properly checked
+  ttyd::mario_pouch::pouchGetJumpLv();
+  ttyd::mario_pouch::pouchGetHammerLv();
+  
+  // Call original function
+  return mPFN_initBattleStuff_trampoline();
+}
+
 void enableArtAttackHitboxes()
 {
   #ifdef TTYD_US

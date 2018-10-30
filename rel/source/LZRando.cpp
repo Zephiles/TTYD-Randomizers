@@ -86,6 +86,8 @@ extern "C" {
   void BranchBackRandomizeBeroOnFileLoad();
   void StartResetSystemFlag();
   void BranchBackResetSystemFlag();
+  void StartAdjustTitleScreenTimer();
+  void BranchBackAdjustTitleScreenTimer();
 }
 
 namespace mod {
@@ -1550,6 +1552,7 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
   if (LZRando)
   {
     char *tempNextBero = NextBero; // Prevent NextBero from being loaded in multiple times
+    char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
     
     // Only randomize if the loading zone was not manually changed
     if (!ChangedLZ)
@@ -1596,8 +1599,6 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
     // If not using the challenge mode, check for loading zones where Boat Mode should be used
     if (!LZRandoChallenge)
     {
-      char *tempNextMap = NextMap; // Prevent NextMap from being loaded in multiple times
-      
       if (ttyd::string::strcmp(tempNextMap, "dou_02") == 0)
       {
         if (ttyd::string::strcmp(tempNextBero, "e_bero_1") == 0)
@@ -1718,10 +1719,6 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
           TransformIntoShip = true;
         }
       }
-      else if (ttyd::string::strcmp(tempNextMap, "tik_20") == 0)
-      {
-        TransformIntoShip = true;
-      }
       
       // Check if Boat Mode should be used for the current loading zone
       if (TransformIntoShip)
@@ -1729,6 +1726,15 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
         // Force Mario to transform into the boat
         ttyd::mot_ship::marioReInit_ship();
       }
+    }
+    
+    // Manually transform into the boat if the current room is tik_20, regardless of whether the challenge mode is being used or not
+    if (ttyd::string::strcmp(tempNextMap, "tik_20") == 0)
+    {
+      ttyd::mot_ship::marioReInit_ship();
+      
+      // Prevent other functions from taking Mario out of Boat Mode
+      TransformIntoShip = true;
     }
     
     // Check if the curtain needs to be cleared when loading a file
@@ -2236,6 +2242,19 @@ void reloadScreen()
           {
             return;
           }
+        }
+      }
+    }
+    else if (ttyd::string::strcmp(tempNextMap, "jin_00") == 0)
+    {
+      // Only check for the Sequences in which the Atomic Boo can spawn
+      if (SequencePosition >= 197)
+      {
+        // If the player just got the Steeple Key, then the Sequence would be set to 198. They could then reload the room to fight the Atomic Boo, even if 20 minutes have not passed.
+        if (CheckChallengeModeTimerCutoff() && (ttyd::mario_pouch::pouchGetHammerLv() > 1))
+        {
+          // The player is currently able to fight the Atomic Boo and 20 minutes have not passed, so don't allow reloading the room
+          return;
         }
       }
     }
@@ -2838,6 +2857,43 @@ bool resetSystemFlag(void *GSWAddress)
 }
 }
 
+extern "C" {
+// The function needs to be different for JP
+#ifndef TTYD_JP
+uint32_t adjustTitleScreenTimer(uint32_t currentTime)
+{
+  // Only adjust the timer if the player gets a Game Over and is using the Loading Zone randomizer
+  if (GameOverFlag && LZRando)
+  {
+    return (currentTime * 8); // 7 seconds
+  }
+  else
+  {
+    // Return the original value
+    return (currentTime * 20); // 19 seconds
+  }
+}
+#else
+int32_t adjustTitleScreenTimer(uint32_t currentTime, void *titleWorkPointer2)
+{
+  // Store the current time
+  uint32_t tempTitleWorkPointer2 = reinterpret_cast<uint32_t>(titleWorkPointer2);
+  *reinterpret_cast<uint32_t *>(tempTitleWorkPointer2 + 0x28) = currentTime;
+  
+  // Only adjust the timer if the player gets a Game Over and is using the Loading Zone randomizer
+  if (GameOverFlag && LZRando)
+  {
+    return (currentTime - 420); // 7 seconds
+  }
+  else
+  {
+    // Return the original value
+    return (currentTime - 1140); // 19 seconds
+  }
+}
+#endif
+}
+
 void Mod::preventPartyLeft(ttyd::party::PartyMembers id)
 {
   // Prevent the game from removing partners
@@ -3026,6 +3082,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t ReplaceJumpFallAnim = 0x800411D0;
     uint32_t RandomizeBeroFileLoad = 0x800F3A70;
     uint32_t ResetSystemFlag = 0x8000847C;
+    uint32_t AdjustTitleScreenTimer = 0x800096B4;
   #elif defined TTYD_JP
     uint32_t RandomWarp = 0x800086F0;
     uint32_t TubeModeCheck = 0x80090D90;
@@ -3041,6 +3098,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t ReplaceJumpFallAnim = 0x80040B34;
     uint32_t RandomizeBeroFileLoad = 0x800EEDB4;
     uint32_t ResetSystemFlag = 0x800083A4;
+    uint32_t AdjustTitleScreenTimer = 0x80009538;
   #elif defined TTYD_EU
     uint32_t RandomWarp = 0x80008994;
     uint32_t TubeModeCheck = 0x800936A0;
@@ -3059,6 +3117,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t ReplaceJumpFallAnim = 0x800412B8;
     uint32_t RandomizeBeroFileLoad = 0x800F48DC;
     uint32_t ResetSystemFlag = 0x80008648;
+    uint32_t AdjustTitleScreenTimer = 0x80009878;
   #endif
   
   // Random Warps
@@ -3128,6 +3187,10 @@ void Mod::writeLZRandoAssemblyPatches()
   // Reset the System Flag if it was modified when loading a file
   patch::writeBranch(reinterpret_cast<void *>(ResetSystemFlag), reinterpret_cast<void *>(StartResetSystemFlag));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackResetSystemFlag), reinterpret_cast<void *>(ResetSystemFlag + 0x4));
+  
+  // Adjust the Title Screen timer when the player gets a Game Over and is using the Loading Zone randomizer
+  patch::writeBranch(reinterpret_cast<void *>(AdjustTitleScreenTimer), reinterpret_cast<void *>(StartAdjustTitleScreenTimer));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackAdjustTitleScreenTimer), reinterpret_cast<void *>(AdjustTitleScreenTimer + 0x4));
 }
 
 void Mod::LZRandoStuff()

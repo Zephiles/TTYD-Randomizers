@@ -4,6 +4,7 @@
 #include <ttyd/itemdrv.h>
 #include <ttyd/mario_pouch.h>
 #include <ttyd/msgdrv.h>
+#include <ttyd/seq_battle.h>
 #include <ttyd/mario_party.h>
 #include <ttyd/party.h>
 #include <ttyd/countdown.h>
@@ -54,6 +55,12 @@ void Mod::init()
   mPFN_getCustomMsg_trampoline = patch::hookFunction(ttyd::msgdrv::msgSearch, [](const char *msgKey)
   {
     return gMod->getCustomMsg(msgKey);
+  });
+  
+  // Run/set additional things when starting a battle
+  mPFN_initBattleStuff_trampoline = patch::hookFunction(ttyd::seq_battle::battle_init, []()
+  {
+    return gMod->initBattleStuff();
   });
   
   // LZ Rando

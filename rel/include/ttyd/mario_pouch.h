@@ -32,7 +32,7 @@ void pouchReviseMarioParam();
 // pouchAddKeepItem
 int16_t pouchGetPartyAttackLv(uint32_t partnerId);
 uint32_t pouchGetHammerLv();
-// pouchGetJumpLv
+uint32_t pouchGetJumpLv();
 // pouchSetAudienceNum
 // pouchGetAudienceNum
 int16_t pouchGetMaxAP();

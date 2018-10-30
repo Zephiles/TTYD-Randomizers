@@ -31,6 +31,8 @@ private:
   void *(*mPFN_itemEntry_trampoline)(const char *, uint32_t, uint32_t, int32_t, void *, float, float, float) = nullptr;
   const char *getCustomMsg(const char *);
   const char *(*mPFN_getCustomMsg_trampoline)(const char *) = nullptr;
+  bool initBattleStuff();
+  bool (*mPFN_initBattleStuff_trampoline)() = nullptr;
   
   // LZ Rando
   void LZRandoStuff();

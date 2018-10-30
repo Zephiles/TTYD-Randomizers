@@ -360,6 +360,13 @@
 // 80073470:imgDisp
 // 80073C1C:zFill
 
+// seq_battle.o
+// 800749A8:battle_exit
+80074B68:battle_init
+// 80074DE0:seq_battleMain
+// 800751BC:seq_battleExit
+// 800751DC:seq_battleInit
+
 // fontmgr.o
 // unused:JUTFont_Draw
 // unused:JUTFont_DrawPos
@@ -674,7 +681,7 @@
 // 800D475C:pouchAddKeepItem
 800D4884:pouchGetPartyAttackLv
 800D4898:pouchGetHammerLv
-// 800D4918:pouchGetJumpLv
+800D4918:pouchGetJumpLv
 // 800D4998:pouchSetAudienceNum
 // 800D49A4:pouchGetAudienceNum
 800D49B0:pouchGetMaxAP
