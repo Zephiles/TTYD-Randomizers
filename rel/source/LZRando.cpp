@@ -1778,6 +1778,9 @@ void setUpNewFile()
   NewFile = false;
   MarioFreeze = false;
   
+  // Reset a flag that should always be reset when starting a new file
+  DefeatedRawkHawk = false;
+  
   // Set up stuff for new file
   // Set Sequence to be just past the Bandit stealing Mario's coins
   ttyd::swdrv::swByteSet(0, 8);
