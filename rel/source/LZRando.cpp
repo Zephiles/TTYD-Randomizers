@@ -2059,16 +2059,19 @@ void specificMapEdits()
       const uint32_t jin_REL_ID = 0xD;
       uint32_t jin_party_kill_script_offset = 0x15108;
       uint32_t eki04_init_script_offset = 0xE5B8;
+      uint32_t jin06_init_script_offset = 0x12100;
     #elif defined TTYD_JP
       const uint32_t eki_REL_ID = 0x7;
       const uint32_t jin_REL_ID = 0xE;
       uint32_t jin_party_kill_script_offset = 0x14FD8;
       uint32_t eki04_init_script_offset = 0xE5A8;
+      uint32_t jin06_init_script_offset = 0x11FD0;
     #elif defined TTYD_EU
       const uint32_t eki_REL_ID = 0x7;
       const uint32_t jin_REL_ID = 0xE;
       uint32_t jin_party_kill_script_offset = 0x15108;
       uint32_t eki04_init_script_offset = 0xE5B8;
+      uint32_t jin06_init_script_offset = 0x12100;
     #endif
     
     uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
@@ -2086,21 +2089,24 @@ void specificMapEdits()
           if (ttyd::string::strcmp(tempNextMap, "eki_04") == 0)
           {
             // Prevent eki_04 from adjusting the Sequence
-            // Replace the conditional instruction with a return, as it is at the end of the function
-            *reinterpret_cast<uint32_t *>(REL_Pointer + eki04_init_script_offset + 0xE4) = 0x00000002; // return
-            break;
+            // Adjust the conditional to check for 0 instead of 316
+            *reinterpret_cast<uint32_t *>(REL_Pointer + eki04_init_script_offset + 0xEC) = 0;
           }
-          else
-          {
-            // Prevent code in the next case from running
-            break;
-          }
+          break;
         }
         case jin_REL_ID:
         {
           // Prevent partners and followers from being removed when in a jin map
-          // Replace the first instruction with a return, as this entire function needs to be avoided
+          // Replace the first instruction with a return, as the entire function needs to be avoided
           *reinterpret_cast<uint32_t *>(REL_Pointer + jin_party_kill_script_offset) = 0x00000002; // return
+          
+          // Make sure the current map is jin_06
+          if (ttyd::string::strcmp(tempNextMap, "jin_06") == 0)
+          {
+            // Prevent jin_06 from adjusting the Sequence
+            // Adjust the conditional to check for 0 instead of 193, and replacing it with a return causes the game to get stuck in one of the evtEntry functions
+            *reinterpret_cast<uint32_t *>(REL_Pointer + jin06_init_script_offset + 0x278) = 0;
+          }
           break;
         }
         default:

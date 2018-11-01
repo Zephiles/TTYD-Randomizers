@@ -744,6 +744,7 @@ void Mod::LZRandoChallengeStuff()
     BossScore = 0;
     GameOverCount = 0;
     FinishedRunCounter = 0;
+    JustDefeatedBoss = 0;
     ttyd::__mem::memset(BossDefeated, false, sizeof(BossDefeated));
   }
   
@@ -942,7 +943,7 @@ void Mod::titleScreenStuff()
   sprintf(tempDisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.3.3",
-    "Loading Zone Randomizer - v1.0.18");
+    "Loading Zone Randomizer - v1.0.19");
   
   drawStringMultipleLines(PosX, PosY, alpha, TextColor, tempDisplayBuffer, Scale);
   
@@ -956,7 +957,7 @@ void Mod::titleScreenStuff()
     PosY += 15;
   #endif
   
-  const char *VersionNumber = "v2.0.20";
+  const char *VersionNumber = "v2.0.21";
   drawStringSingleLine(PosX, PosY, alpha, TextColor, VersionNumber, Scale);
   
   // Draw the remaining time for when gameplay will resume
