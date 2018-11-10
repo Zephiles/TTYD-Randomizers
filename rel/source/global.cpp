@@ -83,7 +83,6 @@ bool TransformIntoShip = false;
 bool CloseCurtainFlag = false;
 bool MarioFreeze = false;
 bool ClearCacheFlag = false;
-uint8_t SQWarpAwayCounter = 0;
 char *NewBero = new char[32]; // 31 bytes for NextBero, 1 byte for NULL
 char *NewMap = new char[9]; // 8 bytes for NextMap, 1 byte for NULL
 bool CheckCurrentTextboxFlag = false;

@@ -9,7 +9,6 @@
 #include <ttyd/party.h>
 #include <ttyd/countdown.h>
 #include <ttyd/mot_ship.h>
-#include <ttyd/evt_seq.h>
 #include <ttyd/fadedrv.h>
 #include <ttyd/evt_bero.h>
 #include <ttyd/fontmgr.h>
@@ -86,12 +85,6 @@ void Mod::init()
   mPFN_marioShipForceStop_trampoline = patch::hookFunction(ttyd::mot_ship::marioShipForceStop, []()
   {
     return gMod->preventMarioShipForceStop();
-  });
-  
-  // Prevent getting a Game Over if warping away from the Shadow Queen
-  mPFN_warpAwayFromSQ_trampoline = patch::hookFunction(ttyd::evt_seq::evt_seq_set_seq, [](void *ptr)
-  {
-    return gMod->warpAwayFromSQ(ptr);
   });
   
   // Prevent being able to get items while reloading a room

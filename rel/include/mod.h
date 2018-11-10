@@ -45,8 +45,6 @@ private:
   void (*mPFN_countDownStart_trampoline)(uint32_t, uint32_t) = nullptr;
   void *preventMarioShipForceStop();
   void *(*mPFN_marioShipForceStop_trampoline)() = nullptr;
-  uint32_t warpAwayFromSQ(void *);
-  uint32_t (*mPFN_warpAwayFromSQ_trampoline)(void *) = nullptr;
   bool preventGetItemOnReload(uint32_t);
   bool (*mPFN_preventGetItemOnReload_trampoline)(uint32_t) = nullptr;
   void preventSpecificFades(int, int, uint8_t[4]);

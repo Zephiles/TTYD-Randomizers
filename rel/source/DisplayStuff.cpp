@@ -979,7 +979,7 @@ void Mod::titleScreenStuff()
   int32_t PosX = -203;
   int32_t PosY = -35;
   float Scale = 0.9;
-  int32_t WindowWidth = 454;
+  int32_t WindowWidth = 456;
   uint32_t WindowColor = 0x000000CC;
   int32_t Curve = 10;
   char *tempDisplayBuffer = DisplayBuffer; // Prevent DisplayBuffer from being loaded in multiple times
@@ -993,7 +993,7 @@ void Mod::titleScreenStuff()
   sprintf(tempDisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.3.4",
-    "Loading Zone Randomizer - v1.0.21");
+    "Loading Zone Randomizer - v1.0.23");
   
   drawTextWithWindow(tempDisplayBuffer, PosX, PosY, alpha, 
     TextColor, Scale, WindowWidth, WindowColor, Curve);
@@ -1008,7 +1008,7 @@ void Mod::titleScreenStuff()
     PosY += 15;
   #endif
   
-  const char *VersionNumber = "v2.0.23";
+  const char *VersionNumber = "v2.0.25";
   drawText(VersionNumber, PosX, PosY, alpha, TextColor, Scale);
   
   // Draw the remaining time for when gameplay will resume

@@ -49,7 +49,6 @@ extern uint16_t NewFile_GSWF_Array_Size;
 extern uint16_t NewFile_GSWF_Array[];
 extern uint32_t seqMainAddress;
 extern bool ClearCacheFlag;
-extern uint8_t SQWarpAwayCounter;
 extern uint8_t JustDefeatedBoss;
 // extern uint32_t AreaObjectsAddressesStart;
 // extern uint32_t AreaLZsAddressesStart;
@@ -1977,9 +1976,6 @@ void specificMapEdits()
     // Reset TransformIntoShip, so that it doesn't conflict with other loading zones
     TransformIntoShip = false;
     
-    // Reset SQWarpAwayCounter to 0, as it needs to be off once in a new room
-    SQWarpAwayCounter = 0;
-    
     // Reset JustDefeatedBoss, so that it can be used for other bosses
     JustDefeatedBoss = 0;
     
@@ -2142,26 +2138,35 @@ void specificMapEdits()
       const uint32_t eki_REL_ID = 0x6;
       const uint32_t gra_REL_ID = 0xA;
       const uint32_t jin_REL_ID = 0xD;
+      const uint32_t las_REL_ID = 0x10;
       uint32_t eki04_init_script_offset = 0xE5B8;
       uint32_t gra_party_kill_script_offset = 0x7F70;
       uint32_t jin_party_kill_script_offset = 0x15108;
       uint32_t jin06_init_script_offset = 0x12100;
+      uint32_t las29_sekaiyami2_script_offset = 0x34D94;
+      uint32_t las29_game_over_SQ_on_no_address_offset = 0x130C;
     #elif defined TTYD_JP
       const uint32_t eki_REL_ID = 0x7;
       const uint32_t gra_REL_ID = 0xB;
       const uint32_t jin_REL_ID = 0xE;
+      const uint32_t las_REL_ID = 0x11;
       uint32_t eki04_init_script_offset = 0xE5A8;
       uint32_t gra_party_kill_script_offset = 0x7E40;
       uint32_t jin_party_kill_script_offset = 0x14FD8;
       uint32_t jin06_init_script_offset = 0x11FD0;
+      uint32_t las29_sekaiyami2_script_offset = 0x34D14;
+      uint32_t las29_game_over_SQ_on_no_address_offset = 0x1378;
     #elif defined TTYD_EU
       const uint32_t eki_REL_ID = 0x7;
       const uint32_t gra_REL_ID = 0xB;
       const uint32_t jin_REL_ID = 0xE;
+      const uint32_t las_REL_ID = 0x11;
       uint32_t eki04_init_script_offset = 0xE5B8;
       uint32_t gra_party_kill_script_offset = 0x7F90;
       uint32_t jin_party_kill_script_offset = 0x15108;
       uint32_t jin06_init_script_offset = 0x12100;
+      uint32_t las29_sekaiyami2_script_offset = 0x34D94;
+      uint32_t las29_game_over_SQ_on_no_address_offset = 0x130C;
     #endif
     
     uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
@@ -2207,6 +2212,23 @@ void specificMapEdits()
             // Replace the conditional part with nops
             nopInstructionsInREL(reinterpret_cast<void *>(
               REL_Pointer + jin06_init_script_offset + 0x270), 0x18);
+          }
+          break;
+        }
+        case las_REL_ID:
+        {
+          // Make sure the current map is las_29
+          if (managestrings::strcmp_NextMap("las_29"))
+          {
+            // Prevent a Game Over from occuring if the player says No to the Shadow Queen
+            // Warp away instead of causing a Game Over
+            uint32_t NewSeqAddress = REL_Pointer + las29_sekaiyami2_script_offset + las29_game_over_SQ_on_no_address_offset;
+            const char *tempNewMap = "gor_01";
+            const char *tempNewBero = "w_bero";
+            
+            *reinterpret_cast<uint32_t *>(NewSeqAddress + 0x8) = static_cast<uint32_t>(MapChange);
+            *reinterpret_cast<uint32_t *>(NewSeqAddress + 0xC) = reinterpret_cast<uint32_t>(tempNewMap);
+            *reinterpret_cast<uint32_t *>(NewSeqAddress + 0x10) = reinterpret_cast<uint32_t>(tempNewBero);
           }
           break;
         }
@@ -2956,17 +2978,6 @@ char *checkCurrentTextbox(char *currentText)
         ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "gor_01", nullptr);
       }
     }
-    else if (managestrings::strcmp_String(currentText, "stg8_las_139"))
-    {
-      if (!tempCheckCurrentTextboxFlag)
-      {
-        // Only run this code once
-        CheckCurrentTextboxFlag = true;
-        
-        // Set a value to warp away from the Shadow Queen fight if the player says No
-        SQWarpAwayCounter = 1;
-      }
-    }
     else if (managestrings::strcmp_String(currentText, "stg8_las_146"))
     {
       if (!tempCheckCurrentTextboxFlag)
@@ -3177,34 +3188,6 @@ void *Mod::preventMarioShipForceStop()
   {
     // Call original function
     return mPFN_marioShipForceStop_trampoline();
-  }
-}
-
-uint32_t Mod::warpAwayFromSQ(void *ptr)
-{
-  // Prevent getting a Game Over if the player said No to the Shadow Queen
-  if (SQWarpAwayCounter > 0)
-  {
-    // Only run this code once, as it runs multiple times during a transition, and it will interfere with other code if it sets the Sequence more than once
-    if (SQWarpAwayCounter == 1)
-    {
-      // Increment the counter so that the Sequence isn't set multiple times
-      SQWarpAwayCounter = 2;
-      
-      // Set the Sequence to post game
-      ttyd::swdrv::swByteSet(0, 405);
-      
-      // Warp to a different room
-      ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "las_29", "w_bero");
-    }
-    
-    // Prevent the function from running, so that it does not trigger a Game Over
-    return 0;
-  }
-  else
-  {
-    // Call original function
-    return mPFN_warpAwayFromSQ_trampoline(ptr);
   }
 }
 
