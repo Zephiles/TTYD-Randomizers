@@ -2975,6 +2975,7 @@ char *checkCurrentTextbox(char *currentText)
         JustDefeatedBoss = 12;
         
         // Warp away immediately
+        ttyd::swdrv::swByteSet(0, 400);
         ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "gor_01", nullptr);
       }
     }
