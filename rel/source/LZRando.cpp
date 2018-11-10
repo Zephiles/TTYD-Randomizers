@@ -2894,6 +2894,7 @@ char *checkCurrentTextbox(char *currentText)
         JustDefeatedBoss = 8;
         
         // Warp away immediately
+        ttyd::swdrv::swByteSet(0, 332);
         ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "gor_01", nullptr);
       }
     }
@@ -2909,8 +2910,8 @@ char *checkCurrentTextbox(char *currentText)
         
         // Warp away immediately
         ttyd::mario_pouch::pouchGetItem(randomizeItem());
-        // Don't need to set a warp, as the game already does so when Crump's textbox closes
         ttyd::swdrv::swByteSet(0, 373);
+        // Don't need to set a warp, as the game already does so when Crump's textbox closes
       }
     }
     else if (managestrings::strcmp_String(currentText, "stg8_las_24"))
