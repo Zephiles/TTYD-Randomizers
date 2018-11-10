@@ -1,12 +1,12 @@
 #include "mod.h"
+#include "managestrings.h"
 #include "items.h"
 #include "patch.h"
 
 #include <ttyd/system.h>
 #include <ttyd/mario_pouch.h>
-#include <ttyd/string.h>
-#include <ttyd/swdrv.h>
 #include <ttyd/seqdrv.h>
+#include <ttyd/swdrv.h>
 #include <ttyd/mariost.h>
 #include <ttyd/__mem.h>
 #include <ttyd/OSCache.h>
@@ -17,6 +17,7 @@ extern uint16_t PossibleItems[];
 extern uint16_t ItemArraySize;
 extern bool LZRandoChallenge;
 extern uint32_t TimerCount;
+extern uint16_t FieldMostRecentItem;
 extern char *NextMap;
 extern bool HitShineSprite;
 extern bool CrystalStarIsInField;
@@ -78,6 +79,7 @@ extern "C" {
 
 namespace mod {
 
+extern "C" {
 uint32_t randomizeItem()
 {
   uint32_t NewItem;
@@ -162,8 +164,17 @@ uint32_t randomizeItem()
       ConfirmNewItem = true;
     }
   }
-
+  
+  // Store the item in FieldMostRecentItem, unless currently in a battle
+  ttyd::seqdrv::SeqIndex Seq = ttyd::seqdrv::seqGetSeq();
+  ttyd::seqdrv::SeqIndex Battle = ttyd::seqdrv::SeqIndex::kBattle;
+  if (Seq != Battle)
+  {
+    FieldMostRecentItem = NewItem;
+  }
+  
   return NewItem;
+}
 }
 
 uint32_t randomizeItemWithChecks(uint32_t currentItemId)
@@ -174,7 +185,7 @@ uint32_t randomizeItemWithChecks(uint32_t currentItemId)
   if (currentItemId == ShineSprite)
   {
     // Randomize if currently receiving from Bub
-    if (ttyd::string::strncmp(tempNextMap, "rsh_04", 6) == 0)
+    if (managestrings::strncmp_String(tempNextMap, "rsh_04", 6))
     {
       return randomizeItem();
     }
@@ -212,7 +223,7 @@ uint32_t randomizeItemWithChecks(uint32_t currentItemId)
     CrystalStarIsInField = true;
     
     // Check if current item is the Emerald Star, and if the player is currently in Magnus 1.0's room
-    if ((currentItemId == EmeraldStar) && (ttyd::string::strcmp(tempNextMap, "mri_01") == 0))
+    if ((currentItemId == EmeraldStar) && (managestrings::strcmp_NextMap("mri_01")))
     {
       if (!EmeraldStarAlreadyChanged)
       {
@@ -814,22 +825,22 @@ void preventTextboxOptions(char *currentText, void *storeAddress, int32_t select
   const int32_t FirstOption = 0;
   const int32_t SecondOption = 1;
   
-  if (ttyd::string::strcmp(currentText, "mac_0_084_02_yesno") == 0)
+  if (managestrings::strcmp_String(currentText, "mac_0_084_02_yesno"))
   {
     // Prevent the second option from being selected if currently being asked to do the Action Commands tutorial
     NewOption = FirstOption;
   }
-  else if (ttyd::string::strcmp(currentText, "mac_0_084_03_yesno") == 0)
+  else if (managestrings::strcmp_String(currentText, "mac_0_084_03_yesno"))
   {
     // Prevent the first option from being selected if currently being asked to do the Action Commands tutorial
     NewOption = SecondOption;
   }
-  else if (ttyd::string::strcmp(currentText, "mac_0_103_03_yesno") == 0)
+  else if (managestrings::strcmp_String(currentText, "mac_0_103_03_yesno"))
   {
     // Prevent the first option from being selected if currently being asked to do the Special Moves tutorial
     NewOption = SecondOption;
   }
-  else if (ttyd::string::strcmp(currentText, "stg6_rsh_diary_01_yn") == 0)
+  else if (managestrings::strcmp_String(currentText, "stg6_rsh_diary_01_yn"))
   {
     // Prevent the first option from being selected, so that the game does not crash when reading the diary
     NewOption = SecondOption;
@@ -847,162 +858,164 @@ void preventTextboxOptions(char *currentText, void *storeAddress, int32_t select
 
 const char *Mod::getCustomMsg(const char *msgKey)
 {
-  if (ttyd::string::strcmp(msgKey, "msg_cake") == 0)
+  char *tempMsgKey = const_cast<char *>(msgKey);
+  
+  if (managestrings::strcmp_String(tempMsgKey, "msg_cake"))
   {
     // Change the description for the Cake
     const char *description = "Replenishes 10 HP.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "msg_kame_no_noroi") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "msg_kame_no_noroi"))
   {
     // Change the description for Koopa Curse
     const char *description = "Has a chance of inducing the\nslow status to all enemies.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "msg_teki_kyouka") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "msg_teki_kyouka"))
   {
     // Change the description for Trade Off
     const char *description = "Increases the levels of all\nenemies by 5. Can be stacked.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "in_debug_badge") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "in_debug_badge"))
   {
     // Change the name for the Debug Badge
     const char *name = "Debug Badge";
     return name;
   }
-  else if (ttyd::string::strcmp(msgKey, "msg_debug_badge") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "msg_debug_badge"))
   {
     // Change the description for the Debug Badge
     const char *description = "Automatically does action\ncommands, stylishes,\nsuperguards, and fills the\nrun meter.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "in_mega_jump") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "in_mega_jump"))
   {
     // Change the name for Mega Jump
     const char *name = "Mega Jump";
     return name;
   }
-  else if (ttyd::string::strcmp(msgKey, "btl_mega_jump") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "btl_mega_jump"))
   {
     // Change the battle description for Mega Jump
     const char *description = "Stomp on a single enemy using\ntremendous attack power.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "msg_mega_jump") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "msg_mega_jump"))
   {
     // Change the menu description for Mega Jump
     const char *description = "Allows Mario to perform a\njump attack for 4 FP. This\nattack does ((Jump Power\nx 2) + 4) damage to one\nenemy.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "in_mega_smash") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "in_mega_smash"))
   {
     // Change the name for Mega Smash
     const char *name = "Mega Smash";
     return name;
   }
-  else if (ttyd::string::strcmp(msgKey, "btl_mega_smash") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "btl_mega_smash"))
   {
     // Change the battle description for Mega Smash
     const char *description = "Hammer a single enemy using\ntremendous attack power.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "msg_mega_smash") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "msg_mega_smash"))
   {
     // Change the menu description for Mega Smash
     const char *description = "Allows Mario to perform a\nhammer attack for 4 FP. This\nattack does (Hammer Power\n + 4) damage to one enemy.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "in_mega_quake") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "in_mega_quake"))
   {
     // Change the name for Mega Quake
     const char *name = "Mega Quake";
     return name;
   }
-  else if (ttyd::string::strcmp(msgKey, "btl_mega_quake") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "btl_mega_quake"))
   {
     // Change the battle description for Mega Quake
     const char *description = "Greatly damages all ground\nenemies.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "msg_mega_quake") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "msg_mega_quake"))
   {
     // Change the menu description for Mega Quake
     const char *description = "Allows Mario to perform a\nhammer attack for 7 FP. This\nattack does 10 base damage\nto all grounded enemies.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "in_lucky_start_p") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "in_lucky_start_p"))
   {
     // Change the name for Lucky Start P
     const char *name = "Lucky Start P";
     return name;
   }
-  else if (ttyd::string::strcmp(msgKey, "msg_lucky_start_p") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "msg_lucky_start_p"))
   {
     // Change the menu description for Lucky Start P
     const char *description = "Make something good happen\nto your partner when you\nfirst enter battle.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "in_art_attack_hitboxes") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "in_art_attack_hitboxes"))
   {
     // Change the name for the Art Attack hitboxes badge
     const char *name = "A.A. Hitboxes";
     return name;
   }
-  else if (ttyd::string::strcmp(msgKey, "msg_art_attack_hitboxes") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "msg_art_attack_hitboxes"))
   {
     // Change the menu description for the Art Attack hitboxes badge
     const char *description = "Displays hitboxes around\nenemies when using Art\nAttack.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "in_run_meter") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "in_run_meter"))
   {
     // Change the name for the Run Meter badge
     const char *name = "Run Meter";
     return name;
   }
-  else if (ttyd::string::strcmp(msgKey, "msg_run_meter") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "msg_run_meter"))
   {
     // Change the menu description for the Run Meter badge
     const char *description = "Automatically fills the run\nmeter.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "in_super_charge") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "in_super_charge"))
   {
     // Change the name for Super Charge
     const char *name = "Super Charge";
     return name;
   }
-  else if (ttyd::string::strcmp(msgKey, "btl_hlp_cmd_operation_super_charge") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "btl_hlp_cmd_operation_super_charge"))
   {
     // Change the battle description to use the Charge description
     msgKey = "btl_hlp_cmd_operation_charge";
   }
-  else if (ttyd::string::strcmp(msgKey, "msg_super_charge") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "msg_super_charge"))
   {
     // Change the menu description for Super Charge
     const char *description = "Wear this to add Super\nCharge to Mario's Tactics\nmenu. This move requires\n2 FP and charges by +4.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "in_super_charge_p") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "in_super_charge_p"))
   {
     // Change the name for Super Charge P
     const char *name = "Super Charge P";
     return name;
   }
-  else if (ttyd::string::strcmp(msgKey, "msg_super_charge_p") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "msg_super_charge_p"))
   {
     // Change the menu description for Super Charge P
     const char *description = "Wear this to add Super\nCharge to your partner's\nTactics menu. This move\nrequires 2 FP and charges\nby +4.";
     return description;
   }
-  else if (ttyd::string::strcmp(msgKey, "stg6_rsh_diary_01") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "stg6_rsh_diary_01"))
   {
     // Change the text asking if you want to read the diary
     const char *message = "<system>\nSelect Yes to read the\ndiary.\n<o>";
     return message;
   }
-  else if (ttyd::string::strcmp(msgKey, "stg6_rsh_diary_01_yn") == 0)
+  else if (managestrings::strcmp_String(tempMsgKey, "stg6_rsh_diary_01_yn"))
   {
     // Change the yes/no text answers for the diary
     const char *message = "<select 0 1 0 40>No\nNo\nMaybe";

@@ -1,3 +1,5 @@
+#include "items.h"
+
 #include <cstdint>
 
 extern "C" {
@@ -55,14 +57,15 @@ uint8_t HelpMenuCounter = 0;
 uint8_t PreviousHelpMenuCounterValue = 0;
 
 // Item Rando
-bool RandomizeCoins = false;
+uint16_t FieldMostRecentItem = ThunderBolt; // Have a Thunder Bolt used by default as a failsafe
 bool HitShineSprite = false;
 bool CrystalStarIsInField = false;
 bool EmeraldStarAlreadyChanged = false;
-uint16_t CrystalStarNewItem = 1; // Have the Strange Sack used by default as a failsafe
+uint16_t CrystalStarNewItem = StrangeSack; // Have a Strange Sack used by default as a failsafe
 bool MarioRunAwayCoinDrop = false;
 bool HitMultiCoinBlock = false;
 bool EnemyHeldItemArrayInUse = false;
+bool RandomizeCoins = false;
 int8_t EnemyHeldItemArrayCounter = 0;
 bool RanAwayFromBattle = false;
 uint16_t EnemyHeldItemArray[8][8] = { 0 };
@@ -75,7 +78,7 @@ bool ReloadCurrentScreen = false;
 bool ChangedLZ = false;
 bool GameOverFlag = false;
 bool NewFile = false;
-bool DefeatedRawkHawk = false;
+uint16_t DefeatedRawkHawkCounter = 0;
 bool TransformIntoShip = false;
 bool CloseCurtainFlag = false;
 bool MarioFreeze = false;
@@ -83,6 +86,7 @@ bool ClearCacheFlag = false;
 uint8_t SQWarpAwayCounter = 0;
 char *NewBero = new char[32]; // 31 bytes for NextBero, 1 byte for NULL
 char *NewMap = new char[9]; // 8 bytes for NextMap, 1 byte for NULL
+bool CheckCurrentTextboxFlag = false;
 bool ResetSystemFlag = false;
 
 // LZ Rando Challenge
