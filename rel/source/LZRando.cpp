@@ -133,6 +133,53 @@ void InitRawkHawk()
   ttyd::swdrv::swSet(2509);
 }
 
+void *getPartnerPointer()
+{
+  return ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId());
+}
+
+uint8_t getPartnerOut()
+{
+  uint32_t PartnerPointer = reinterpret_cast<uint32_t>(getPartnerPointer());
+  if (PartnerPointer != 0)
+  {
+    return *reinterpret_cast<uint8_t *>(PartnerPointer + 0x31);
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+void *bringPartnerOut()
+{
+  uint32_t PartnerPointer = reinterpret_cast<uint32_t>(getPartnerPointer());
+  
+  if (!PartnerPointer)
+  {
+    ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
+    uint8_t PreviousPartnerOut = player->prevFollowerId[0];
+    
+    // Check if a partner was previously out
+    if (PreviousPartnerOut != 0)
+    {
+      // A partner was previously out, so bring it back out
+      ttyd::mario_party::marioPartyHello(static_cast<ttyd::party::PartyMembers>(PreviousPartnerOut));
+    }
+    else
+    {
+      // Bring out Goombella if no partner was previously out
+      ttyd::mario_party::marioPartyHello(ttyd::party::PartyMembers::Goombella);
+    }
+    
+    return getPartnerPointer();
+  }
+  else
+  {
+    return reinterpret_cast<void *>(PartnerPointer);
+  }
+}
+
 void CheckMapForReloadChanges()
 {
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
@@ -572,21 +619,42 @@ void getRandomWarp()
     }
     else if (managestrings::strcmp_NextMap("gon_11"))
     {
-      // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 56
-      if ((SequencePosition < 56) && CheckChallengeModeTimerCutoff())
+      if (SequencePosition < 56)
       {
-        continue;
+        if (CheckChallengeModeTimerCutoff())
+        {
+          // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the Sequence is less than 56
+          continue;
+        }
+        else
+        {
+          // Make sure a partner is out for Hooktail
+          bringPartnerOut();
+        }
       }
     }
     else if (managestrings::strcmp_NextMap("gon_12"))
     {
-      if (LZRandoChallenge)
+      if (SequencePosition < 50)
       {
-        // Skip the Mowz cutscene if using the challenge mode
-        if (SequencePosition < 50)
+        if (LZRandoChallenge)
         {
-          // Set the Sequence to 50 to prevent the cutscene from playing
-          ttyd::swdrv::swByteSet(0, 50);
+          // Skip the Mowz cutscene if using the challenge mode
+          if (SequencePosition < 50)
+          {
+            // Set the Sequence to 50 to prevent the cutscene from playing
+            ttyd::swdrv::swByteSet(0, 50);
+          }
+        }
+        else
+        {
+          // Bring out Goombella if either no partner is out or a partner from past Chapter 1 is out
+          uint8_t CurrentPartnerOut = getPartnerOut();
+          
+          if ((CurrentPartnerOut == 0) || (CurrentPartnerOut > static_cast<uint8_t>(ttyd::party::PartyMembers::Koops)))
+          {
+            ttyd::mario_party::marioPartyEntry(ttyd::party::PartyMembers::Goombella);
+          }
         }
       }
     }
@@ -936,6 +1004,9 @@ void getRandomWarp()
         else
         {
           // Allow Gloomtail to be fought if the Sequence is before or at 387
+          // Make sure a partner is out for Gloomtail
+          bringPartnerOut();
+          
           // Set the Sequence to 387 so that Gloomtail can be fought
           ttyd::swdrv::swByteSet(0, 387);
         }
@@ -979,6 +1050,9 @@ void getRandomWarp()
         else
         {
           // Allow the Shadow Queen to be fought if the Sequence is before or at 400
+          // Make sure a partner is out for the Shadow Queen
+          bringPartnerOut();
+          
           // Set the Sequence to 400 so that the Shadow Queen can be fought
           ttyd::swdrv::swByteSet(0, 400);
           managestrings::strcpy_NextBero("sekai_yami2");
@@ -1050,6 +1124,9 @@ void getRandomWarp()
         else
         {
           // Allow Crump to be fought if the Sequence is before or at 259
+          // Make sure a partner is out for Crump
+          bringPartnerOut();
+          
           // Set the Sequence to 259 so that Crump can be fought
           ttyd::swdrv::swByteSet(0, 259);
         }
@@ -1955,18 +2032,6 @@ void nopInstructionsInREL(void *startAddress, uint32_t size)
   }
 }
 
-uint8_t getPartnerOut(uint32_t PartnerPointer)
-{
-  if (PartnerPointer != 0)
-  {
-    return *reinterpret_cast<uint8_t *>(PartnerPointer + 0x31);
-  }
-  else
-  {
-    return 0;
-  }
-}
-
 void specificMapEdits()
 {
   ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
@@ -1982,31 +2047,17 @@ void specificMapEdits()
     JustDefeatedBoss = 0;
     
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-    uint32_t PartnerPointer = reinterpret_cast<uint32_t>(ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId()));
     ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
     // uint32_t AreaObjectAddresses = *reinterpret_cast<uint32_t *>(AreaObjectsAddressesStart + 0x4);
     // uint32_t AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZsAddressesStart);
     // AreaLZAddresses = *reinterpret_cast<uint32_t *>(AreaLZAddresses + 0x4);
     
-    if (managestrings::strcmp_NextMap("gon_12"))
-    {
-      if (SequencePosition < 50)
-      {
-        uint8_t CurrentPartnerOut = getPartnerOut(PartnerPointer);
-        
-        if ((CurrentPartnerOut == 0) || (CurrentPartnerOut > static_cast<uint8_t>(ttyd::party::PartyMembers::Koops)))
-        {
-          // Bring out Goombella if either no partner is out or a partner from past Chapter 1 is out
-          ttyd::mario_party::marioPartyEntry(ttyd::party::PartyMembers::Goombella);
-        }
-      }
-    }
-    else if (managestrings::strcmp_NextMap("gor_01"))
+    if (managestrings::strcmp_NextMap("gor_01"))
     {
       if (MarioFreeze)
       {
         uint32_t RopeAddress = *reinterpret_cast<uint32_t *>(_mapEntAddress);
-        RopeAddress= *reinterpret_cast<uint32_t *>(RopeAddress + 0x154);
+        RopeAddress = *reinterpret_cast<uint32_t *>(RopeAddress + 0x154);
         float RopePosZ = *reinterpret_cast<float *>(RopeAddress + 0x8B4);
         
         player->flags1 |= (1 << 1); // Turn on the 1 bit
@@ -2037,7 +2088,7 @@ void specificMapEdits()
       else if ((SequencePosition == 210) || (SequencePosition == 211))
       {
         // Check if the Sequence is currently set to fight Doopliss 2
-        uint8_t CurrentPartnerOut = getPartnerOut(PartnerPointer);
+        uint8_t CurrentPartnerOut = getPartnerOut();
         
         if (CurrentPartnerOut != static_cast<uint8_t>(ttyd::party::PartyMembers::Vivian))
         {
@@ -2066,23 +2117,6 @@ void specificMapEdits()
     }
     else if (managestrings::strcmp_NextMap("las_29"))
     {
-      // Make sure a partner is out for the Shadow Queen cutscene
-      if (!PartnerPointer)
-      {
-        // Check if a partner was previously out
-        uint8_t PreviousPartnerOut = player->prevFollowerId[0];
-        if (PreviousPartnerOut != 0)
-        {
-          // A partner was previously out, so bring it back out
-          ttyd::mario_party::marioPartyHello(static_cast<ttyd::party::PartyMembers>(PreviousPartnerOut));
-        }
-        else
-        {
-          // Bring out Goombella if no partner was previously out
-          ttyd::mario_party::marioPartyHello(ttyd::party::PartyMembers::Goombella);
-        }
-      }
-      
       // Warp out of the Shadow Queen room if she is defeated, so that the cutscene is skipped
       if (SequencePosition == 401)
       {
@@ -2103,25 +2137,7 @@ void specificMapEdits()
     else if (managestrings::strcmp_NextMap("muj_00"))
     {
       // Make sure a partner is out for the ship cutscene
-      if (SequencePosition == 259)
-      {
-        if (!PartnerPointer)
-        {
-          // Check if a partner was previously out
-          uint8_t PreviousPartnerOut = player->prevFollowerId[0];
-          if (PreviousPartnerOut != 0)
-          {
-            // A partner was previously out, so bring it back out
-            ttyd::mario_party::marioPartyHello(static_cast<ttyd::party::PartyMembers>(PreviousPartnerOut));
-          }
-          else
-          {
-            // Bring out Goombella if no partner was previously out
-            ttyd::mario_party::marioPartyHello(ttyd::party::PartyMembers::Goombella);
-          }
-        }
-      }
-      else if (SequencePosition == 260)
+      if (SequencePosition == 260)
       {
         // Warp to a different room to skip the cutscene after beating Crump
         // Only warp if the challenge mode is in use
@@ -3157,27 +3173,15 @@ void *fixEvtMapBlendSetFlagPartners(void *PartnerPointer)
 {
   uint32_t tempPartnerPointer = reinterpret_cast<uint32_t>(PartnerPointer);
   
-  // Bring out a partner if no partner is currently out
   if (!tempPartnerPointer)
   {
-    // Check if a partner was previously out
-    ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
-    uint8_t PreviousPartnerOut = player->prevFollowerId[0];
-    if (PreviousPartnerOut != 0)
-    {
-      // A partner was previously out, so bring it back out
-      ttyd::mario_party::marioPartyHello(static_cast<ttyd::party::PartyMembers>(PreviousPartnerOut));
-    }
-    else
-    {
-      // Bring out Goombella if no partner was previously out
-      ttyd::mario_party::marioPartyHello(ttyd::party::PartyMembers::Goombella);
-    }
-    
-    return ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId());
+    // Bring out a partner if no partner is currently out
+    return bringPartnerOut();
   }
-  
-  return PartnerPointer;
+  else
+  {
+    return PartnerPointer;
+  }
 }
 }
 
