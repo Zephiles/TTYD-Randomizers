@@ -2241,8 +2241,8 @@ void specificMapEdits()
         }
         case las_REL_ID:
         {
-          // Make sure the current map is las_29
-          if (managestrings::strcmp_NextMap("las_29"))
+          // Make sure the challenge mode is currently in use and the current map is las_29
+          if (LZRandoChallenge && managestrings::strcmp_NextMap("las_29"))
           {
             // Prevent a Game Over from occuring if the player says No to the Shadow Queen
             // Warp away instead of causing a Game Over
@@ -3009,6 +3009,17 @@ char *checkCurrentTextbox(char *currentText)
         // Warp away immediately
         ttyd::swdrv::swByteSet(0, 400);
         ttyd::seqdrv::seqSetSeq(ttyd::seqdrv::SeqIndex::kMapChange, "gor_01", nullptr);
+      }
+    }
+    else if (managestrings::strcmp_String(currentText, "stg8_las_137"))
+    {
+      if (!tempCheckCurrentTextboxFlag)
+      {
+        // Only run this code once
+        CheckCurrentTextboxFlag = true;
+        
+        // Just agreed to be the Shadow Queen's servant, so set the Sequence to 405
+        ttyd::swdrv::swByteSet(0, 405);
       }
     }
     else if (managestrings::strcmp_String(currentText, "stg8_las_146"))
