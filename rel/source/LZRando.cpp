@@ -93,6 +93,8 @@ extern "C" {
   void BranchBackResetSystemFlag();
   void StartAdjustTitleScreenTimer();
   void BranchBackAdjustTitleScreenTimer();
+  void StartFixEvtMapBlendSetFlagPartners();
+  void BranchBackFixEvtMapBlendSetFlagPartners();
 }
 
 namespace mod {
@@ -2139,34 +2141,40 @@ void specificMapEdits()
       const uint32_t gra_REL_ID = 0xA;
       const uint32_t jin_REL_ID = 0xD;
       const uint32_t las_REL_ID = 0x10;
+      const uint32_t usu_REL_ID = 0x1B;
       uint32_t eki04_init_script_offset = 0xE5B8;
       uint32_t gra_party_kill_script_offset = 0x7F70;
       uint32_t jin_party_kill_script_offset = 0x15108;
       uint32_t jin06_init_script_offset = 0x12100;
       uint32_t las29_sekaiyami2_script_offset = 0x34D94;
       uint32_t las29_game_over_SQ_on_no_address_offset = 0x130C;
+      uint32_t usu_party_kill_script_offset = 0x16F40;
     #elif defined TTYD_JP
       const uint32_t eki_REL_ID = 0x7;
       const uint32_t gra_REL_ID = 0xB;
       const uint32_t jin_REL_ID = 0xE;
       const uint32_t las_REL_ID = 0x11;
+      const uint32_t usu_REL_ID = 0x1D;
       uint32_t eki04_init_script_offset = 0xE5A8;
       uint32_t gra_party_kill_script_offset = 0x7E40;
       uint32_t jin_party_kill_script_offset = 0x14FD8;
       uint32_t jin06_init_script_offset = 0x11FD0;
       uint32_t las29_sekaiyami2_script_offset = 0x34D14;
       uint32_t las29_game_over_SQ_on_no_address_offset = 0x1378;
+      uint32_t usu_party_kill_script_offset = 0x16BF0;
     #elif defined TTYD_EU
       const uint32_t eki_REL_ID = 0x7;
       const uint32_t gra_REL_ID = 0xB;
       const uint32_t jin_REL_ID = 0xE;
       const uint32_t las_REL_ID = 0x11;
+      const uint32_t usu_REL_ID = 0x1E;
       uint32_t eki04_init_script_offset = 0xE5B8;
       uint32_t gra_party_kill_script_offset = 0x7F90;
       uint32_t jin_party_kill_script_offset = 0x15108;
       uint32_t jin06_init_script_offset = 0x12100;
       uint32_t las29_sekaiyami2_script_offset = 0x34D94;
       uint32_t las29_game_over_SQ_on_no_address_offset = 0x130C;
+      uint32_t usu_party_kill_script_offset = 0x16F40;
     #endif
     
     uint32_t GSWAddresses = *reinterpret_cast<uint32_t *>(GSWAddressesStart);
@@ -2230,6 +2238,14 @@ void specificMapEdits()
             *reinterpret_cast<uint32_t *>(NewSeqAddress + 0xC) = reinterpret_cast<uint32_t>(tempNewMap);
             *reinterpret_cast<uint32_t *>(NewSeqAddress + 0x10) = reinterpret_cast<uint32_t>(tempNewBero);
           }
+          break;
+        }
+        case usu_REL_ID:
+        {
+          // Prevent partners and followers from being removed from the field
+          // Replace most of the function with nops, as all of it needs to be avoided
+          nopInstructionsInREL(reinterpret_cast<void *>(
+            REL_Pointer + usu_party_kill_script_offset), 0x9C);
           break;
         }
         default:
@@ -3136,6 +3152,35 @@ int32_t adjustTitleScreenTimer(uint32_t currentTime, void *titleWorkPointer2)
 #endif
 }
 
+extern "C" {
+void *fixEvtMapBlendSetFlagPartners(void *PartnerPointer)
+{
+  uint32_t tempPartnerPointer = reinterpret_cast<uint32_t>(PartnerPointer);
+  
+  // Bring out a partner if no partner is currently out
+  if (!tempPartnerPointer)
+  {
+    // Check if a partner was previously out
+    ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
+    uint8_t PreviousPartnerOut = player->prevFollowerId[0];
+    if (PreviousPartnerOut != 0)
+    {
+      // A partner was previously out, so bring it back out
+      ttyd::mario_party::marioPartyHello(static_cast<ttyd::party::PartyMembers>(PreviousPartnerOut));
+    }
+    else
+    {
+      // Bring out Goombella if no partner was previously out
+      ttyd::mario_party::marioPartyHello(ttyd::party::PartyMembers::Goombella);
+    }
+    
+    return ttyd::party::partyGetPtr(ttyd::mario_party::marioGetPartyId());
+  }
+  
+  return PartnerPointer;
+}
+}
+
 void Mod::preventPartyLeft(ttyd::party::PartyMembers id)
 {
   // Prevent the game from removing partners
@@ -3297,6 +3342,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t RandomizeBeroFileLoad = 0x800F3A70;
     uint32_t ResetSystemFlag = 0x8000847C;
     uint32_t AdjustTitleScreenTimer = 0x800096B4;
+    uint32_t FixEvtMapBlendSetFlagPartners = 0x800389C4;
   #elif defined TTYD_JP
     uint32_t RandomWarp = 0x800086F0;
     uint32_t TubeModeCheck = 0x80090D90;
@@ -3313,6 +3359,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t RandomizeBeroFileLoad = 0x800EEDB4;
     uint32_t ResetSystemFlag = 0x800083A4;
     uint32_t AdjustTitleScreenTimer = 0x80009538;
+    uint32_t FixEvtMapBlendSetFlagPartners = 0x80038328;
   #elif defined TTYD_EU
     uint32_t RandomWarp = 0x80008994;
     uint32_t TubeModeCheck = 0x800936A0;
@@ -3332,6 +3379,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t RandomizeBeroFileLoad = 0x800F48DC;
     uint32_t ResetSystemFlag = 0x80008648;
     uint32_t AdjustTitleScreenTimer = 0x80009878;
+    uint32_t FixEvtMapBlendSetFlagPartners = 0x80038AAC;
   #endif
   
   // Random Warps
@@ -3405,6 +3453,10 @@ void Mod::writeLZRandoAssemblyPatches()
   // Adjust the Title Screen timer when the player gets a Game Over and is using the Loading Zone randomizer
   patch::writeBranch(reinterpret_cast<void *>(AdjustTitleScreenTimer), reinterpret_cast<void *>(StartAdjustTitleScreenTimer));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackAdjustTitleScreenTimer), reinterpret_cast<void *>(AdjustTitleScreenTimer + 0x4));
+  
+  // Prevent the game from crashing in evt_map_blend_set_flag if no partner is out
+  patch::writeBranch(reinterpret_cast<void *>(FixEvtMapBlendSetFlagPartners), reinterpret_cast<void *>(StartFixEvtMapBlendSetFlagPartners));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackFixEvtMapBlendSetFlagPartners), reinterpret_cast<void *>(FixEvtMapBlendSetFlagPartners + 0x4));
 }
 
 void Mod::LZRandoStuff()

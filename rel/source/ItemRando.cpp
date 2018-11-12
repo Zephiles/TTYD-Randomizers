@@ -75,6 +75,7 @@ extern "C" {
   void StartPreventTextboxOptions();
   void BranchBackPreventTextboxOptions();
   void StartMultiCoinBlock();
+  void StartRandomizeSupernovaSmallStars();
 }
 
 namespace mod {
@@ -856,6 +857,19 @@ void preventTextboxOptions(char *currentText, void *storeAddress, int32_t select
 }
 }
 
+extern "C" {
+uint32_t randomizeSupernovaSmallStars()
+{
+  #ifdef TTYD_JP
+    const uint32_t DiamondStarIconValue = 407;
+  #else
+    const uint32_t DiamondStarIconValue = 415;
+  #endif
+  
+  return ttyd::system::irand(7) + DiamondStarIconValue;
+}
+}
+
 const char *Mod::getCustomMsg(const char *msgKey)
 {
   char *tempMsgKey = const_cast<char *>(msgKey);
@@ -1296,7 +1310,6 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t ZubastarIconAddress1 = 0x80233F04;
     uint32_t ZubastarIconAddress2 = 0x80233F6C;
-    uint8_t ZubastarIconValue = 0xA3; // 419
     
     uint32_t PreventTextbox = 0x800D214C;
   #elif defined TTYD_JP
@@ -1379,7 +1392,6 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t ZubastarIconAddress1 = 0x8022E854;
     uint32_t ZubastarIconAddress2 = 0x8022E8BC;
-    uint8_t ZubastarIconValue = 0x9B; // 411
     
     uint32_t PreventTextbox = 0x800CE01C;
   #elif defined TTYD_EU
@@ -1462,7 +1474,6 @@ void Mod::writeItemRandoAssemblyPatches()
     
     uint32_t ZubastarIconAddress1 = 0x80237994;
     uint32_t ZubastarIconAddress2 = 0x802379FC;
-    uint8_t ZubastarIconValue = 0xA3; // 419
     
     uint32_t PreventTextbox = 0x800D2F44;
   #endif
@@ -1606,10 +1617,6 @@ void Mod::writeItemRandoAssemblyPatches()
   *reinterpret_cast<uint32_t *>(itemDataTable + (DebugBadge * 0x28) + 0x8) = reinterpret_cast<uint32_t>(DebugBadgeMenuDescription);
   *reinterpret_cast<uint32_t *>(itemDataTable + (DebugBadge * 0x28) + 0xC) = reinterpret_cast<uint32_t>(DebugBadgeMenuDescription);
   
-  // Change the icon for the small Supernova star from the Sapphire star to the Crystal star
-  *reinterpret_cast<uint8_t *>(ZubastarIconAddress1 + 0x3) = ZubastarIconValue;
-  *reinterpret_cast<uint8_t *>(ZubastarIconAddress2 + 0x3) = ZubastarIconValue;
-  
   // Change sell price for Trade Off
   *reinterpret_cast<uint16_t *>((itemDataTable + (TradeOff * 0x28)) + 0x1A) = 10;
   
@@ -1741,6 +1748,14 @@ void Mod::writeItemRandoAssemblyPatches()
   // Prevent certain textbox options from being selected
   patch::writeBranch(reinterpret_cast<void *>(PreventTextbox), reinterpret_cast<void *>(StartPreventTextboxOptions));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackPreventTextboxOptions), reinterpret_cast<void *>(PreventTextbox + 0x4));
+  
+  // Randomize the small stars used during Supernova
+  patch::writeBranch(reinterpret_cast<void *>(ZubastarIconAddress1), reinterpret_cast<void *>(StartRandomizeSupernovaSmallStars));
+  patch::writeBranch(reinterpret_cast<void *>(ZubastarIconAddress2), reinterpret_cast<void *>(StartRandomizeSupernovaSmallStars));
+  
+  // Adjust branches to be bl instead of b; should modify the patch function to allow for this instead
+  *reinterpret_cast<uint32_t *>(ZubastarIconAddress1) += 0x1;
+  *reinterpret_cast<uint32_t *>(ZubastarIconAddress2) += 0x1;
   
   // Enable Art Attack hitboxes if a specific badge is equipped
   enableArtAttackHitboxes();
