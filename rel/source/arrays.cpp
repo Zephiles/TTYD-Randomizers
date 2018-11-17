@@ -17,6 +17,45 @@ uint16_t LZMapArraySize = sizeof(PossibleLZMaps) / sizeof(PossibleLZMaps[0]);
 uint32_t PossibleChallengeMaps[] = { aji_02, aji_03, aji_05, aji_07, aji_11, aji_12, aji_13, aji_14, bom_00, bom_01, bom_02, bom_03, bom_04, dou_00, dou_02, dou_04, dou_05, dou_06, dou_07, dou_09, dou_10, eki_00, eki_03, eki_04, eki_05, eki_06, gon_01, gon_02, gon_03, gon_04, gon_05, gon_06, gon_07, gon_08, gon_09, gon_11, gon_12, gon_13, gor_00, gor_01, gor_02, gor_03, gor_04, gra_00, gra_01, gra_02, gra_03, gra_04, gra_05, gra_06, hei_00, hei_01, hei_02, hei_04, hei_06, hei_08, hei_10, hei_12, hei_13, hom_00, jin_00, jin_03, jin_04, jin_05, jin_06, jin_07, jin_08, jin_09, jin_10, jin_11, jon_00, las_01, las_02, las_03, las_04, las_05, las_06, las_07, las_09, las_11, las_12, las_13, las_14, las_15, las_16, las_17, las_18, las_19, las_20, las_22, las_24, las_25, las_26, las_28, las_29, las_30, moo_01, moo_02, moo_06, moo_07, mri_00, mri_01, mri_02, mri_03, mri_04, mri_05, mri_06, mri_07, mri_09, mri_10, mri_12, mri_13, mri_15, mri_16, mri_17, mri_19, mri_20, muj_00, muj_01, muj_02, muj_03, muj_04, muj_05, muj_12, nok_00, nok_01, pik_00, pik_01, pik_03, pik_04, rsh_00_c, rsh_02_c, rsh_03_c, rsh_04_c, rsh_05_a, rsh_06_a, tik_00, tik_01, tik_02, tik_03, tik_04, tik_05, tik_06, tik_07, tik_11, tik_12, tik_13, tik_15, tik_16, tik_17, tik_18, tik_19, tik_20, tik_21, tou_01, tou_02, tou_03, tou_04, tou_05, tou_06, tou_07, tou_08, tou_12, usu_00, usu_01, win_00, win_01, win_02, win_03, win_05 };
 uint16_t ChallengeMapArraySize = sizeof(PossibleChallengeMaps) / sizeof(PossibleChallengeMaps[0]);
 
+uint16_t EnemyIDArrayLifeShroomCheck[] = {
+  // Blooper
+  8,
+  
+  // Gold Fuzzy
+  20,
+  
+  // Vivian - Chapter 2
+  33,
+  
+  // Magnus 1.0
+  34,
+  
+  // Doopliss 2
+  79,
+  
+  // Crump - Chapter 5
+  99,
+  
+  // X-Nauts in Crump Chapter 5 fight
+  100,
+  
+  // Magnus 2.0
+  121,
+  
+  // Doopliss - Chapter 8 Shadow Sirens fight
+  135,
+  
+  // Bowser - Chapter 8
+  144,
+  
+  // Grodus
+  146,
+  
+  // Shadow Queen
+  148
+};
+uint8_t EnemyIDArrayLifeShroomCheckSize = sizeof(EnemyIDArrayLifeShroomCheck) / sizeof(EnemyIDArrayLifeShroomCheck[0]);
+
 // Set up array for GSWFs to turn on upon starting a new file with the Loading Zone randomizer/Challenge Mode
 uint16_t NewFile_GSWF_Array[] = {
   // Turn on GSWF(0) to skip shop tutorials
@@ -221,10 +260,10 @@ const char *HelpMenuArray[] = {
   "The current Score and Time are displayed on-screen.\nWhen the timer reaches 0, the game will state that\nthe time is up, and will give the options to either\ncontinue playing or to return to the title screen. The\nFinal Score will also be displayed, as well as where\neach of the points came from. The order of the\npoints are the same as the list prior. If you choose\nto continue playing, then the timer will reset to 1\nhour, but the Final Score will remain displayed. Both\nthe Score and the sources for the Score will still\nupdate, but the Final Score will remain unchanged.\n\nL + R can be pressed at anytime during gameplay to\ntoggle the display for where the points came from\n\nMost cutscenes are skipped or shortened",
   
   // Page 27
-  "Many maps from the standard Loading Zone\nrandomizer are excluded\n\nThe Debug Badge will never spawn\n\nCrystal stars and/or the Magical Map cannot be\nobtained within the first 5 minutes\n\nThe Pit cannot be accessed within the first 10 minutes\n\nBosses cannot be accessed within the first 20 minutes\n\nSaying No to the Shadow Queen will warp you to a\ndifferent room instead of resulting in a Game Over.\nHowever, doing so will set the Sequence to 405.",
+  "Many maps from the standard Loading Zone\nrandomizer are excluded\n\nThe Debug Badge will never spawn\n\nCrystal stars and/or the Magical Map cannot be\nobtained within the first 5 minutes\n\nThe Pit cannot be accessed within the first 10 minutes\n\nBosses cannot be accessed within the first 20 minutes\n\nThe Shadow Queen cannot be encountered within the\nlast 5 minutes",
   
   // Page 28
-  "Defeating the Shadow Queen will warp you to a\ndifferent room\n\nWhen a boss that does not require a specific\nSequence (such as the Atomic Boo) is defeated, you\nmust go to a different room in order for them to\nrespawn. Warping to the same room will not respawn\nthem; you must warp to a different room first.\n\nThe 50% chance to fight Rawk Hawk is now a 100%\nchance",
+  "Saying No to the Shadow Queen will warp you to a\ndifferent room instead of resulting in a Game Over.\nHowever, doing so will set the Sequence to 405.\n\nDefeating the Shadow Queen will warp you to a\ndifferent room\n\nWhen a boss that does not require a specific\nSequence (such as the Atomic Boo) is defeated, you\nmust go to a different room in order for them to\nrespawn. Warping to the same room will not respawn\nthem; you must warp to a different room first.\n\nThe 50% chance to fight Rawk Hawk is now a 100%\nchance",
   
   // Page 29
   "While on the File Select Screen, L + Y can be pressed\nto toggle a menu that displays the Final Scores from\nyour previous challenge runs. This menu can only be\nopened while using the Challenge Mode. The menu\ndisplays the scores in the order that they occured,\nso the first one on the list is the first run\ncompleted, etc. If you got a Game Over and then\nproceeded to start a new run, then that entry will\nbe marked with Reset instead of an actual score. In\nthe event that the scores exceed the total amount\non the page (currently supports up to 64 scores), then\nD-Pad Left/Right can be used to navigate to the\nother pages. It is important to note that the scores\nwill be cleared upon resetting the game, as resetting\nclears all of the game's memory."  

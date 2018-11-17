@@ -30,8 +30,10 @@ extern bool RandomizeCoins;
 extern int8_t EnemyHeldItemArrayCounter;
 extern bool RanAwayFromBattle;
 extern uint16_t EnemyHeldItemArray[8][8];
-extern uint32_t CrystalStarPointerAddress;
+extern uint8_t EnemyIDArrayLifeShroomCheckSize;
+extern uint16_t EnemyIDArrayLifeShroomCheck[];
 extern bool RandomizeGivenItem;
+extern uint32_t CrystalStarPointerAddress;
 
 extern "C" {
   void StartCrystalStarPointerWrite();
@@ -333,14 +335,45 @@ void manageEnemyHeldItemArray()
 }
 
 extern "C" {
-uint32_t assignEnemyHeldItem(void *OriginalEnemyHeldItemArray, uint32_t ArrayIndex)
+uint32_t assignEnemyHeldItem(void *CurrentEnemyPointer, void *OriginalEnemyHeldItemArray, uint32_t ArrayIndex)
 {
-  uint32_t NewItem = 0;
+  uint32_t NewItem;
   
-  // Make sure the item isn't an important item or the Debug Badge
-  while ((NewItem < GoldBar) || (NewItem == DebugBadge))
+  bool ExitLoop = false;
+  while (!ExitLoop)
   {
     NewItem = randomizeItem();
+    
+    if ((NewItem < GoldBar) || (NewItem == DebugBadge))
+    {
+      continue;
+    }
+    
+    if (NewItem == LifeShroom)
+    {
+      // Prevent certain bosses from holding a Life Shroom, as it can result in a softlock
+      uint32_t tempCurrentEnemyPointer = reinterpret_cast<uint32_t>(CurrentEnemyPointer);
+      uint32_t CurrentEnemyId = *reinterpret_cast<uint32_t *>(tempCurrentEnemyPointer + 0x8);
+      
+      uint32_t EnemyIDArraySize = EnemyIDArrayLifeShroomCheckSize; // Prevent EnemyIDArrayLifeShroomCheckSize from being loaded multiple times
+      bool SameId = false;
+      for (uint32_t i = 0; i < EnemyIDArraySize; i++)
+      {
+        if (EnemyIDArrayLifeShroomCheck[i] == CurrentEnemyId)
+        {
+          SameId = true;
+          break;
+        }
+      }
+      
+      // Get a new item if the current enemy is a boss that should not hold a Life Shroom
+      if (SameId)
+      {
+        continue;
+      }
+    }
+    
+    ExitLoop = true;
   }
   
   // Get current slot in the array to use

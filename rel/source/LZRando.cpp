@@ -180,6 +180,21 @@ void *bringPartnerOut()
   }
 }
 
+bool CheckForItemWarpToRoom(uint16_t Item)
+{
+  if (!LZRandoChallenge)
+  {
+    return false;
+  }
+  
+  if (ttyd::mario_pouch::pouchCheckItem(Item) == 0)
+  {
+    return false;
+  }
+  
+  return true;
+}
+
 void CheckMapForReloadChanges()
 {
   uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
@@ -466,6 +481,22 @@ void getRandomWarp()
         ttyd::swdrv::swByteSet(0, 361);
       }
     }
+    else if (managestrings::strcmp_NextMap("aji_02"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Elevator Key already
+      if (CheckForItemWarpToRoom(ElevatorKey2))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("aji_05"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Card Key already
+      if (CheckForItemWarpToRoom(CardKey1))
+      {
+        continue;
+      }
+    }
     else if (managestrings::strcmp_NextMap("aji_07"))
     {
       // Set the Loading Zone to be able to get the Cog if the player doesn't have it already
@@ -485,6 +516,22 @@ void getRandomWarp()
         
       // Prevent the loading zone from being changed
       ChangedLZ = true;
+    }
+    else if (managestrings::strcmp_NextMap("aji_11"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Card Key already
+      if (CheckForItemWarpToRoom(CardKey3))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("aji_12"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Card Key already
+      if (CheckForItemWarpToRoom(CardKey2))
+      {
+        continue;
+      }
     }
     else if (managestrings::strcmp_NextMap("aji_13"))
     {
@@ -538,13 +585,12 @@ void getRandomWarp()
         // Prevent the loading zone from being changed
         ChangedLZ = true;
       }
-      else if (SequencePosition < 320)
+      else
       {
-        // Prevent being able to get the Elevator Key more than once
-        if (ttyd::mario_pouch::pouchCheckItem(ElevatorKey1) > 0)
+        // Prevent the player from warping to this room if the challenge mode is in use and if they have the Elevator Key already
+        if (CheckForItemWarpToRoom(ElevatorKey1))
         {
-          // Adjust the Sequence to prevent the player from being able to get the key more than once
-          ttyd::swdrv::swByteSet(0, 320);
+          continue;
         }
       }
     }
@@ -696,6 +742,14 @@ void getRandomWarp()
         // Turn off GSWF(1775) so that the Moon Stone can spawn
         ttyd::swdrv::swClear(1775);
       }
+      else
+      {
+        // Warp to a different room if using the challenge mode
+        if (LZRandoChallenge)
+        {
+          continue;
+        }
+      }
     }
     else if (managestrings::strcmp_NextMap("hei_10"))
     {
@@ -725,21 +779,27 @@ void getRandomWarp()
         // Turn off GSWF(1774) so that the Sun Stone can spawn
         ttyd::swdrv::swClear(1774);
       }
+      else
+      {
+        // Warp to a different room if using the challenge mode
+        if (LZRandoChallenge)
+        {
+          continue;
+        }
+      }
     }
     else if (managestrings::strcmp_NextMap("hom_00"))
     {
       if (LZRandoChallenge)
       {
-        // Skip the cutscene with Doopliss if using the challenge mode
-        if (SequencePosition <= 310)
+        // Prevent the player from warping to this room if they have the Station Key already
+        if (ttyd::mario_pouch::pouchCheckItem(StationKey1) > 0)
         {
-          // Check if the player has gotten the Station Key
-          if (ttyd::mario_pouch::pouchCheckItem(StationKey1) > 0)
-          {
-            // Adjust the Sequence to prevent the player from getting multiple Station Keys
-            ttyd::swdrv::swByteSet(0, 311);
-          }
-          else
+          continue;
+        }
+        else
+        {
+          if (SequencePosition <= 310)
           {
             // Set the Sequence to 310 to prevent the cutscene from playing
             ttyd::swdrv::swByteSet(0, 310);
@@ -967,6 +1027,54 @@ void getRandomWarp()
         }
       }
     }
+    else if (managestrings::strcmp_NextMap("las_12"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Palace Key already
+      if (CheckForItemWarpToRoom(PalaceKey2))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("las_13"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Palace Key already
+      if (CheckForItemWarpToRoom(PalaceKey3))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("las_14"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Palace Key already
+      if (CheckForItemWarpToRoom(PalaceKey4))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("las_16"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Palace Key already
+      if (CheckForItemWarpToRoom(PalaceKey6))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("las_17"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Palace Key already
+      if (CheckForItemWarpToRoom(PalaceKey7))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("las_18"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Palace Key already
+      if (CheckForItemWarpToRoom(PalaceKey8))
+      {
+        continue;
+      }
+    }
     else if (managestrings::strcmp_NextMap("las_19"))
     {
       // Prevent warping to this room if using the challenge mode and the Sequence is under 390
@@ -1042,24 +1150,35 @@ void getRandomWarp()
     {
       if (SequencePosition <= 400)
       {
-        if (CheckChallengeModeTimerCutoff())
+        if (LZRandoChallenge)
         {
+          uint32_t tempTimerCount = TimerCount; // Prevent TimerCount from being loaded multiple times
+          
           // Get a new map if currently using the challenge mode and 20 minutes have not passed yet
-          continue;
-        }
-        else
-        {
-          // Allow the Shadow Queen to be fought if the Sequence is before or at 400
-          // Make sure a partner is out for the Shadow Queen
-          bringPartnerOut();
+          uint32_t TimerCount40Minutecutoff = ttyd::system::sysMsec2Frame(2400000); // 40 minutes
+          if (tempTimerCount >= TimerCount40Minutecutoff)
+          {
+            continue;
+          }
           
-          // Set the Sequence to 400 so that the Shadow Queen can be fought
-          ttyd::swdrv::swByteSet(0, 400);
-          managestrings::strcpy_NextBero("sekai_yami2");
-          
-          // Prevent the loading zone from being changed
-          ChangedLZ = true;
+          // Get a new map if there are less than 5 minutes left
+          uint32_t TimerCount5MinuteCutoff = ttyd::system::sysMsec2Frame(300000); // 5 minutes
+          if (tempTimerCount < TimerCount5MinuteCutoff)
+          {
+            continue;
+          }
         }
+        
+        // Allow the Shadow Queen to be fought if the Sequence is before or at 400
+        // Make sure a partner is out for the Shadow Queen
+        bringPartnerOut();
+        
+        // Set the Sequence to 400 so that the Shadow Queen can be fought
+        ttyd::swdrv::swByteSet(0, 400);
+        managestrings::strcpy_NextBero("sekai_yami2");
+        
+        // Prevent the loading zone from being changed
+        ChangedLZ = true;
       }
     }
     else if (managestrings::strcmp_NextMap("moo_00"))

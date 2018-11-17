@@ -5,11 +5,12 @@ StartWriteEnemyHeldItems:
 stwu %sp,-0x18(%sp)
 stmw %r29,0x8(%sp)
 mr %r29,%r3
+mr %r3,%r31 # CurrentEnemyPointer
 mr %r30,%r4
 mr %r31,%r5
 
-mr %r3,%r27 # OriginalEnemyHeldItemArray
-mr %r4,%r5 # ArrayIndex
+mr %r4,%r27 # OriginalEnemyHeldItemArray
+# r5 already contains ArrayIndex
 bl assignEnemyHeldItem
 mr %r0,%r3
 
