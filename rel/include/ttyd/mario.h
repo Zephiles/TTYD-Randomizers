@@ -169,7 +169,7 @@ int8_t marioKeyOffChk();
 // marioFBattlePost
 // marioFBattlePrepare
 // marioChkCtrl
-// marioChkKey
+bool marioChkKey();
 // marioCheckMenuDisable
 // marioCaseEventValidChk
 // marioItemGetOk

@@ -1057,6 +1057,49 @@
 // 8016779C:winPartyInit2
 80167848:winPartyInit
 
+// win_main.o
+// 8017B0C4:unk_JP_US_PAL_58
+// 8017B2B0:unk_JP_US_PAL_59
+// 8017B330:unk_JP_US_PAL_60
+// 8017B350:unk_JP_US_PAL_61
+// 8017B5B0:winLectureCheck
+// 8017B60C:winLectureOn
+// 8017B670:winLectureKeyMask
+// 8017B84C:unk_JP_US_PAL_62
+// 8017B864:unk_JP_US_PAL_63
+// 8017B8D8:winIconSet
+// 8017BBCC:winIconGrayInit
+// 8017BFDC:winIconInit
+// 8017C158:winTexSet_x2
+// 8017C3F8:winTexInit_x2
+// 8017C6D0:winTexSetRot
+// 8017C9BC:unk_JP_US_PAL_64
+// 8017CC2C:winTexSet
+// 8017CEF0:winTexInit
+// 8017D068:winFontSetLabel
+// 8017D10C:unk_US_PAL_12
+// 8017D28C:winFontSetEdge
+// 8017D3B8:winFontSetR
+// 8017D52C:winFontSetPitch
+// 8017D6AC:winFontSet
+// 8017D7D0:winFontInit
+// 8017D7F0:winGhostDiaryChk
+// 8017D834:cam_r
+// 8017D8F8:unk_JP_US_PAL_65
+// 8017D91C:party_color
+// 8017D96C:famicom_check
+// 8017D9BC:itemUseFunc2
+// 8017D9E0:itemUseFunc
+// 8017DD14:winDispKoopa
+// 8017DF00:winDisp
+// 8017DF24:winMain
+// 8017EAEC:winOpenDisable
+// 8017EB08:winOpenEnable
+// 8017EB24:winCheck
+// 8017EB70:winReInit
+// 8017EB9C:winInit
+8017EBD4:winGetPtr
+
 // mario_cam.o
 // 801A86F0:marioCamZoomUpLevelMain
 // 801A89A0:marioCamZoomUp
@@ -1092,6 +1135,44 @@
 80200D28:countDownStart
 // 80200E14:countDownSaveReStart
 // 80200F40:countDownInit
+
+// winmgr.o
+// 8023976C:select_disp3_mario
+// 80239880:select_disp3_party
+// 80239980:select_disp3
+// 80239A00:select_main3
+// 80239AE8:select_disp2
+// 80239E10:select_disp_luigi
+// 8023A5F0:select_disp_mario
+// 8023B0E8:select_disp_party
+// 8023BC74:select_disp
+// 8023CA6C:select_main
+// 8023CF04:unk_JP_US_PAL_76
+// 8023CF0C:winMgrSelectDelete
+// 8023CF50:winMgrSelectOther
+// 8023D4C0:winMgrSelect
+// 8023D524:unk_US_PAL_15
+// 8023D59C:unk_JP_US_PAL_77
+// 8023D5E4:unk_JP_US_PAL_78
+// 8023D624:winMgrSelectEntry
+// 8023E53C:winMgrHelpDraw
+// 8023E9B8:winMgrHelpMain
+// 8023EAA0:winMgrHelpInit
+// 8023EAB4:winMgrGetPtr
+// 8023EAC8:winMgrSetPriority
+// 8023EAEC:winMgrSetSize
+8023EB1C:winMgrAction
+// 8023EB34:winMgrDelete
+// 8023EB50:winMgrCloseAutoDelete
+// 8023EB8C:winMgrClose
+// 8023EBBC:winMgrOpen
+// 8023EBF8:winMgrSetParam
+// 8023EC1C:winMgrEntry
+// 8023ECB8:winMgrSeq
+// 8023F1B0:winMgrMain
+// 8023F288:winMgrDisp
+// 8023F70C:winMgrReInit
+// 8023F740:winMgrInit
 
 // runtime.c
 802648BC:_savefpr_14

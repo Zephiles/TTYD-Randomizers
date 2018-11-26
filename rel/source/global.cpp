@@ -13,9 +13,10 @@ extern "C" {
   uint32_t seqMainAddress = r13 + 0x1860;
   uint32_t BattleAddressesStart = r13 + 0x1C70;
   // uint32_t AreaObjectsAddressesStart = 0x803D98A8;
-  // uint32_t NPCAddressesStart = r13 + 0x19A0;
+  uint32_t NPCAddressesStart = r13 + 0x19A0;
   uint32_t _mapEntAddress = r13 + 0x1740;
   uint32_t wp_fadedrv_Address = r13 + 0x1700;
+  uint32_t winMgrAddress = r13 + 0xC20;
 #elif defined TTYD_JP
   uint32_t r13 = 0x80417260;
   char *NextBero = reinterpret_cast<char *>(r13 + 0x1128);
@@ -24,9 +25,10 @@ extern "C" {
   uint32_t seqMainAddress = r13 + 0x1300;
   uint32_t BattleAddressesStart  = r13 + 0x1710;
   // uint32_t AreaObjectsAddressesStart = 0x803CA2D8;
-  // uint32_t NPCAddressesStart = r13 + 0x1448;
+  uint32_t NPCAddressesStart = r13 + 0x1448;
   uint32_t _mapEntAddress = r13 + 0x11E0;
   uint32_t wp_fadedrv_Address = r13 + 0x11A0;
+  uint32_t winMgrAddress = r13 + 0x6C0;
 #elif defined TTYD_EU
   uint32_t r13 = 0x80429760;
   char *NextBero = reinterpret_cast<char *>(r13 + 0x1768);
@@ -35,9 +37,10 @@ extern "C" {
   uint32_t seqMainAddress = r13 + 0x1940;
   uint32_t BattleAddressesStart  = r13 + 0x1D50;
   // uint32_t AreaObjectsAddressesStart = 0x803DA6F8;
-  // uint32_t NPCAddressesStart = r13 + 0x1A80;
+  uint32_t NPCAddressesStart = r13 + 0x1A80;
   uint32_t _mapEntAddress = r13 + 0x1820;
   uint32_t wp_fadedrv_Address = r13 + 0x17E0;
+  uint32_t winMgrAddress = r13 + 0xD00;
 #endif
 
 uint32_t GSWAddressesStart = r13 - 0x6F50;

@@ -1057,6 +1057,50 @@
 // 8016928C:winPartyInit2
 80169338:winPartyInit
 
+// win_main.o
+// 8017CB64:unk_JP_US_PAL_58
+// 8017CD50:unk_JP_US_PAL_59
+// 8017CDD0:unk_JP_US_PAL_60
+// 8017CDF0:unk_JP_US_PAL_61
+// 8017D050:winLectureCheck
+// 8017D0AC:winLectureOn
+// 8017D110:winLectureKeyMask
+// 8017D2EC:unk_JP_US_PAL_62
+// 8017D304:unk_JP_US_PAL_63
+// 8017D378:winIconSet
+// 8017D66C:winIconGrayInit
+// 8017DA7C:winIconInit
+// 8017DBF8:winTexSet_x2
+// 8017DE98:winTexInit_x2
+// 8017E170:winTexSetRot
+// 8017E45C:unk_JP_US_PAL_64
+// 8017E6CC:winTexSet
+// 8017E990:winTexInit
+// 8017EB08:winFontSetLabel
+// 8017EBAC:unk_US_PAL_12
+// 8017ED2C:winFontSetEdge
+// 8017EE58:zz_8017ee58_
+// 8017F0CC:winFontSetR
+// 8017F240:winFontSetPitch
+// 8017F3C0:winFontSet
+// 8017F4E4:winFontInit
+// 8017F504:winGhostDiaryChk
+// 8017F548:cam_r
+// 8017F60C:unk_JP_US_PAL_65
+// 8017F630:party_color
+// 8017F680:famicom_check
+// 8017F6D0:itemUseFunc2
+// 8017F6F4:itemUseFunc
+// 8017FA28:winDispKoopa
+// 8017FC14:winDisp
+// 8017FC38:winMain
+// 801807BC:winOpenDisable
+// 801807D8:winOpenEnable
+// 801807F4:winCheck
+// 80180840:winReInit
+// 8018086C:winInit
+801808A4:winGetPtr
+
 // mario_cam.o
 // 801AA3CC:marioCamZoomUpLevelMain
 // 801AA67C:marioCamZoomUp
@@ -1092,6 +1136,44 @@
 80204708:countDownStart
 // 802047F4:countDownSaveReStart
 // 80204920:countDownInit
+
+// winmgr.o
+// 8023D1FC:select_disp3_mario
+// 8023D310:select_disp3_party
+// 8023D410:select_disp3
+// 8023D490:select_main3
+// 8023D574:select_disp2
+// 8023D89C:select_disp_luigi
+// 8023E07C:select_disp_mario
+// 8023EB74:select_disp_party
+// 8023F700:select_disp
+// 802404F8:select_main
+// 802409CC:unk_JP_US_PAL_76
+// 802409D4:winMgrSelectDelete
+// 80240A18:winMgrSelectOther
+// 80240F88:winMgrSelect
+// 80240FEC:unk_US_PAL_15
+// 80241064:unk_JP_US_PAL_77
+// 802410AC:unk_JP_US_PAL_78
+// 8024111C:winMgrSelectEntry
+// 80242034:winMgrHelpDraw
+// 802424CC:winMgrHelpMain
+// 802425B0:winMgrHelpInit
+// 802425C4:winMgrGetPtr
+// 802425D8:winMgrSetPriority
+// 802425FC:winMgrSetSize
+8024262C:winMgrAction
+// 80242644:winMgrDelete
+// 80242660:winMgrCloseAutoDelete
+// 8024269C:winMgrClose
+// 802426CC:winMgrOpen
+// 80242708:winMgrSetParam
+// 8024272C:winMgrEntry
+// 802427C8:winMgrSeq
+// 80242CC0:winMgrMain
+// 80242D98:winMgrDisp
+// 8024321C:winMgrReInit
+// 80243250:winMgrInit
 
 // runtime.c
 8026849C:_savefpr_14

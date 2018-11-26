@@ -52,9 +52,10 @@ extern bool ClearCacheFlag;
 extern uint8_t JustDefeatedBoss;
 // extern uint32_t AreaObjectsAddressesStart;
 // extern uint32_t AreaLZsAddressesStart;
-// extern uint32_t NPCAddressesStart;
 extern uint32_t _mapEntAddress;
+extern uint32_t winMgrAddress;
 extern char *NextMap;
+extern uint32_t NPCAddressesStart;
 extern char *NewBero;
 extern char *NewMap;
 extern uint32_t wp_fadedrv_Address;
@@ -95,6 +96,8 @@ extern "C" {
   void BranchBackAdjustTitleScreenTimer();
   void StartFixEvtMapBlendSetFlagPartners();
   void BranchBackFixEvtMapBlendSetFlagPartners();
+  void StartFixShineBlockSystemLevel();
+  void BranchBackFixShineBlockSystemLevel();
 }
 
 namespace mod {
@@ -107,7 +110,6 @@ void InitRawkHawk()
   {
     ttyd::swdrv::swClear(Rawk_Hawk_GSWF_Array[i]);
   }
-  
   
   for (int i = 0; i < 4; i++)
   {
@@ -157,8 +159,16 @@ void *bringPartnerOut()
   
   if (!PartnerPointer)
   {
-    ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
-    uint8_t PreviousPartnerOut = player->prevFollowerId[0];
+    ttyd::mario::Player *MarioPointer = ttyd::mario::marioGetPtr();
+    
+    #ifdef TTYD_JP
+      // JP has the uint8_t in a different location?
+      uint32_t tempMarioPointer = reinterpret_cast<uint32_t>(MarioPointer);
+      uint8_t PreviousPartnerOut = *reinterpret_cast<uint8_t *>(tempMarioPointer + 0x243);
+    #else
+      ttyd::mario::Player *player = MarioPointer;
+      uint8_t PreviousPartnerOut = player->prevFollowerId[0];
+    #endif
     
     // Check if a partner was previously out
     if (PreviousPartnerOut != 0)
@@ -180,19 +190,61 @@ void *bringPartnerOut()
   }
 }
 
-bool CheckForItemWarpToRoom(uint16_t Item)
+bool CheckForSingleItemWarpToRoom(uint16_t Item)
 {
   if (!LZRandoChallenge)
   {
     return false;
   }
   
-  if (ttyd::mario_pouch::pouchCheckItem(Item) == 0)
+  if (ttyd::mario_pouch::pouchCheckItem(Item) > 0)
+  {
+    return true;
+  }
+  
+  return false;
+}
+
+bool CheckForMultipleItemsWarpToRoomGSWFs(const uint16_t GSWF_array[], uint32_t array_size)
+{
+  if (!LZRandoChallenge)
   {
     return false;
   }
   
-  return true;
+  uint32_t FoundGSWFs = 0;
+  
+  for (uint32_t i = 0; i < array_size; i++)
+  {
+    if (ttyd::swdrv::swGet(GSWF_array[i]))
+    {
+      FoundGSWFs++;
+    }
+  }
+  
+  if (FoundGSWFs == array_size)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool CheckForSingleItemWarpToRoomGSWF(uint16_t GSWF)
+{
+  if (!LZRandoChallenge)
+  {
+    return false;
+  }
+  
+  if (ttyd::swdrv::swGet(GSWF))
+  {
+    return true;
+  }
+  
+  return false;
 }
 
 void CheckMapForReloadChanges()
@@ -483,8 +535,27 @@ void getRandomWarp()
     }
     else if (managestrings::strcmp_NextMap("aji_02"))
     {
-      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Elevator Key already
-      if (CheckForItemWarpToRoom(ElevatorKey2))
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 2 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        4176,
+        4211 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("aji_03"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the main 3 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        4198,
+        4216,
+        5665 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
       {
         continue;
       }
@@ -492,7 +563,7 @@ void getRandomWarp()
     else if (managestrings::strcmp_NextMap("aji_05"))
     {
       // Prevent the player from warping to this room if the challenge mode is in use and if they have the Card Key already
-      if (CheckForItemWarpToRoom(CardKey1))
+      if (CheckForSingleItemWarpToRoomGSWF(4182))
       {
         continue;
       }
@@ -508,6 +579,11 @@ void getRandomWarp()
         // Prevent the loading zone from being changed
         ChangedLZ = true;
       }
+      else if (LZRandoChallenge)
+      {
+        // Prevent warping to this room if using the challenge mode and if the player already has the Cog
+        continue;
+      }
     }
     else if (managestrings::strcmp_NextMap("aji_08"))
     {
@@ -520,15 +596,20 @@ void getRandomWarp()
     else if (managestrings::strcmp_NextMap("aji_11"))
     {
       // Prevent the player from warping to this room if the challenge mode is in use and if they have the Card Key already
-      if (CheckForItemWarpToRoom(CardKey3))
+      if (CheckForSingleItemWarpToRoomGSWF(4180))
       {
         continue;
       }
     }
     else if (managestrings::strcmp_NextMap("aji_12"))
     {
-      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Card Key already
-      if (CheckForItemWarpToRoom(CardKey2))
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 2 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        4183,
+        4214 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
       {
         continue;
       }
@@ -547,6 +628,35 @@ void getRandomWarp()
         continue;
       }
     }
+    else if (managestrings::strcmp_NextMap("bom_00"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 2 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        3891,
+        5658 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("bom_01"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item in the room already
+      if (CheckForSingleItemWarpToRoomGSWF(5659))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("dou_00"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item in the room already
+      if (CheckForSingleItemWarpToRoomGSWF(2990))
+      {
+        continue;
+      }
+    }
     else if (managestrings::strcmp_NextMap("dou_07"))
     {
       // Only check if the player hasn't gotten the Boat Mode curse yet
@@ -554,7 +664,7 @@ void getRandomWarp()
       {
         if (SequencePosition != 246)
         {
-          // Automaticallt adjust the Sequence if the player talked to the chest but didn't fight the Embers
+          // Automatically adjust the Sequence if the player talked to the chest but didn't fight the Embers
           // Automatically adjust the Sequence if the Embers were defeated but the player did not get the key
           // Automatically adjust the Sequence if the player got the Black Key but didn't open the chest
           // if (ttyd::swdrv::swGet(2988) || ttyd::swdrv::swGet(2989) || ttyd::swdrv::swGet(2987))
@@ -564,6 +674,27 @@ void getRandomWarp()
             ttyd::swdrv::swByteSet(0, 246);
           }
         }
+      }
+      else
+      {
+        // Prevent the player from warping to this room if the challenge mode is in use and if they have the curse and the item in the room already
+        static const uint16_t Check_GSWF_Array[] = {
+          2980,
+          2985, };
+        uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+        
+        if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+        {
+          continue;
+        }
+      }
+    }
+    else if (managestrings::strcmp_NextMap("eki_00"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(3745))
+      {
+        continue;
       }
     }
     else if (managestrings::strcmp_NextMap("eki_05"))
@@ -585,13 +716,10 @@ void getRandomWarp()
         // Prevent the loading zone from being changed
         ChangedLZ = true;
       }
-      else
+      else if (CheckForSingleItemWarpToRoom(ElevatorKey1))
       {
         // Prevent the player from warping to this room if the challenge mode is in use and if they have the Elevator Key already
-        if (CheckForItemWarpToRoom(ElevatorKey1))
-        {
-          continue;
-        }
+        continue;
       }
     }
     else if (managestrings::strcmp_NextMap("gon_01"))
@@ -622,6 +750,29 @@ void getRandomWarp()
             // Only set the Sequence when using the challenge mode, as the cutscene will also set it
             ttyd::swdrv::swByteSet(0, 38);
           }
+        }
+      }
+    }
+    else if (managestrings::strcmp_NextMap("gon_05"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 3 items in the room already
+      // Must check for the Castle Key individually, as it spawns based on Sequence
+      static const uint16_t Check_GSWF_Array[] = {
+        1503,
+        5606 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        // Prevent warping to this room if the player cannot currently get the Castle Key
+        if (SequencePosition >= 53)
+        {
+          continue;
+        }
+        else if (CheckForSingleItemWarpToRoom(CastleKey3))
+        {
+          // Prevent warping to this room if the player has the Castle Key already
+          continue;
         }
       }
     }
@@ -662,6 +813,11 @@ void getRandomWarp()
           ttyd::swdrv::swClear(1494);
         }
       }
+      else if (LZRandoChallenge)
+      {
+        // Prevent warping to this room if the player has the curse already
+        continue;
+      }
     }
     else if (managestrings::strcmp_NextMap("gon_11"))
     {
@@ -681,7 +837,19 @@ void getRandomWarp()
     }
     else if (managestrings::strcmp_NextMap("gon_12"))
     {
-      if (SequencePosition < 50)
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 4 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        1507,
+        1508,
+        1509,
+        5540 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+      else if (SequencePosition < 50)
       {
         if (LZRandoChallenge)
         {
@@ -704,14 +872,76 @@ void getRandomWarp()
         }
       }
     }
+    else if (managestrings::strcmp_NextMap("gon_13"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Up Arrow already
+      if (CheckForSingleItemWarpToRoomGSWF(1510))
+      {
+        continue;
+      }
+    }
     else if (managestrings::strcmp_NextMap("gor_02"))
     {
       // Turn off GSWF(1207) to allow the player to get the follower again
       ttyd::swdrv::swClear(1207);
     }
+    else if (managestrings::strcmp_NextMap("gor_04"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 2 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        5583,
+        5584 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("gra_00"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Black Key already
+      if (CheckForSingleItemWarpToRoomGSWF(2091))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("gra_02"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 3 items in the room already
+      // Must check for the Shop Key individually, as it spawns based on Sequence
+      static const uint16_t Check_GSWF_Array[] = {
+        5631,
+        5632 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        // Prevent warping to this room if the player cannot currently get the Shop Key
+        if (SequencePosition >= 184)
+        {
+          continue;
+        }
+        else if (CheckForSingleItemWarpToRoom(ShopKey))
+        {
+          // Prevent warping to this room if the player has the Shop Key already
+          continue;
+        }
+      }
+    }
     else if (managestrings::strcmp_NextMap("gra_06"))
     {
-      if (LZRandoChallenge)
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 2 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        2090,
+        5633 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+      else if (LZRandoChallenge)
       {
         // Skip the intro cutscene if using the challenge mode
         if (SequencePosition < 193)
@@ -723,7 +953,18 @@ void getRandomWarp()
     }
     else if (managestrings::strcmp_NextMap("hei_00"))
     {
-      if (LZRandoChallenge)
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 3 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        1778,
+        1780,
+        5598 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+      else if (LZRandoChallenge)
       {
         // Skip the intro cutscene and the Hooktail flying cutscene if using the challenge mode
         if (SequencePosition < 24)
@@ -742,32 +983,43 @@ void getRandomWarp()
         // Turn off GSWF(1775) so that the Moon Stone can spawn
         ttyd::swdrv::swClear(1775);
       }
-      else
+      else if (LZRandoChallenge)
       {
         // Warp to a different room if using the challenge mode
-        if (LZRandoChallenge)
-        {
-          continue;
-        }
+        continue;
       }
     }
     else if (managestrings::strcmp_NextMap("hei_10"))
     {
-      if (CheckChallengeModeTimerCutoff())
+      if (SequencePosition <= 31)
       {
-        if (SequencePosition <= 31)
+        bool SunStoneCheck = ttyd::swdrv::swGet(1774);
+        bool MoonStoneCheck = ttyd::swdrv::swGet(1775);
+        
+        if (CheckChallengeModeTimerCutoff())
         {
-          // Check if the player has gotten the Sun Stone
-          if (ttyd::swdrv::swGet(1774))
+          // Check if the player has gotten the Sun Stone and the Moon Stone
+          if (SunStoneCheck && MoonStoneCheck)
           {
-            // Check if the player has gotten the Moon Stone
-            if (ttyd::swdrv::swGet(1775))
-            {
-              // Prevent being able to fight the Gold Fuzzy if the Sequence is set for it and the player has both stones
-              continue;
-            }
+            // Prevent being able to fight the Gold Fuzzy if the Sequence is set for it and the player has both stones
+            continue;
+          }
+          else if (CheckForSingleItemWarpToRoomGSWF(1796))
+          {
+            // Prevent warping to this room if the challenge mode is in use and the player has the item in the room already
+            continue;
           }
         }
+        else if (!SunStoneCheck && !MoonStoneCheck && CheckForSingleItemWarpToRoomGSWF(1796))
+        {
+          // Prevent warping to this room if the challenge mode is in use, the player does not have both stones, and the player has the item in the room already
+          continue;
+        }
+      }
+      else if (CheckForSingleItemWarpToRoomGSWF(1796))
+      {
+        // Prevent warping to this room if the challenge mode is in use and the player has the item in the room already
+        continue;
       }
     }
     else if (managestrings::strcmp_NextMap("hei_12"))
@@ -779,13 +1031,10 @@ void getRandomWarp()
         // Turn off GSWF(1774) so that the Sun Stone can spawn
         ttyd::swdrv::swClear(1774);
       }
-      else
+      else if (LZRandoChallenge)
       {
         // Warp to a different room if using the challenge mode
-        if (LZRandoChallenge)
-        {
-          continue;
-        }
+        continue;
       }
     }
     else if (managestrings::strcmp_NextMap("hom_00"))
@@ -797,21 +1046,22 @@ void getRandomWarp()
         {
           continue;
         }
-        else
+        else if (SequencePosition <= 310)
         {
-          if (SequencePosition <= 310)
-          {
-            // Set the Sequence to 310 to prevent the cutscene from playing
-            ttyd::swdrv::swByteSet(0, 310);
-          }
+          // Set the Sequence to 310 to prevent the cutscene from playing
+          ttyd::swdrv::swByteSet(0, 310);
         }
       }
     }
     else if (managestrings::strcmp_NextMap("jin_00"))
     {
+      uint32_t HammerLevelCheck = ttyd::mario_pouch::pouchGetHammerLv();
+      bool SteepleKeyCheck = ttyd::mario_pouch::pouchCheckItem(SteepleKey1) == 0;
+      bool tempLZRandoChallenge = LZRandoChallenge; // Prevent LZRandoChallenge from being loaded multiple times
+
       if (CheckChallengeModeTimerCutoff())
       {
-        if (ttyd::mario_pouch::pouchGetHammerLv() > 1)
+        if (HammerLevelCheck > 1)
         {
           // Get a new map if currently using the challenge mode, 20 minutes have not passed, and the player has a Hammer upgrade
           continue;
@@ -819,11 +1069,11 @@ void getRandomWarp()
         else if (SequencePosition < 198)
         {
           // Check if the player has the Steeple Key
-          if (ttyd::mario_pouch::pouchCheckItem(SteepleKey1) == 0)
+          if (SteepleKeyCheck)
           {
             // Change the loading zone to allow the player to get the Steeple Key
             // Only change the loading zone if using the challenge mode
-            if (LZRandoChallenge)
+            if (tempLZRandoChallenge)
             {
               managestrings::strcpy_NextBero("e_bero_3");
               
@@ -840,19 +1090,27 @@ void getRandomWarp()
           }
           else
           {
-            // Set the Sequence to 198 to prevent the player from getting another Steeple Key
-            ttyd::swdrv::swByteSet(0, 198);
+            if (tempLZRandoChallenge)
+            {
+              // Prevent warping to this room if the player has the Steeple Key already and if they cannot currently fight the Atomic Boo
+              continue;
+            }
+            else
+            {
+              // Set the Sequence to 198 to prevent the player from getting another Steeple Key
+              ttyd::swdrv::swByteSet(0, 198);
+            }
           }
         }
       }
       else if (SequencePosition < 198)
       {
         // Check if the player has the Steeple Key
-        if (ttyd::mario_pouch::pouchCheckItem(SteepleKey1) == 0)
+        if (SteepleKeyCheck)
         {
           // Change the loading zone to allow the player to get the Steeple Key
           // Only change the loading zone if using the challenge mode
-          if (LZRandoChallenge)
+          if (tempLZRandoChallenge)
           {
             managestrings::strcpy_NextBero("e_bero_3");
             
@@ -860,7 +1118,7 @@ void getRandomWarp()
             ChangedLZ = true;
           }
           
-          if (LZRandoChallenge && (SequencePosition < 194))
+          if (tempLZRandoChallenge && (SequencePosition < 194))
           {
             // Adjust the Sequence to skip the intro cutscene if necessary
             // Set the Sequence to 194 to prevent the cutscene from playing
@@ -869,13 +1127,32 @@ void getRandomWarp()
         }
         else
         {
-          // Set the Sequence to 198 to prevent the player from getting another Steeple Key
-          ttyd::swdrv::swByteSet(0, 198);
+          if (tempLZRandoChallenge)
+          {
+            // Prevent warping to this room if the player has the Steeple Key already and if they cannot currently fight the Atomic Boo
+            if (HammerLevelCheck <= 1)
+            {
+              continue;
+            }
+          }
+          else
+          {
+            // Set the Sequence to 198 to prevent the player from getting another Steeple Key
+            ttyd::swdrv::swByteSet(0, 198);
+          }
         }
       }
     }
+    else if (managestrings::strcmp_NextMap("jin_03"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(5634))
+      {
+        continue;
+      }
+    }
     else if (managestrings::strcmp_NextMap("jin_04"))
-    { 
+    {
       // Check if the sequence is before or at Doopliss 2
       if (SequencePosition <= 210)
       {
@@ -917,6 +1194,65 @@ void getRandomWarp()
             ttyd::swdrv::swByteSet(0, 210);
           }
         }
+      }
+    }
+    else if (managestrings::strcmp_NextMap("jin_05"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 4 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        2235,
+        2237,
+        5549,
+        5635 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("jin_06"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(2238))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("jin_07"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already and if they currently cannot open the Boo's Chest
+      if ((SequencePosition > 195) && CheckForSingleItemWarpToRoomGSWF(5636))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("jin_08"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 4 items in the room already and if they cannot currently get the letter from the chest
+      // Must check for the letter individually, as it spawns based on Sequence
+      static const uint16_t Check_GSWF_Array[] = {
+        2230,
+        2239,
+        2240,
+        5637 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        // Prevent warping to this room if the player cannot currently get the letter
+        if (SequencePosition >= 209)
+        {
+          continue;
+        }
+      }
+    }
+    else if (managestrings::strcmp_NextMap("jin_11"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(5551))
+      {
+        continue;
       }
     }
     else if (managestrings::strcmp_NextMap("jon_00"))
@@ -1027,10 +1363,24 @@ void getRandomWarp()
         }
       }
     }
+    else if (managestrings::strcmp_NextMap("las_11"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use, both blocks are smashed, and if they have the Palace Key already
+      static const uint16_t Check_GSWF_Array[] = {
+        4339,
+        4340,
+        4362 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+    }
     else if (managestrings::strcmp_NextMap("las_12"))
     {
       // Prevent the player from warping to this room if the challenge mode is in use and if they have the Palace Key already
-      if (CheckForItemWarpToRoom(PalaceKey2))
+      if (CheckForSingleItemWarpToRoomGSWF(4363))
       {
         continue;
       }
@@ -1038,7 +1388,7 @@ void getRandomWarp()
     else if (managestrings::strcmp_NextMap("las_13"))
     {
       // Prevent the player from warping to this room if the challenge mode is in use and if they have the Palace Key already
-      if (CheckForItemWarpToRoom(PalaceKey3))
+      if (CheckForSingleItemWarpToRoomGSWF(4364))
       {
         continue;
       }
@@ -1046,7 +1396,21 @@ void getRandomWarp()
     else if (managestrings::strcmp_NextMap("las_14"))
     {
       // Prevent the player from warping to this room if the challenge mode is in use and if they have the Palace Key already
-      if (CheckForItemWarpToRoom(PalaceKey4))
+      if (CheckForSingleItemWarpToRoomGSWF(4365))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("las_15"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use, both blocks are smashed, and if they have the Palace Key already
+      static const uint16_t Check_GSWF_Array[] = {
+        4345,
+        4346,
+        4366 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
       {
         continue;
       }
@@ -1054,7 +1418,7 @@ void getRandomWarp()
     else if (managestrings::strcmp_NextMap("las_16"))
     {
       // Prevent the player from warping to this room if the challenge mode is in use and if they have the Palace Key already
-      if (CheckForItemWarpToRoom(PalaceKey6))
+      if (CheckForSingleItemWarpToRoomGSWF(4367))
       {
         continue;
       }
@@ -1062,7 +1426,7 @@ void getRandomWarp()
     else if (managestrings::strcmp_NextMap("las_17"))
     {
       // Prevent the player from warping to this room if the challenge mode is in use and if they have the Palace Key already
-      if (CheckForItemWarpToRoom(PalaceKey7))
+      if (CheckForSingleItemWarpToRoomGSWF(4368))
       {
         continue;
       }
@@ -1070,7 +1434,7 @@ void getRandomWarp()
     else if (managestrings::strcmp_NextMap("las_18"))
     {
       // Prevent the player from warping to this room if the challenge mode is in use and if they have the Palace Key already
-      if (CheckForItemWarpToRoom(PalaceKey8))
+      if (CheckForSingleItemWarpToRoomGSWF(4369))
       {
         continue;
       }
@@ -1181,6 +1545,19 @@ void getRandomWarp()
         ChangedLZ = true;
       }
     }
+    else if (managestrings::strcmp_NextMap("las_30"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 2 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        4393,
+        4394 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+    }
     else if (managestrings::strcmp_NextMap("moo_00"))
     {
       // Skip the intro cutscene
@@ -1193,6 +1570,32 @@ void getRandomWarp()
     }
     else if (managestrings::strcmp_NextMap("mri_00"))
     {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already and if they already have a follower
+      if (CheckForSingleItemWarpToRoomGSWF(2825))
+      {
+        uint32_t PartnerPointer = reinterpret_cast<uint32_t>(getPartnerPointer());
+        if (!PartnerPointer)
+        {
+          ttyd::mario::Player *MarioPointer = ttyd::mario::marioGetPtr();
+          
+          #ifdef TTYD_JP
+            // JP has the uint8_t in a different location?
+            uint32_t tempMarioPointer = reinterpret_cast<uint32_t>(MarioPointer);
+            uint8_t PreviousPartnerOut = *reinterpret_cast<uint8_t *>(tempMarioPointer + 0x243);
+          #else
+            ttyd::mario::Player *player = MarioPointer;
+            uint8_t PreviousPartnerOut = player->prevFollowerId[0];
+          #endif
+          
+          // Check if a partner was previously out
+          if (PreviousPartnerOut != 0)
+          {
+            // A partner was previously out, so dont warp to this room
+            continue;
+          }
+        }
+      }
+      
       // Turn off GSWF(2826) to allow the player to get the follower again
       ttyd::swdrv::swClear(2826);
     }
@@ -1219,13 +1622,114 @@ void getRandomWarp()
         }
       }
     }
+    else if (managestrings::strcmp_NextMap("mri_02"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(5612))
+      {
+        continue;
+      }
+    }
     else if (managestrings::strcmp_NextMap("mri_03"))
     {
-      // Skip the Dried Shroom cutscene with Petuni if using the challenge mode
+      // Prevent warping to this room if the challenge mode is in use, the player has gotten the item in the room already, and if the player does not have either the Red Key nor the Blue Key
+      if (CheckForSingleItemWarpToRoomGSWF(5613))
+      {
+        if ((ttyd::mario_pouch::pouchCheckItem(RedKey) == 0) && 
+          (ttyd::mario_pouch::pouchCheckItem(BlueKey) == 0))
+        {
+          continue;
+        }
+      }
+      
       if (LZRandoChallenge && (SequencePosition == 98))
       {
+        // Skip the Dried Shroom cutscene with Petuni if using the challenge mode
         // Set the Sequence to 100 to prevent the cutscene from playing
         ttyd::swdrv::swByteSet(0, 100);
+      }
+    }
+    else if (managestrings::strcmp_NextMap("mri_04"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 2 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        2837,
+        2839 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("mri_05"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 2 items in the room already and if enemies are no longer spawning in the room
+      static const uint16_t Check_GSWF_Array[] = {
+        2844,
+        5542 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        if (SequencePosition >= 114)
+        {
+          continue;
+        }
+      }
+    }
+    else if (managestrings::strcmp_NextMap("mri_09"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 3 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        2852,
+        2853,
+        5543 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("mri_10"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the Super Boots already
+      if (CheckForSingleItemWarpToRoomGSWF(2854))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("mri_15"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(5616))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("mri_17"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already and if they have already broken the floor panel
+      static const uint16_t Check_GSWF_Array[] = {
+        2871,
+        5617 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("mri_20"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item in the room already and if enemies are no longer spawning in the room
+      if (CheckForSingleItemWarpToRoomGSWF(2875))
+      {
+        if (SequencePosition >= 114)
+        {
+          continue;
+        }
       }
     }
     else if (managestrings::strcmp_NextMap("muj_00"))
@@ -1299,6 +1803,39 @@ void getRandomWarp()
         }
       }
     }
+    else if (managestrings::strcmp_NextMap("rsh_00_c"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(5648))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("rsh_02_c"))
+    {
+      // Prevent warping to this room if the challenge mode is in use and the player has the 3 items already and if they cannot currently use the bed
+      static const uint16_t Check_GSWF_Array[] = {
+        3462,
+        5559,
+        5649 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        if (SequencePosition < 283)
+        {
+          continue;
+        }
+      }
+    }
+    else if (managestrings::strcmp_NextMap("rsh_04_c"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(5652))
+      {
+        continue;
+      }
+    }
     else if (managestrings::strcmp_NextMap("rsh_05_a"))
     {
       // The game will crash if the player enters this room with the Sequence being greater than 338
@@ -1345,6 +1882,17 @@ void getRandomWarp()
     }
     else if (managestrings::strcmp_NextMap("tik_03"))
     {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 2 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        1356,
+        5590 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+      
       // Turn on GSWF(1334) to have the entrances revealed already
       ttyd::swdrv::swSet(1334);
     }
@@ -1354,6 +1902,35 @@ void getRandomWarp()
       {
         // Set the Sequence to 16 to prevent the cutscene from playing
         ttyd::swdrv::swByteSet(0, 16);
+      }
+    }
+    else if (managestrings::strcmp_NextMap("tik_06"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(5593))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("tik_13"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(5596))
+      {
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("tik_19"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already and if they have the curse already
+      static const uint16_t Check_GSWF_Array[] = {
+        1352,
+        5597 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
       }
     }
     else if (managestrings::strcmp_NextMap("tou_01"))
@@ -1376,6 +1953,14 @@ void getRandomWarp()
           // Set the Sequence to 127 to prevent the intro cutscene from playing
           ttyd::swdrv::swByteSet(0, 127);
         }
+      }
+    }
+    else if (managestrings::strcmp_NextMap("tou_02"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(5623))
+      {
+        continue;
       }
     }
     else if (managestrings::strcmp_NextMap("tou_03"))
@@ -1472,13 +2057,29 @@ void getRandomWarp()
     }
     else if (managestrings::strcmp_NextMap("tou_04"))
     {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(2520))
+      {
+        continue;
+      }
+      
       // Turn off GSWF(2384) and GSWF(2385) to prevent the pipe cutscenes from playing
       ttyd::swdrv::swClear(2384);
       ttyd::swdrv::swClear(2385);
     }
     else if (managestrings::strcmp_NextMap("tou_05"))
     {
-      if (LZRandoChallenge)
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 2 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        2508,
+        5624 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+      else if (LZRandoChallenge)
       {
         // Adjust the Sequence to skip the cutscene of signing up to be a fighter if using the challenge mode
         if (SequencePosition < 130)
@@ -1490,6 +2091,25 @@ void getRandomWarp()
     }
     else if (managestrings::strcmp_NextMap("tou_06"))
     {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 4 items in the room already and if they are not currently doing the trouble for the Battle Trunks
+      static const uint16_t Check_GSWF_Array[] = {
+        2521,
+        2523,
+        5547,
+        5626 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        uint32_t CurrentTrouble = ttyd::swdrv::swByteGet(1420); // GSW(1420)
+        const uint32_t JoleneTroubleBattleTrunks = 13;
+        
+        if (CurrentTrouble != JoleneTroubleBattleTrunks)
+        {
+          continue;
+        }
+      }
+      
       if (LZRandoChallenge)
       {
         // Adjust the Sequence to skip the Mowz cutscene if using the challenge mode
@@ -1546,6 +2166,14 @@ void getRandomWarp()
       
       // Turn off GSWF(2389) to prevent winning coins/going down a rank
       ttyd::swdrv::swClear(2389);
+    }
+    else if (managestrings::strcmp_NextMap("tou_12"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(5627))
+      {
+        continue;
+      }
     }
     else if (managestrings::strcmp_NextMap("usu_00"))
     {
@@ -1618,6 +2246,19 @@ void getRandomWarp()
         }
       }
     }
+    else if (managestrings::strcmp_NextMap("win_05"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 2 items in the room already
+      static const uint16_t Check_GSWF_Array[] = {
+        2684,
+        5611 };
+      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
+      
+      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      {
+        continue;
+      }
+    }
     
     ConfirmNewMap = true;
   }
@@ -1643,7 +2284,7 @@ bool CheckIfValidLoadingZone(char *CurrentBero)
   
   if (managestrings::strcmp_NextMap("aji_13"))
   {
-    const char *LoadingZones[] = {
+    static const char *LoadingZones[] = {
       "dokan_6",
       "dokan_7",
       "dokan_8",
@@ -1658,7 +2299,7 @@ bool CheckIfValidLoadingZone(char *CurrentBero)
   }
   else if (managestrings::strcmp_NextMap("gor_03"))
   {
-    const char *LoadingZones[] = {
+    static const char *LoadingZones[] = {
       "s_bero",
       "A_dokan_02" };
     uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
@@ -1670,7 +2311,7 @@ bool CheckIfValidLoadingZone(char *CurrentBero)
   }
   else if (managestrings::strcmp_NextMap("gra_04"))
   {
-    const char *LoadingZones[] = {
+    static const char *LoadingZones[] = {
       "w_bero_1",
       "w_bero_2" };
     uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
@@ -1682,7 +2323,7 @@ bool CheckIfValidLoadingZone(char *CurrentBero)
   }
   else if (managestrings::strcmp_NextMap("gra_05"))
   {
-    const char *LoadingZones[] = {
+    static const char *LoadingZones[] = {
       "ana_1",
       "ana_2",
       "A_ana_1",
@@ -1699,7 +2340,7 @@ bool CheckIfValidLoadingZone(char *CurrentBero)
     if (SequencePosition < 390)
     {
       // Lower part of the room is not loaded
-      const char *LoadingZones[] = {
+      static const char *LoadingZones[] = {
         "n_bero",
         "e_bero_2" };
       uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
@@ -1715,7 +2356,7 @@ bool CheckIfValidLoadingZone(char *CurrentBero)
     if (SequencePosition < 390)
     {
       // Lower part of the room is not loaded
-      const char *LoadingZones[] = {
+      static const char *LoadingZones[] = {
         "n_bero",
         "e_bero_2" };
       uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
@@ -1731,7 +2372,7 @@ bool CheckIfValidLoadingZone(char *CurrentBero)
     if (SequencePosition < 390)
     {
       // Lower part of the room is not loaded
-      const char *LoadingZones[] = {
+      static const char *LoadingZones[] = {
         "n_bero_2",
         "n_bero_1",
         "e_bero_2" };
@@ -1748,7 +2389,7 @@ bool CheckIfValidLoadingZone(char *CurrentBero)
     if (SequencePosition < 390)
     {
       // Lower part of the room is not loaded
-      const char *LoadingZones[] = {
+      static const char *LoadingZones[] = {
         "n_bero_1",
         "e_bero_2" };
       uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
@@ -1838,7 +2479,7 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
       }
       else if (managestrings::strcmp_NextMap("dou_03"))
       {
-        const char *LoadingZones[] = {
+        static const char *LoadingZones[] = {
           "w_bero_1",
           "e_bero_2",
           "s_bero" };
@@ -1858,7 +2499,7 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
       }
       else if (managestrings::strcmp_NextMap("dou_09"))
       {
-        const char *LoadingZones[] = {
+        static const char *LoadingZones[] = {
           "e_bero_1",
           "n_bero" };
         uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
@@ -1870,7 +2511,7 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
       }
       else if (managestrings::strcmp_NextMap("dou_10"))
       {
-        const char *LoadingZones[] = {
+        static const char *LoadingZones[] = {
           "w_bero_1",
           "e_bero" };
         uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
@@ -1889,7 +2530,7 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
       }
       else if (managestrings::strcmp_NextMap("dou_12"))
       {
-        const char *LoadingZones[] = {
+        static const char *LoadingZones[] = {
           "w_bero_1",
           "e_bero_1" };
         uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
@@ -1908,7 +2549,7 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
       }
       else if (managestrings::strcmp_NextMap("tik_15"))
       {
-        const char *LoadingZones[] = {
+        static const char *LoadingZones[] = {
           "w_bero_1",
           "e_bero" };
         uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
@@ -1920,7 +2561,7 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
       }
       else if (managestrings::strcmp_NextMap("tik_16"))
       {
-        const char *LoadingZones[] = {
+        static const char *LoadingZones[] = {
           "w_bero_1",
           "e_bero_1" };
         uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
@@ -1932,7 +2573,7 @@ uint32_t Mod::getRandomLZ(void *scriptContext, uint32_t waitMode)
       }
       else if (managestrings::strcmp_NextMap("tik_17"))
       {
-        const char *LoadingZones[] = {
+        static const char *LoadingZones[] = {
           "w_bero_1",
           "e_bero_1" };
         uint32_t LoadingZoneArraySize = sizeof(LoadingZones) / sizeof(LoadingZones[0]);
@@ -2276,6 +2917,7 @@ void specificMapEdits()
       const uint32_t gra_REL_ID = 0xA;
       const uint32_t jin_REL_ID = 0xD;
       const uint32_t las_REL_ID = 0x10;
+      const uint32_t tik_REL_ID = 0x18;
       const uint32_t usu_REL_ID = 0x1B;
       uint32_t eki04_init_script_offset = 0xE5B8;
       uint32_t gra_party_kill_script_offset = 0x7F70;
@@ -2283,12 +2925,14 @@ void specificMapEdits()
       uint32_t jin06_init_script_offset = 0x12100;
       uint32_t las29_sekaiyami2_script_offset = 0x34D94;
       uint32_t las29_game_over_SQ_on_no_address_offset = 0x130C;
+      uint32_t tik01_init_script_offset = 0x14A98;
       uint32_t usu_party_kill_script_offset = 0x16F40;
     #elif defined TTYD_JP
       const uint32_t eki_REL_ID = 0x7;
       const uint32_t gra_REL_ID = 0xB;
       const uint32_t jin_REL_ID = 0xE;
       const uint32_t las_REL_ID = 0x11;
+      const uint32_t tik_REL_ID = 0x1A;
       const uint32_t usu_REL_ID = 0x1D;
       uint32_t eki04_init_script_offset = 0xE5A8;
       uint32_t gra_party_kill_script_offset = 0x7E40;
@@ -2296,12 +2940,14 @@ void specificMapEdits()
       uint32_t jin06_init_script_offset = 0x11FD0;
       uint32_t las29_sekaiyami2_script_offset = 0x34D14;
       uint32_t las29_game_over_SQ_on_no_address_offset = 0x1378;
+      uint32_t tik01_init_script_offset = 0x14A00;
       uint32_t usu_party_kill_script_offset = 0x16BF0;
     #elif defined TTYD_EU
       const uint32_t eki_REL_ID = 0x7;
       const uint32_t gra_REL_ID = 0xB;
       const uint32_t jin_REL_ID = 0xE;
       const uint32_t las_REL_ID = 0x11;
+      const uint32_t tik_REL_ID = 0x1A;
       const uint32_t usu_REL_ID = 0x1E;
       uint32_t eki04_init_script_offset = 0xE5B8;
       uint32_t gra_party_kill_script_offset = 0x7F90;
@@ -2309,6 +2955,7 @@ void specificMapEdits()
       uint32_t jin06_init_script_offset = 0x12100;
       uint32_t las29_sekaiyami2_script_offset = 0x34D94;
       uint32_t las29_game_over_SQ_on_no_address_offset = 0x130C;
+      uint32_t tik01_init_script_offset = 0x14A98;
       uint32_t usu_party_kill_script_offset = 0x16F40;
     #endif
     
@@ -2372,6 +3019,17 @@ void specificMapEdits()
             *reinterpret_cast<uint32_t *>(NewSeqAddress + 0x8) = static_cast<uint32_t>(MapChange);
             *reinterpret_cast<uint32_t *>(NewSeqAddress + 0xC) = reinterpret_cast<uint32_t>(tempNewMap);
             *reinterpret_cast<uint32_t *>(NewSeqAddress + 0x10) = reinterpret_cast<uint32_t>(tempNewBero);
+          }
+          break;
+        }
+        case tik_REL_ID:
+        {
+          // Make sure the challenge mode is currently in use and the current map is tik_01
+          if (LZRandoChallenge && managestrings::strcmp_NextMap("tik_01"))
+          {
+            // Prevent the forced Goomba fight from occuring
+            nopInstructionsInREL(reinterpret_cast<void *>(
+              REL_Pointer + tik01_init_script_offset + 0x314), 0x4);
           }
           break;
         }
@@ -2462,6 +3120,8 @@ void reloadScreen()
   ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
   const uint16_t ReceivingItem = 15;
   
+  uint32_t SystemLevel = ttyd::mariost::marioStGetSystemLevel();
+  
   ttyd::seqdrv::SeqIndex NextSeq = ttyd::seqdrv::seqGetNextSeq();
   ttyd::seqdrv::SeqIndex Game = ttyd::seqdrv::SeqIndex::kGame;
   ttyd::seqdrv::SeqIndex MapChange = ttyd::seqdrv::SeqIndex::kMapChange;
@@ -2490,6 +3150,19 @@ void reloadScreen()
     {
       // Only allow if not currently reloading the room already
       return;
+    }
+    
+    // Prevent reloading the room if currently using an item in the pause menu
+    if (SystemLevel == 15)
+    {
+      uint32_t tempWinMgrAddress = *reinterpret_cast<uint32_t *>(winMgrAddress);
+      tempWinMgrAddress = *reinterpret_cast<uint32_t *>(tempWinMgrAddress + 0x4);
+      uint32_t CurrentAction = *reinterpret_cast<uint32_t *>(tempWinMgrAddress + 0xCC);
+      
+      if ((CurrentAction & ((1 << 0) | (1 << 1))) == 3) // Check if the 0 and 1 bits are on
+      {
+        return;
+      }
     }
     
     // Prevent reloading the room if the player is currently in a room with a boss. This prevents the player from repeatedly killing the boss for SP and/or points.
@@ -2614,6 +3287,41 @@ void reloadScreen()
       }
     }
     
+    // Prevent reloading if one of the fights with the fuzzies in hei_08 or hei_12 is about to start
+    // The code is exactly the same for both of these rooms
+    if (managestrings::strcmp_NextMap("hei_08"))
+    {
+      // Make sure the player is not in the pause menu and currently does not have control
+      if ((SystemLevel != 15) && !ttyd::mario::marioChkKey())
+      {
+        // Prevent reloading if the fuzzy has landed on the ground
+        uint32_t tempNPCAddressesStart = *reinterpret_cast<uint32_t *>(NPCAddressesStart);
+        float FuzzyCoordinateY = *reinterpret_cast<float *>(tempNPCAddressesStart + 0x90);
+        
+        if (FuzzyCoordinateY <= 0)
+        {
+          // The fuzzy has landed, so prevent being able to reload the room
+          return;
+        }
+      }
+    }
+    else if (managestrings::strcmp_NextMap("hei_12"))
+    {
+      // Make sure the player is not in the pause menu and currently does not have control
+      if ((SystemLevel != 15) && !ttyd::mario::marioChkKey())
+      {
+        // Prevent reloading if the fuzzy has landed on the ground
+        uint32_t tempNPCAddressesStart = *reinterpret_cast<uint32_t *>(NPCAddressesStart);
+        float FuzzyCoordinateY = *reinterpret_cast<float *>(tempNPCAddressesStart + 0x90);
+        
+        if (FuzzyCoordinateY <= 0) // The value can sometimes go negative, so checking for <= is necessary
+        {
+          // The fuzzy has landed, so prevent being able to reload the room
+          return;
+        }
+      }
+    }
+    
     // Not in the pause menu
     // A separate address for NextBero is needed, as the original value will be cleared during the reloading process
     // The game will crash if NextMap is used directly in seqSetSeq, so a separate address must be used instead
@@ -2632,7 +3340,6 @@ void reloadScreen()
     // Reset the camera - mainly for the black bars at the top and bottom of the screen
     *reinterpret_cast<uint16_t *>(CameraPointer) &= ~((1 << 8) | (1 << 9)); // Turn off the 8 and 9 bits
     
-    uint32_t SystemLevel = ttyd::mariost::marioStGetSystemLevel();
     if (SystemLevel == 0)
     {
       return;
@@ -2817,7 +3524,7 @@ uint32_t getCurseReturnValue(uint32_t pouchCheckItem, const char *CheckMapArray[
 extern "C" {
 uint32_t enablePaperTubeModes(uint32_t pouchCheckItem)
 {
-  const char *CheckMapArray[] = {
+  static const char *CheckMapArray[] = {
     "aji_13",
     "usu_01",
     "jin_05",
@@ -2834,7 +3541,7 @@ uint32_t enablePaperTubeModes(uint32_t pouchCheckItem)
 extern "C" {
 uint32_t enableBoatMode(uint32_t pouchCheckItem)
 {
-  const char *CheckMapArray[] = {
+  static const char *CheckMapArray[] = {
     "tik_20",
     "dou_05",
     "dou_11" };
@@ -2847,7 +3554,7 @@ uint32_t enableBoatMode(uint32_t pouchCheckItem)
 extern "C" {
 uint32_t enablePlaneMode(uint32_t pouchCheckItem)
 {
-  const char *CheckMapArray[] = {
+  static const char *CheckMapArray[] = {
     "aji_13",
     "dou_11" };
   uint32_t ArraySize = sizeof(CheckMapArray) / sizeof(CheckMapArray[0]);  
@@ -3315,6 +4022,18 @@ void *fixEvtMapBlendSetFlagPartners(void *PartnerPointer)
 }
 }
 
+extern "C" {
+void fixShineBlockSystemLevel(uint32_t _systemLevel, void *_systemLevelAddress)
+{
+  // Do not store the new value if currently reloading the room
+  if (!ReloadCurrentScreen)
+  {
+    uint32_t tempSystemLevelPointer = reinterpret_cast<uint32_t>(_systemLevelAddress);
+    *reinterpret_cast<uint32_t *>(tempSystemLevelPointer + 0x18) = _systemLevel;
+  }
+}
+}
+
 void Mod::preventPartyLeft(ttyd::party::PartyMembers id)
 {
   // Prevent the game from removing partners
@@ -3477,6 +4196,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t ResetSystemFlag = 0x8000847C;
     uint32_t AdjustTitleScreenTimer = 0x800096B4;
     uint32_t FixEvtMapBlendSetFlagPartners = 0x800389C4;
+    uint32_t FixShineBlockSystemLevel = 0x800664B8;
   #elif defined TTYD_JP
     uint32_t RandomWarp = 0x800086F0;
     uint32_t TubeModeCheck = 0x80090D90;
@@ -3494,6 +4214,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t ResetSystemFlag = 0x800083A4;
     uint32_t AdjustTitleScreenTimer = 0x80009538;
     uint32_t FixEvtMapBlendSetFlagPartners = 0x80038328;
+    uint32_t FixShineBlockSystemLevel = 0x800655B4;
   #elif defined TTYD_EU
     uint32_t RandomWarp = 0x80008994;
     uint32_t TubeModeCheck = 0x800936A0;
@@ -3514,6 +4235,7 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t ResetSystemFlag = 0x80008648;
     uint32_t AdjustTitleScreenTimer = 0x80009878;
     uint32_t FixEvtMapBlendSetFlagPartners = 0x80038AAC;
+    uint32_t FixShineBlockSystemLevel = 0x80066D50;
   #endif
   
   // Random Warps
@@ -3591,6 +4313,10 @@ void Mod::writeLZRandoAssemblyPatches()
   // Prevent the game from crashing in evt_map_blend_set_flag if no partner is out
   patch::writeBranch(reinterpret_cast<void *>(FixEvtMapBlendSetFlagPartners), reinterpret_cast<void *>(StartFixEvtMapBlendSetFlagPartners));
   patch::writeBranch(reinterpret_cast<void *>(BranchBackFixEvtMapBlendSetFlagPartners), reinterpret_cast<void *>(FixEvtMapBlendSetFlagPartners + 0x4));
+  
+  // Fix not being able to interact with stuff if the player reloads the room but then hits a shine sprite block while reloading
+  patch::writeBranch(reinterpret_cast<void *>(FixShineBlockSystemLevel), reinterpret_cast<void *>(StartFixShineBlockSystemLevel));
+  patch::writeBranch(reinterpret_cast<void *>(BranchBackFixShineBlockSystemLevel), reinterpret_cast<void *>(FixShineBlockSystemLevel + 0x4));
 }
 
 void Mod::LZRandoStuff()

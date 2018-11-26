@@ -507,7 +507,15 @@ void Mod::LZRandoChallengeStuff()
     else
     {
       ttyd::mario::Player *player = ttyd::mario::marioGetPtr();
-      if (player->prevFollowerId[1] > 0)
+      
+      #ifdef TTYD_JP
+        // JP has the uint8_t in a different location?
+        uint8_t prevFollower = player->unk_244;
+      #else
+        uint8_t prevFollower = player->prevFollowerId[1];
+      #endif
+      
+      if (prevFollower > 0)
       {
         // Add 2 points if the player has a follower
         MainScores[3] = 2;
@@ -532,7 +540,7 @@ void Mod::LZRandoChallengeStuff()
     uint32_t BonetailNumCheck = EndSequenceChecks + 3;
 
     uint32_t SequencePosition = ttyd::swdrv::swByteGet(0);
-    const uint16_t SequenceChecks[] = { 39, 85, 200, 211, 260, 383, 388 };
+    static const uint16_t SequenceChecks[] = { 39, 85, 200, 211, 260, 383, 388 };
 
     for (uint32_t i = 1; i <= TotalBosses; i++)
     {
@@ -993,7 +1001,7 @@ void Mod::titleScreenStuff()
   sprintf(tempDisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.3.6",
-    "Loading Zone Randomizer - v1.0.28");
+    "Loading Zone Randomizer - v1.0.29");
   
   drawTextWithWindow(tempDisplayBuffer, PosX, PosY, alpha, 
     TextColor, Scale, WindowWidth, WindowColor, Curve);
@@ -1008,7 +1016,7 @@ void Mod::titleScreenStuff()
     PosY += 15;
   #endif
   
-  const char *VersionNumber = "v2.0.30";
+  const char *VersionNumber = "v2.0.31";
   drawText(VersionNumber, PosX, PosY, alpha, TextColor, Scale);
   
   // Draw the remaining time for when gameplay will resume
@@ -1297,11 +1305,11 @@ void Mod::helpMenu()
   
   // Display page titles
   uint32_t ItemRandoStartingPage = 2;
-  uint32_t ItemRandoTotalPages = 8;
+  uint32_t ItemRandoTotalPages = 9;
   uint32_t LZRandoStartingPage = ItemRandoStartingPage + ItemRandoTotalPages;
   uint32_t LZRandoTotalPages = 11;
   uint32_t ChallengeModeStartingPage = LZRandoStartingPage + LZRandoTotalPages;
-  uint32_t ChallengeModeTotalPages = 9;
+  uint32_t ChallengeModeTotalPages = 10;
   
   if ((HelpMenuCounter >= ItemRandoStartingPage) && (HelpMenuCounter <= (ItemRandoStartingPage + ItemRandoTotalPages - 1)))
   {
