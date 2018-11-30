@@ -536,14 +536,13 @@ void getRandomWarp()
     else if (managestrings::strcmp_NextMap("aji_02"))
     {
       // Prevent the player from warping to this room if the challenge mode is in use and if they have the 2 items in the room already
-      static const uint16_t Check_GSWF_Array[] = {
-        4176,
-        4211 };
-      uint32_t ArraySize = sizeof(Check_GSWF_Array) / sizeof(Check_GSWF_Array[0]);
-      
-      if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
+      // Need to manually check for the Elevator Key, as it spawns depending on the Sequence
+      if (CheckForSingleItemWarpToRoomGSWF(4211))
       {
-        continue;
+        if (ttyd::mario_pouch::pouchCheckItem(ElevatorKey2) > 0)
+        {
+          continue;
+        }
       }
     }
     else if (managestrings::strcmp_NextMap("aji_03"))
@@ -812,10 +811,23 @@ void getRandomWarp()
           // Turn off GSWF(1494)
           ttyd::swdrv::swClear(1494);
         }
+        else if (LZRandoChallenge)
+        {
+          // Prevent warping to this room if the player has the key already
+          continue;
+        }
       }
       else if (LZRandoChallenge)
       {
         // Prevent warping to this room if the player has the curse already
+        continue;
+      }
+    }
+    else if (managestrings::strcmp_NextMap("gon_08"))
+    {
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the item already
+      if (CheckForSingleItemWarpToRoomGSWF(1505))
+      {
         continue;
       }
     }

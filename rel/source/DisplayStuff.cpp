@@ -569,7 +569,7 @@ void Mod::LZRandoChallengeStuff()
           if (!BossDefeated[i - 1])
           {
             BossDefeated[i - 1] = true;
-            BossScore += 8;
+            BossScore += 9;
           }
         }
         else
@@ -601,7 +601,7 @@ void Mod::LZRandoChallengeStuff()
           if (!BossDefeated[i - 1])
           {
             BossDefeated[i - 1] = true;
-            BossScore += 25;
+            BossScore += 30;
           }
         }
         else
@@ -1001,7 +1001,7 @@ void Mod::titleScreenStuff()
   sprintf(tempDisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.3.6",
-    "Loading Zone Randomizer - v1.0.29");
+    "Loading Zone Randomizer - v1.0.30");
   
   drawTextWithWindow(tempDisplayBuffer, PosX, PosY, alpha, 
     TextColor, Scale, WindowWidth, WindowColor, Curve);
@@ -1016,7 +1016,7 @@ void Mod::titleScreenStuff()
     PosY += 15;
   #endif
   
-  const char *VersionNumber = "v2.0.31";
+  const char *VersionNumber = "v2.0.32";
   drawText(VersionNumber, PosX, PosY, alpha, TextColor, Scale);
   
   // Draw the remaining time for when gameplay will resume
