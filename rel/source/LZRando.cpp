@@ -1146,6 +1146,11 @@ void getRandomWarp()
             {
               continue;
             }
+            else
+            {
+              // Set the Sequence to 198 to prevent the player from getting another Steeple Key
+              ttyd::swdrv::swByteSet(0, 198);
+            }
           }
           else
           {
@@ -1241,7 +1246,7 @@ void getRandomWarp()
     }
     else if (managestrings::strcmp_NextMap("jin_08"))
     {
-      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 4 items in the room already and if they cannot currently get the letter from the chest
+      // Prevent the player from warping to this room if the challenge mode is in use and if they have the 5 items in the room already, or if they cannot currently get the letter but already have the 4 other items
       // Must check for the letter individually, as it spawns based on Sequence
       static const uint16_t Check_GSWF_Array[] = {
         2230,
@@ -1252,8 +1257,8 @@ void getRandomWarp()
       
       if (CheckForMultipleItemsWarpToRoomGSWFs(Check_GSWF_Array, ArraySize))
       {
-        // Prevent warping to this room if the player cannot currently get the letter
-        if (SequencePosition >= 209)
+        // Prevent warping to this room if the player cannot currently get the latter, or if they already have it
+        if ((SequencePosition >= 209) || (ttyd::mario_pouch::pouchCheckItem(TheLetterp) > 0))
         {
           continue;
         }
@@ -1606,6 +1611,13 @@ void getRandomWarp()
             continue;
           }
         }
+      }
+      
+      // Prevent the intro cutscene from playing
+      if (SequencePosition == 73)
+      {
+        // Set the Sequence ahead to skip the cutscene
+        ttyd::swdrv::swByteSet(0, 74);
       }
       
       // Turn off GSWF(2826) to allow the player to get the follower again
