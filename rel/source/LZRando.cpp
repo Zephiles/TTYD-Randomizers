@@ -4213,8 +4213,18 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t SpawnPartnerInBattle = 0x800F8B44;
     uint32_t PreventBattleOnRespawn = 0x800465CC;
     uint32_t CheckCurrentTextbox = 0x800D2880;
-    uint32_t PowerRushIconCheck = 0x8001A320;
-    uint32_t PowerRushPIconCheck = 0x8001A314;
+    uint32_t PowerRushIconCheck1 = 0x8001A320;
+    uint32_t PowerRushIconCheck2 = 0x8001AA58;
+    uint32_t PowerRushIconCheck3 = 0x8001B1B4;
+    uint32_t PowerRushIconCheck4 = 0x8001AFD0;
+    uint32_t PowerRushIconCheck5 = 0x8001A540;
+    uint32_t PowerRushIconCheck6 = 0x8001A76C;
+    uint32_t PowerRushPIconCheck1 = 0x8001A314;
+    uint32_t PowerRushPIconCheck2 = 0x8001AA4C;
+    uint32_t PowerRushPIconCheck3 = 0x8001B1A8;
+    uint32_t PowerRushPIconCheck4 = 0x8001AFC4;
+    uint32_t PowerRushPIconCheck5 = 0x8001A534;
+    uint32_t PowerRushPIconCheck6 = 0x8001A760;
     uint32_t ReplaceJumpFallAnim = 0x800411D0;
     uint32_t RandomizeBeroFileLoad = 0x800F3A70;
     uint32_t ResetSystemFlag = 0x8000847C;
@@ -4252,8 +4262,18 @@ void Mod::writeLZRandoAssemblyPatches()
     uint32_t SpawnPartnerInBattle = 0x800F99B0;
     uint32_t PreventBattleOnRespawn = 0x800466B4;
     uint32_t CheckCurrentTextbox = 0x800D3678;
-    uint32_t PowerRushIconCheck = 0x8001A4E4;
-    uint32_t PowerRushPIconCheck = 0x8001A4D8;
+    uint32_t PowerRushIconCheck1 = 0x8001A4E4;
+    uint32_t PowerRushIconCheck2 = 0x8001AC1C;
+    uint32_t PowerRushIconCheck3 = 0x8001B378;
+    uint32_t PowerRushIconCheck4 = 0x8001B194;
+    uint32_t PowerRushIconCheck5 = 0x8001A704;
+    uint32_t PowerRushIconCheck6 = 0x8001A930;
+    uint32_t PowerRushPIconCheck1 = 0x8001A4D8;
+    uint32_t PowerRushPIconCheck2 = 0x8001AC10;
+    uint32_t PowerRushPIconCheck3 = 0x8001B36C;
+    uint32_t PowerRushPIconCheck4 = 0x8001B188;
+    uint32_t PowerRushPIconCheck5 = 0x8001A6F8;
+    uint32_t PowerRushPIconCheck6 = 0x8001A924;
     uint32_t ReplaceJumpFallAnim = 0x800412B8;
     uint32_t RandomizeBeroFileLoad = 0x800F48DC;
     uint32_t ResetSystemFlag = 0x80008648;
@@ -4315,8 +4335,18 @@ void Mod::writeLZRandoAssemblyPatches()
   // Allow the Power Rush and Power Rush P icons to be set to the JP icon
   // Does not need to be changed for the JP version
   #ifndef TTYD_JP
-    *reinterpret_cast<uint32_t *>(PowerRushIconCheck) = 0x60000000; // nop
-    *reinterpret_cast<uint32_t *>(PowerRushPIconCheck) = 0x60000000; // nop
+    *reinterpret_cast<uint32_t *>(PowerRushIconCheck1) = 0x60000000; // nop
+    *reinterpret_cast<uint32_t *>(PowerRushIconCheck2) = 0x60000000; // nop
+    *reinterpret_cast<uint32_t *>(PowerRushIconCheck3) = 0x60000000; // nop
+    *reinterpret_cast<uint32_t *>(PowerRushIconCheck4) = 0x60000000; // nop
+    *reinterpret_cast<uint32_t *>(PowerRushIconCheck5) = 0x60000000; // nop
+    *reinterpret_cast<uint32_t *>(PowerRushIconCheck6) = 0x60000000; // nop
+    *reinterpret_cast<uint32_t *>(PowerRushPIconCheck1) = 0x60000000; // nop
+    *reinterpret_cast<uint32_t *>(PowerRushPIconCheck2) = 0x60000000; // nop
+    *reinterpret_cast<uint32_t *>(PowerRushPIconCheck3) = 0x60000000; // nop
+    *reinterpret_cast<uint32_t *>(PowerRushPIconCheck4) = 0x60000000; // nop
+    *reinterpret_cast<uint32_t *>(PowerRushPIconCheck5) = 0x60000000; // nop
+    *reinterpret_cast<uint32_t *>(PowerRushPIconCheck6) = 0x60000000; // nop
   #endif
   
   patch::writeBranch(reinterpret_cast<void *>(ReplaceJumpFallAnim), reinterpret_cast<void *>(StartReplaceJumpFallAnim));

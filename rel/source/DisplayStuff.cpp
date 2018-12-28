@@ -4,6 +4,7 @@
 #include "items.h"
 #include "buttons.h"
 
+#include <ttyd/icondrv.h>
 #include <ttyd/fontmgr.h>
 #include <ttyd/windowdrv.h>
 #include <ttyd/seqdrv.h>
@@ -55,6 +56,34 @@ extern uint8_t HelpMenuArraySize;
 
 namespace mod {
 
+int32_t *drawIcon(int32_t position[3], uint16_t iconNum, float scale)
+{
+  float NewPosition[3];
+  int32_t ArraySize = static_cast<int32_t>(sizeof(NewPosition) / sizeof(float));
+  
+  for (int32_t i = 0; i < ArraySize; i++)
+  {
+    NewPosition[i] = static_cast<float>(position[i]);
+  }
+  
+  ttyd::icondrv::iconDispGx(NewPosition, 24, iconNum, scale);
+  return position;
+}
+
+int32_t *drawIconFromItem(int32_t position[3], uint16_t itemNum, float scale)
+{
+  #ifdef TTYD_US
+    uint32_t itemDataTable = 0x803108A8;
+  #elif defined TTYD_JP
+    uint32_t itemDataTable = 0x8030EE58;
+  #elif defined TTYD_EU
+    uint32_t itemDataTable = 0x8031C638;
+  #endif
+  
+  uint16_t iconNum = *reinterpret_cast<uint16_t *>(itemDataTable + (itemNum * 0x28) + 0x20);
+  return drawIcon(position, iconNum, scale);
+}
+
 void drawWindow(uint32_t color, int32_t x, int32_t y, int32_t width, int32_t height, int32_t curve)
 {
   ttyd::windowdrv::windowDispGX_Waku_col(0, reinterpret_cast<uint8_t *>(&color), x, y, width, height, curve);
@@ -83,7 +112,6 @@ void startDrawString(uint8_t alpha, uint32_t color, float scale)
 void drawText(const char *text, int32_t x, int32_t y, uint8_t alpha, uint32_t color, float scale)
 {
   startDrawString(alpha, color, scale);
-  
   bool MultipleLines = false;
   
   uint32_t i = 0;
@@ -102,15 +130,18 @@ void drawText(const char *text, int32_t x, int32_t y, uint8_t alpha, uint32_t co
     i++;
   }
   
+  float NewX = static_cast<float>(x);
+  float NewY = static_cast<float>(y);
+  
   if (MultipleLines)
   {
     // The text has multiple lines
-    drawstring::drawStringMultiline(x, y, text);
+    drawstring::drawStringMultiline(NewX, NewY, text);
   }
   else
   {
     // The text has one line
-    ttyd::fontmgr::FontDrawString(x, y, text);
+    ttyd::fontmgr::FontDrawString(NewX, NewY, text);
   }
 }
 
@@ -1001,7 +1032,7 @@ void Mod::titleScreenStuff()
   sprintf(tempDisplayBuffer,
     "%s\n%s",
     "Item Randomizer - v1.3.6",
-    "Loading Zone Randomizer - v1.0.31");
+    "Loading Zone Randomizer - v1.0.32");
   
   drawTextWithWindow(tempDisplayBuffer, PosX, PosY, alpha, 
     TextColor, Scale, WindowWidth, WindowColor, Curve);
@@ -1016,7 +1047,7 @@ void Mod::titleScreenStuff()
     PosY += 15;
   #endif
   
-  const char *VersionNumber = "v2.0.33";
+  const char *VersionNumber = "v2.0.34";
   drawText(VersionNumber, PosX, PosY, alpha, TextColor, Scale);
   
   // Draw the remaining time for when gameplay will resume
@@ -1304,15 +1335,156 @@ void Mod::helpMenu()
   drawText(PageText, PosX, PosY, alpha, TextColor, Scale);
   
   // Display page titles
-  uint32_t ItemRandoStartingPage = 2;
-  uint32_t ItemRandoTotalPages = 9;
-  uint32_t LZRandoStartingPage = ItemRandoStartingPage + ItemRandoTotalPages;
-  uint32_t LZRandoTotalPages = 11;
-  uint32_t ChallengeModeStartingPage = LZRandoStartingPage + LZRandoTotalPages;
-  uint32_t ChallengeModeTotalPages = 10;
+  const uint32_t ItemRandoStartingPage = 2;
+  const uint32_t ItemRandoTotalPages = 9;
+  const uint32_t LZRandoStartingPage = ItemRandoStartingPage + ItemRandoTotalPages;
+  const uint32_t LZRandoTotalPages = 11;
+  const uint32_t ChallengeModeStartingPage = LZRandoStartingPage + LZRandoTotalPages;
+  const uint32_t ChallengeModeTotalPages = 10;
+  
+  // Set up array to use for displaying icons
+  int32_t IconPosition[3];
+  int32_t *tempIconPosition;
+  const int32_t IconPositionX = 0;
+  const int32_t IconPositionY = 1;
+  IconPosition[2] = 0;
   
   if ((HelpMenuCounter >= ItemRandoStartingPage) && (HelpMenuCounter <= (ItemRandoStartingPage + ItemRandoTotalPages - 1)))
   {
+    switch (HelpMenuCounter)
+    {
+      case ItemRandoStartingPage + 5:
+      {
+        // Check if currently on page 6 of the Item Randomizer section
+        // Draw the icons for each item/badge
+        // Koopa Curse
+        IconPosition[IconPositionX] = -205;
+        IconPosition[IconPositionY] = 93;
+        float scale = 0.6;
+        tempIconPosition = drawIconFromItem(IconPosition, KoopaCurse, scale);
+        
+        // Cake
+        tempIconPosition[IconPositionX] = -204;
+        tempIconPosition[IconPositionY] = 33;
+        // scale = 0.6;
+        tempIconPosition = drawIconFromItem(tempIconPosition, Cake, scale);
+        
+        // Trade Off
+        tempIconPosition[IconPositionX] = -202;
+        tempIconPosition[IconPositionY] = -10;
+        // scale = 0.6;
+        tempIconPosition = drawIconFromItem(tempIconPosition, TradeOff, scale);
+        
+        // Debug Badge
+        tempIconPosition[IconPositionX] = -201;
+        tempIconPosition[IconPositionY] = -70;
+        scale = 0.5;
+        tempIconPosition = drawIconFromItem(tempIconPosition, DebugBadge, scale);
+        
+        // Mega Jump
+        tempIconPosition[IconPositionX] = -202;
+        tempIconPosition[IconPositionY] = -128;
+        scale = 0.6;
+        tempIconPosition = drawIconFromItem(tempIconPosition, UpgradedPowerJump, scale);
+        
+        break;
+      }
+      case ItemRandoStartingPage + 6:
+      {
+        // Check if currently on page 7 of the Item Randomizer section
+        // Draw the icons for each item/badge
+        // Mega Smash
+        IconPosition[IconPositionX] = -202;
+        IconPosition[IconPositionY] = 133;
+        float scale = 0.6;
+        tempIconPosition = drawIconFromItem(IconPosition, UpgradedPowerSmash, scale);
+        
+        // Mega Quake
+        // tempIconPosition[IconPositionX] = -202;
+        tempIconPosition[IconPositionY] = 53;
+        // scale = 0.6;
+        tempIconPosition = drawIconFromItem(tempIconPosition, UpgradedQuakeHammer, scale);
+        
+        // Triple Dip
+        // tempIconPosition[IconPositionX] = -202;
+        tempIconPosition[IconPositionY] = -27;
+        // scale = 0.6;
+        tempIconPosition = drawIconFromItem(tempIconPosition, TripleDip, scale);
+        
+        // All or Nothing P
+        // tempIconPosition[IconPositionX] = -202;
+        tempIconPosition[IconPositionY] = -87;
+        // scale = 0.6;
+        tempIconPosition = drawIconFromItem(tempIconPosition, AllorNothingP, scale);
+        
+        // FP Drain P
+        tempIconPosition[IconPositionX] = -196;
+        tempIconPosition[IconPositionY] = -127;
+        // scale = 0.6;
+        tempIconPosition = drawIconFromItem(tempIconPosition, FPDrainP, scale);
+        
+        // Lucky Day P
+        tempIconPosition[IconPositionX] = -198;
+        tempIconPosition[IconPositionY] = -167;
+        // scale = 0.6;
+        tempIconPosition = drawIconFromItem(tempIconPosition, LuckyDayP, scale);
+        
+        break;
+      }
+      case ItemRandoStartingPage + 7:
+      {
+        // Check if currently on page 8 of the Item Randomizer section
+        // Draw the icons for each item/badge
+        // Lucky Start P
+        IconPosition[IconPositionX] = -195;
+        IconPosition[IconPositionY] = 133;
+        float scale = 0.6;
+        tempIconPosition = drawIconFromItem(IconPosition, LuckyStartPLuckyStartIcon, scale);
+        
+        // Pity Flower P
+        // tempIconPosition[IconPositionX] = -195;
+        tempIconPosition[IconPositionY] = 53;
+        // scale = 0.6;
+        tempIconPosition = drawIconFromItem(tempIconPosition, PityFlowerP, scale);
+        
+        // Super Charge
+        // tempIconPosition[IconPositionX] = -195;
+        tempIconPosition[IconPositionY] = 13;
+        // scale = 0.6;
+        tempIconPosition = drawIconFromItem(tempIconPosition, SuperCharge, scale);
+        
+        // Super Charge P
+        // tempIconPosition[IconPositionX] = -195;
+        tempIconPosition[IconPositionY] = -47;
+        // scale = 0.6;
+        tempIconPosition = drawIconFromItem(tempIconPosition, SuperChargeP, scale);
+        
+        // Art Attack Badge
+        // tempIconPosition[IconPositionX] = -195;
+        tempIconPosition[IconPositionY] = -107;
+        // scale = 0.6;
+        tempIconPosition = drawIconFromItem(tempIconPosition, InvalidItemBadgeNoKnownEffect, scale);
+        
+        break;
+      }
+      case ItemRandoStartingPage + 8:
+      {
+        // Check if currently on page 9 of the Item Randomizer section
+        // Draw the icons for each item/badge
+        // Run Meter Badge
+        IconPosition[IconPositionX] = -196;
+        IconPosition[IconPositionY] = 133;
+        float scale = 0.55;
+        tempIconPosition = drawIconFromItem(IconPosition, InvalidItemBadgePNoKnownEffect, scale);
+        
+        break;
+      }
+      default:
+      {
+        break;
+      }
+    }
+    
     // Draw the Item Randomizer page title
     PosX = -80;
     PosY = 180;
@@ -1325,16 +1497,53 @@ void Mod::helpMenu()
   }
   else if ((HelpMenuCounter >= LZRandoStartingPage) && (HelpMenuCounter <= (LZRandoStartingPage + LZRandoTotalPages - 1)))
   {
-    if (HelpMenuCounter == (LZRandoStartingPage + 4))
+    switch (HelpMenuCounter)
     {
-      // Check if currently on page 5 of the Loading Zone Randomizer section
-      PosX = 0;
-      PosY = 110;
-      // Scale = 0.6;
-      
-      // Draw second column of Loading Zone Randomizer page 5
-      const char *BossesText = "15. Magnus 2\n16. Dark Bones (las_05)\n17. Gloomtail\n18. Shadow Sirens (Ch8)\n19. Grodus\n20. Bowser & Kammy\n21. Shadow Queen\n22. Bonetail";
-      drawText(BossesText, PosX, PosY, alpha, TextColor, Scale);
+      case LZRandoStartingPage + 4:
+      {
+        // Check if currently on page 5 of the Loading Zone Randomizer section
+        PosX = 0;
+        PosY = 110;
+        // Scale = 0.6;
+        
+        // Draw second column of Loading Zone Randomizer page 5
+        const char *BossesText = "15. Magnus 2\n16. Dark Bones (las_05)\n17. Gloomtail\n18. Shadow Sirens (Ch8)\n19. Grodus\n20. Bowser & Kammy\n21. Shadow Queen\n22. Bonetail";
+        drawText(BossesText, PosX, PosY, alpha, TextColor, Scale);
+        
+        break;
+      }
+      #ifndef TTYD_JP
+      case LZRandoStartingPage + 6:
+      {
+        // Check if currently on page 7 of the Loading Zone Randomizer section
+        // Draw each icon for Power Rush and Power Rush P
+        // Only draw for the US and EU versions, as the JP version does not have the other language icons on the disc
+        // Power Rush
+        tempIconPosition = IconPosition;
+        tempIconPosition[IconPositionX] = 48;
+        tempIconPosition[IconPositionY] = -88;
+        float scale = 0.5;
+        
+        for (uint16_t i = 0; i < 5; i++)
+        {
+          tempIconPosition = drawIcon(tempIconPosition, 73 + i, scale);
+          tempIconPosition[IconPositionX] += 18;
+        }
+        
+        // Power Rush P
+        for (uint16_t i = 0; i < 5; i++)
+        {
+          tempIconPosition = drawIcon(tempIconPosition, 103 + i, scale);
+          tempIconPosition[IconPositionX] += 18;
+        }
+        
+        break;
+      }
+      #endif
+      default:
+      {
+        break;
+      }
     }
     
     // Draw the Loading Zone Randomizer page title

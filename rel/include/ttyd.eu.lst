@@ -128,6 +128,34 @@
 // 80013D54:fadeInit
 // 80013E68:_callback
 
+// icondrv.o
+// 80019060:iconNumberDispGx3D
+// 800192E4:iconNumberDispGx
+// 80019568:iconSetAlpha
+// 80019610:iconSetScale
+// 800196C8:iconFlagOff
+// 80019768:iconFlagOn
+// 80019808:iconSetPos
+// 80019918:iconNameToPtr
+// 800199BC:iconGX
+// 8001A360:iconGetWidthHight
+// 8001A460:iconGetTexObj
+// 8001A680:iconDispGxCol
+// 8001A8A4:iconDispGx2
+8001AADC:iconDispGx
+8001AB00:iconDispGxAlpha
+// 8001ADB4:iconDisp
+// 8001AE6C:iconChange
+// 8001AFCC:iconDelete
+// 8001B074:iconEntry2D
+// 8001B258:iconEntry
+// 8001B49C:iconMain
+// 8001B810:iconReInit
+// 8001B858:iconTexSetup
+// 8001B85C:iconInit
+// 8001B9D4:_callback_bin
+// 8001BA00:_callback_tpl
+
 // seqdrv.o
 8002E2CC:seqCheckSeq
 8002E2E8:seqGetNextSeq
