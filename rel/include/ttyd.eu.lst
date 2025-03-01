@@ -1273,6 +1273,17 @@
 // w_atan2.c
 80276394:atan2
 
+// OSArena.c
+// text
+// 8029A56C:OSGetArenaHi
+// 8029A574:OSGetArenaLo
+// 8029A57C:OSSetArenaHi
+// 8029A584:OSSetArenaLo
+// 8029A58C:OSAllocFromArenaLo
+// data
+8042AD50:__OSArenaLo
+8042B9F0:__OSArenaHi
+
 // OSCache.c
 // 8029A84C:DCEnable
 // 8029A860:DCInvalidateRange

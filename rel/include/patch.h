@@ -7,6 +7,7 @@
 namespace mod::patch
 {
     void writeBranch(void *ptr, void *destination);
+    void writeBranchBL(void *ptr, void *destination);
 
     template<typename Func, typename Dest>
     Func hookFunction(Func function, Dest destination)

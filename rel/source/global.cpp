@@ -50,7 +50,7 @@ extern "C"
 
     // Display Stuff
     bool TransparentTextFlag = false;
-    char *DisplayBuffer = new char[256];
+    char DisplayBuffer[256] = {0};
     bool ShowScoreSources = false;
     bool TimerDisabled = false;
     bool TimerActive = false;
@@ -86,8 +86,8 @@ extern "C"
     bool CloseCurtainFlag = false;
     bool MarioFreeze = false;
     bool ClearCacheFlag = false;
-    char *NewBero = new char[32]; // 31 bytes for NextBero, 1 byte for NULL
-    char *NewMap = new char[9];   // 8 bytes for NextMap, 1 byte for NULL
+    char NewBero[32] = {0}; // 31 bytes for NextBero, 1 byte for NULL
+    char NewMap[9] = {0};   // 8 bytes for NextMap, 1 byte for NULL
     bool CheckCurrentTextboxFlag = false;
     bool ResetSystemFlag = false;
 

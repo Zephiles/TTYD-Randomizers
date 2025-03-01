@@ -23,7 +23,7 @@
 
 extern char *NextMap;
 extern bool TransparentTextFlag;
-extern char *DisplayBuffer;
+extern char DisplayBuffer[256];
 extern char *NextBero;
 extern int32_t *AllFinalScoresArray;
 extern uint32_t TotalFinalScoresCounter;
@@ -1036,7 +1036,7 @@ namespace mod
         PosY += 15;
 #endif
 
-        const char *VersionNumber = "v2.0.34";
+        const char *VersionNumber = "v2.0.35";
         drawText(VersionNumber, PosX, PosY, alpha, TextColor, Scale);
 
         // Draw the remaining time for when gameplay will resume
