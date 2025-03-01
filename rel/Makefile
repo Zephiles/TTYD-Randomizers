@@ -13,7 +13,7 @@ endif
 
 include $(DEVKITPPC)/gamecube_rules
 
-export GCIPACK	:=	python3 $(realpath ../../bin/gcipack.py)
+export GCIPACK	:=	python3 $(realpath ../../gcipack/gcipack.py)
 export ELF2REL	:=	elf2rel
 
 ifeq ($(VERSION),)
