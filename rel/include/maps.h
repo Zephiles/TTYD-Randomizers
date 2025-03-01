@@ -4,7 +4,7 @@
 
 enum Maps : uint32_t
 {
-  #ifdef TTYD_US
+#ifdef TTYD_US
     aaa_00 = 0x802C0288,
     aji_00 = 0x802C03D0,
     aji_01 = 0x802C03D8,
@@ -275,7 +275,7 @@ enum Maps : uint32_t
     yuu_01 = 0x802C0B34,
     yuu_02 = 0x802C0B3C,
     yuu_03 = 0x802C0B44,
-  #elif defined TTYD_JP
+#elif defined TTYD_JP
     aaa_00 = 0x802C2008,
     aji_00 = 0x802C2150,
     aji_01 = 0x802C2158,
@@ -546,7 +546,7 @@ enum Maps : uint32_t
     yuu_01 = 0x802C28B4,
     yuu_02 = 0x802C28BC,
     yuu_03 = 0x802C28C4,
-  #elif defined TTYD_EU
+#elif defined TTYD_EU
     aaa_00 = 0x802CBE08,
     aji_00 = 0x802CBF50,
     aji_01 = 0x802CBF58,
@@ -817,5 +817,5 @@ enum Maps : uint32_t
     yuu_01 = 0x802CC6B4,
     yuu_02 = 0x802CC6BC,
     yuu_03 = 0x802CC6C4,
-  #endif
+#endif
 };

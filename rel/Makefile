@@ -7,14 +7,14 @@ ifeq ($(strip $(DEVKITPPC)),)
 $(error "Please set DEVKITPPC in your environment. export DEVKITPPC=<path to>devkitPPC")
 endif
 
-ifeq ($(strip $(TTYDRandomizers)),)
-$(error "Please set TTYDRandomizers in your environment. export TTYDRandomizers=<path to>TTYD-Randomizers")
+ifeq ($(shell which elf2rel),)
+$(error "Please install pyelf2rel. pip install pyelf2rel")
 endif
 
 include $(DEVKITPPC)/gamecube_rules
 
-export ELF2REL	:=	$(TTYDRandomizers)/bin/elf2rel
-export GCIPACK	:=	python $(TTYDRandomizers)/gcipack/gcipack.py
+export GCIPACK	:=	python3 $(realpath ../../bin/gcipack.py)
+export ELF2REL	:=	elf2rel
 
 ifeq ($(VERSION),)
 all: us jp eu
@@ -27,8 +27,8 @@ eu:
 
 clean:
 	@$(MAKE) --no-print-directory clean_target VERSION=us
-	@$(MAKE) --no-print-directory clean_target VERSION=eu
 	@$(MAKE) --no-print-directory clean_target VERSION=jp
+	@$(MAKE) --no-print-directory clean_target VERSION=eu
 
 .PHONY: all clean us jp eu
 else
@@ -39,9 +39,14 @@ else
 # SOURCES is a list of directories containing source code
 # INCLUDES is a list of directories containing extra header files
 #---------------------------------------------------------------------------------
+
+# rwildcard taken from stackoverflow:
+# https://stackoverflow.com/questions/2483182/recursive-wildcards-in-gnu-make
+rwildcard=$(foreach d,$(wildcard $(1:=/*)),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+
 TARGET		:=	$(notdir $(CURDIR)).$(VERSION)
 BUILD		:=	build.$(VERSION)
-SOURCES		:=	source $(wildcard source/*)
+SOURCES		:=	source $(call rwildcard,source,*)
 DATA		:=	data
 INCLUDES	:=	include
 
@@ -51,8 +56,8 @@ INCLUDES	:=	include
 
 MACHDEP		= -mno-sdata -mgcn -DGEKKO -mcpu=750 -meabi -mhard-float
 
-CFLAGS		= -nostdlib -ffreestanding -ffunction-sections -fdata-sections -g -Os -Wall -Werror $(MACHDEP) $(INCLUDE)
-CXXFLAGS	= -fno-exceptions -fno-rtti -std=gnu++17 $(CFLAGS)
+CFLAGS		= -nostdlib -ffunction-sections -fdata-sections -fno-shrink-wrap -g -Oz -Wall -Werror -Wextra -Wformat-overflow=0 -Wno-class-memaccess -Wno-uninitialized -Wno-address-of-packed-member $(MACHDEP) $(INCLUDE)
+CXXFLAGS	= -fno-exceptions -fno-rtti -std=gnu++23 $(CFLAGS)
 
 LDFLAGS		= -r -e _prolog -u _prolog -u _epilog -u _unresolved -Wl,--gc-sections -nostdlib -g $(MACHDEP) -Wl,-Map,$(notdir $@).map
 
@@ -182,7 +187,7 @@ $(OFILES_SOURCES) : $(HFILES)
 # REL linking
 %.rel: %.elf
 	@echo output ... $(notdir $@)
-	@$(ELF2REL) $< -s $(MAPFILE)
+	@$(ELF2REL) $< $(MAPFILE) $@
 	
 %.gci: %.rel
 	@echo packing ... $(notdir $@)
