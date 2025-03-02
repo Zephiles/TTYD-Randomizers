@@ -1036,7 +1036,7 @@ namespace mod
         PosY += 15;
 #endif
 
-        const char *VersionNumber = "v2.0.35";
+        const char *VersionNumber = "v2.0.36";
         drawText(VersionNumber, PosX, PosY, alpha, TextColor, Scale);
 
         // Draw the remaining time for when gameplay will resume
